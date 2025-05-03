@@ -65,7 +65,7 @@ import com.example.quanlybongda.Database.Schema.User.*
 @TypeConverters(DateConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract val userDAO: UserDAO;
-    abstract val userSettingsDAO: ThamSoDAO;
+    abstract val thamSoDAO: ThamSoDAO;
 
     abstract val cauThuDAO: CauThuDAO;
     abstract val doiBongDAO: DoiBongDAO;

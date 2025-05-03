@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
 
     id("kotlin-kapt")
 }
@@ -43,16 +45,20 @@ android {
 
 dependencies {
 
-    val room_version = "2.6.1"
-
-    implementation("androidx.room:room-runtime:$room_version")
+    implementation(libs.androidx.room.runtime)
 
     // If this project uses any Kotlin source, use Kotlin Symbol Processing (KSP)
     // See Add the KSP plugin to your project
-    kapt("androidx.room:room-compiler:$room_version")
+    ksp(libs.androidx.room.compiler)
 
     // optional - Kotlin Extensions and Coroutines support for Room
-    implementation("androidx.room:room-ktx:$room_version")
+    implementation(libs.androidx.room.ktx)
+
+
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.5")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

@@ -1,31 +1,39 @@
 package com.example.quanlybongda
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.lifecycleScope
-import com.example.quanlybongda.Database.AppDatabase
+import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import dagger.hilt.android.AndroidEntryPoint
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.quanlybongda.Database.Schema.CauThu
 
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private val databaseViewModel: DatabaseViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val test = AppDatabase.getDatabase(this);
-        lifecycleScope.launch {
-            test.doiBongDAO.selectAllDoiBong();
-        }
         setContent {
             QuanLyBongDaTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -40,7 +48,14 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
+fun Greeting(name: String, modifier: Modifier = Modifier, viewModel: DatabaseViewModel = viewModel()) {
+    var cauThu by remember { mutableStateOf<List<CauThu>>(listOf()) }
+
+    LaunchedEffect(Unit) {
+        cauThu = viewModel.selectAllCauThu();
+        Log.d("INFO", cauThu.toString());
+    }
+
     Text(
         text = "Hello $name!",
         modifier = modifier
