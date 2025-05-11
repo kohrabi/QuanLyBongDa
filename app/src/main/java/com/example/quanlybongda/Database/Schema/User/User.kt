@@ -12,13 +12,14 @@ import java.time.LocalDateTime
         Index(value = arrayOf("email"), unique = true),
         Index(value = arrayOf("id"), name="User_id", unique = true),
         Index(value = arrayOf("email"), name="User_email_unique", unique = true),
+        Index(value = arrayOf("groupId"), name="User_Group_id")
     ),
     foreignKeys = arrayOf(
         ForeignKey(
             entity = UserGroup::class,
             parentColumns = ["groupId"],
             childColumns = ["groupId"],
-            onDelete = ForeignKey.CASCADE
+            onDelete = ForeignKey.SET_DEFAULT
         )
     )
 )

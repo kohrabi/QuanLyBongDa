@@ -15,6 +15,8 @@ data class LoaiBT(
     @ColumnInfo(index = true)
     val maLBT : Int,
     val tenLBT : String,
+    @ColumnInfo(defaultValue = "1")
+    val diemBT : Int,
 )
 
 
@@ -25,7 +27,7 @@ data class LoaiBTBackup(
     @PrimaryKey(autoGenerate = true)
     val BackupID : Int,
     val modifiedDate : Int,
-
     val maLBT : Int,
     val tenLBT : String,
+    val diemBT : Int,
 )

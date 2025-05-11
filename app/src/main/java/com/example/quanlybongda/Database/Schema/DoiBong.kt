@@ -36,7 +36,6 @@ data class DoiBong(
     val maMG : Int,
     @ColumnInfo(defaultValue = "false")
     val deleted : Boolean?,
-//    @Ignore val tenSan : String?,
 )
 
 @Entity(

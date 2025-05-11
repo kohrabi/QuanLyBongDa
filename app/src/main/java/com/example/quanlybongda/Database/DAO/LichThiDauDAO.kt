@@ -32,4 +32,6 @@ interface LichThiDauDAO {
             "WHERE LTD.maMG=:maMG " +
             "GROUP BY LTD.maTD ")
     suspend fun selectAllLichThiDauWithName(maMG: Int) : List<LichThiDau>;
+
+
 }

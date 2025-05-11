@@ -18,9 +18,6 @@ interface ThePhatDAO {
     @Query("SELECT * FROM ThePhat")
     suspend fun selectAllThePhat() : List<ThePhat>;
 
-    @Query("SELECT * FROM ThePhat")
-    fun selectAllThePhatFlow() : Flow<List<ThePhat>>;
-
     @Query("SELECT * FROM ThePhat WHERE maTD=:maTD LIMIT 1")
     suspend fun selectThePhat(maTD: Int) : List<ThePhat>;
 }

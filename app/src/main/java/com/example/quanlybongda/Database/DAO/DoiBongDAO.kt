@@ -1,9 +1,11 @@
 package com.example.quanlybongda.Database.DAO
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
+import com.example.quanlybongda.Database.ReturnTypes.DoiBongTenSan
 import com.example.quanlybongda.Database.Schema.DoiBong
 
 @Dao
@@ -17,12 +19,15 @@ interface DoiBongDAO {
     @Query("SELECT * FROM DoiBong")
     suspend fun selectAllDoiBong() : List<DoiBong>;
 
-    @Query("SELECT DoiBong.*, SanNha.tenSan FROM DoiBong INNER JOIN SanNha ON SanNha.maSan=DoiBong.maSan")
-    suspend fun selectAllDoiBongWithTenSan() : List<DoiBong>;
+    @Query("SELECT * FROM DoiBong WHERE maDoi = :maDoi")
+    suspend fun selectDoiBongMaDoi(maDoi: Int) : DoiBong?;
+
+    @Query("SELECT * FROM DoiBong WHERE maMG = :maMG")
+    suspend fun selectDoiBongMuaGiai(maMG: Int) : DoiBong;
+
+    @Query("SELECT DoiBong.*, SanNha.* FROM DoiBong INNER JOIN SanNha ON SanNha.maSan=DoiBong.maSan")
+    fun selectAllDoiBongWithTenSan() : LiveData<List<DoiBongTenSan>>;
 
     @Query("SELECT * FROM DoiBong WHERE tenDoi LIKE :tenDoi")
     suspend fun selectDoiBongTen(tenDoi: String) : List<DoiBong>;
-
-    @Query("SELECT * FROM DoiBong WHERE maDoi = :maDoi")
-    suspend fun selectDoiBong(maDoi: Int) : DoiBong;
 }

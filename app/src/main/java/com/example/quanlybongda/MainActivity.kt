@@ -50,11 +50,11 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier, viewModel: DatabaseViewModel = hiltViewModel()) {
-    var cauThu by remember { mutableStateOf<List<CauThu>>(listOf()) }
+//    var cauThu by remember { mutableStateOf<List<CauThu>>(listOf()) }
 
     LaunchedEffect(Unit) {
-        cauThu = viewModel.selectAllCauThu();
-        Log.d("INFO", cauThu.toString());
+        val test = viewModel.selectAllUserGroupWithRole();
+        Log.d("AY", test.toString());
     }
 
     Text(

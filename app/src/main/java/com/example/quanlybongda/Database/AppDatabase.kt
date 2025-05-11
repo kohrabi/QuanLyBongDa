@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.example.quanlybongda.Database.DAO.*
-import com.example.quanlybongda.Database.DAO.User.UserDAO
+import com.example.quanlybongda.Database.DAO.User.*
 import com.example.quanlybongda.Database.Schema.*
 import com.example.quanlybongda.Database.Schema.Loai.*
 import com.example.quanlybongda.Database.Schema.User.*
@@ -65,6 +65,9 @@ import com.example.quanlybongda.Database.Schema.User.*
 @TypeConverters(DateConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract val userDAO: UserDAO;
+    abstract val userRoleDAO: UserRoleDAO;
+    abstract val userGroupDAO : UserGroupDAO;
+
     abstract val thamSoDAO: ThamSoDAO;
 
     abstract val cauThuDAO: CauThuDAO;

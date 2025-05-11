@@ -2,6 +2,7 @@ package com.example.quanlybongda.Database.Schema.User
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import com.example.quanlybongda.Database.Schema.MuaGiai
 
 @Entity(

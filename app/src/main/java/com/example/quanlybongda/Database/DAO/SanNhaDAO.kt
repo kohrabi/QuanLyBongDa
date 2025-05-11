@@ -18,7 +18,7 @@ interface SanNhaDAO {
     @Query("SELECT * FROM SanNha")
     suspend fun selectAllSanNha() : List<SanNha>;
 
-    @Query("SELECT * FROM SanNha")
-    fun selectAllSanNhaFlow() : Flow<List<SanNha>>;
+    @Query("SELECT * FROM SanNha WHERE maSan=:maSan LIMIT 1")
+    suspend fun selectSanNhaMaSan(maSan : Int) : SanNha?;
     
 }

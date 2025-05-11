@@ -10,24 +10,11 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ThamGiaDBDAO {
-    @Upsert
-    suspend fun upsertThamGiaDB(vararg thamGiaDB : ThamGiaDB);
 
-    @Delete
-    suspend fun deleteThamGiaDB(vararg thamGiaDB: ThamGiaDB);
+    @Query("SELECT COUNT(*) FROM CauThu WHERE maDoi=:maDoi")
+    suspend fun countThamGiaDB(maDoi: Int) : Int;
 
-    @Query("SELECT * FROM ThamGiaDB")
-    suspend fun selectAllThamGiaDB() : List<ThamGiaDB>;
-
-    @Query("SELECT * FROM ThamGiaDB")
-    fun selectAllThamGiaDBFlow() : Flow<List<ThamGiaDB>>;
-
-//    @Query("SELECT COUNT(*) FROM ThamGiaDB WHERE maMG=:maMG AND maDoi=:maDoi")
-//    suspend fun countThamGiaDB(maMG: Int, maDoi: Int) : Int;
-//
-//    @Query("SELECT COUNT(*) FROM ThamGiaDB " +
-//            "INNER JOIN CauThu ON CauThu.maCT=ThamGiaDB.maCT " +
-//            "WHERE maMG=:maMG AND maDoi=:maDoi AND maLCT=2"
-//    )
-//    suspend fun countThamGiaDBNuocNgoai(maMG: Int, maDoi: Int) : Int;
+    @Query("""SELECT COUNT(*) FROM CauThu     
+        WHERE maDoi=:maDoi AND maLCT=:maLCT""")
+    suspend fun countThamGiaDBLoaiCT(maLCT: Int, maDoi: Int) : Int;
 }
