@@ -70,6 +70,28 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    //Them vao de chay UI
+    implementation("io.coil-kt:coil-compose:2.6.0")
+
+    implementation("androidx.activity:activity-compose:1.7.2")
+    implementation("androidx.compose.ui:ui:1.5.0")
+    implementation("androidx.compose.material:material:1.5.0")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.5.0")
+    implementation("io.coil-kt:coil-compose:2.2.2") // <--- rất quan trọng
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
+    implementation("androidx.compose.runtime:runtime-livedata:1.5.0")
+    implementation(libs.androidx.espresso.core)
+
+    dependencies {
+        implementation ("androidx.compose.material3:material3:1.2.0")
+        implementation ("androidx.activity:activity-compose:1.7.2")
+        implementation ("io.coil-kt:coil-compose:2.5.0")
+        implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
+        implementation("androidx.compose.material:material-icons-core:1.6.7") // Sử dụng phiên bản mới nhất
+        implementation("androidx.compose.material:material-icons-extended:1.6.7") // Tùy chọn, cho nhiều icon hơn
+    }
+
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
