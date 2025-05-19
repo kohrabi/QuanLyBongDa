@@ -98,6 +98,26 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Jetpack Compose
+    implementation(platform("androidx.compose:compose-bom:2024.05.00")) // Sử dụng BOM để quản lý phiên bản Compose
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material:material") // Hoặc androidx.compose.material3:material3 nếu dùng Material 3
+    implementation("androidx.compose.material:material-icons-core") // Cho Icons.Filled
+    implementation("androidx.compose.material:material-icons-extended") // Cho các icon mở rộng (nếu cần)
+    implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.activity:activity-compose:1.9.0") // Cần cho componentActivity
+
+// Coil (for image loading)
+    implementation("io.coil-kt:coil-compose:2.6.0") // Kiểm tra phiên bản mới nhất
+
+// Android Lifecycle (Thường cần cho Compose)
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
+
+
 }
 
 kapt {
