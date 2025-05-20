@@ -21,22 +21,22 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 
 @Composable
-fun LoginScreen() {
+fun Login() {
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
         // Background Image with overlay
-        Image(
-            painter = rememberAsyncImagePainter("https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/a7195ab3-99b7-49a3-923e-03620d8eb0f5"),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
+//        Image(
+//            painter = rememberAsyncImagePainter("https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/a7195ab3-99b7-49a3-923e-03620d8eb0f5"),
+//            contentDescription = null,
+//            contentScale = ContentScale.Crop,
+//            modifier = Modifier.fillMaxSize()
+//        )
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xCC000000)) // dark overlay
+                .background(Color(0xFF222232)) // dark overlay
         )
 
         Column(
@@ -184,5 +184,5 @@ fun LoginScreen() {
 @Preview(showBackground = true, backgroundColor = 0xFF000000)
 @Composable
 fun LoginScreenPreview() { // << ĐỔI TÊN HÀM PREVIEW
-    LoginScreen() // Gọi Composable chính
+    Login() // Gọi Composable chính
 }

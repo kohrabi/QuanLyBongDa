@@ -26,19 +26,13 @@ import androidx.compose.ui.tooling.preview.Preview
 
 
 @Composable
-fun HoSoScreen() {
+fun HoSo() {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF0A0F24))
     ) {
-        // Background image
-        AsyncImage(
-            model = "https://i.imgur.com/1tMFzp8.png",
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
+
 
         Column(
             modifier = Modifier
@@ -208,8 +202,8 @@ fun PlayerRow(name: String, goals: String) {
 
 @Preview(showBackground = true, backgroundColor = 0xFF0A0B0F)
 @Composable
-fun GoalsScoredScreenPreview() {
+fun HoSoScreenPreview() {
     MaterialTheme {
-        HoSoScreen()
+        HoSo()
     }
 }

@@ -45,7 +45,7 @@ import coil.request.ImageRequest // << IMPORT IMAGEREQUEST TỪ COIL
 // data class ImageOptions(val contentScale: ContentScale)
 
 @Composable
-fun YourScreenContentWithFixedBottomNav() {
+fun SignIn2() {
     val context = LocalContext.current // Lấy context ở đây để dùng cho các ImageRequest
 
     Scaffold(
@@ -283,6 +283,6 @@ fun YourScreenContentWithFixedBottomNav() {
 
 @Preview(showBackground = true, backgroundColor = 0xFF000000)
 @Composable
-fun SignInScreen() {
-    YourScreenContentWithFixedBottomNav()
+fun SignInScreen2Preview() {
+    SignIn2()
 }

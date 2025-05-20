@@ -117,6 +117,11 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
 
+    // ... các dependencies khác
+    implementation(platform("androidx.compose:compose-bom:2024.05.00")) // Kiểm tra phiên bản BOM mới nhất
+    debugImplementation("androidx.compose.ui:ui-tooling") // Chỉ cần cho debug builds
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    // ...
 
 }
 
