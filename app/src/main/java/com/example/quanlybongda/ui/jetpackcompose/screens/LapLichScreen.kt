@@ -45,7 +45,7 @@ val textGreenAccent = Color(0xFF4CFF89)
 val textScoreColor = Color(0xFFE0FF00) // Màu vàng chanh cho tỷ số, điều chỉnh lại cho khớp
 
 @Composable
-fun LapLichThiDauVaKetQuaScreen() {
+fun LapLich() {
     val context = LocalContext.current
 
     Scaffold(
@@ -282,8 +282,8 @@ fun AppBottomNavigationBar(context: android.content.Context) {
 
 @Preview(showBackground = true, backgroundColor = 0xFF0A0B0F)
 @Composable
-fun LapLichThiDauVaKetQuaScreenPreview() {
+fun LapLichScreenPreview() {
     MaterialTheme {
-        LapLichThiDauVaKetQuaScreen()
+        LapLich()
     }
 }

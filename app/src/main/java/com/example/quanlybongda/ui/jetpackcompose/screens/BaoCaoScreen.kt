@@ -55,7 +55,7 @@ const val TOTTENHAM_LOGO_URL = "https://i.imgur.com/WfJH7Zm.png"
 const val BRIGHTON_LOGO_URL = "https://i.imgur.com/3YkH7Zm.png"
 
 @Composable
-fun StandingsScreen() {
+fun BaoCao() {
     val context = LocalContext.current
 
     Scaffold( // SỬ DỤNG SCAFFOLD
@@ -284,9 +284,9 @@ enum class League { CHAMPIONS, EUROPA }
 
 @Preview(showBackground = true, backgroundColor = 0xFF0D0D12)
 @Composable
-fun StandingsScreenPreview() {
+fun BaoCaoScreenPreview() {
     MaterialTheme { // Sử dụng MaterialTheme hoặc theme của bạn
-        StandingsScreen()
+        BaoCao()
 
     }
 }

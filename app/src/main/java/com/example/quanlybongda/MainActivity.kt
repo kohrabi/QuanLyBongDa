@@ -25,6 +25,15 @@ import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.quanlybongda.Database.Schema.CauThu
+import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
+import com.example.quanlybongda.ui.jetpackcompose.screens.BaoCao
+import com.example.quanlybongda.ui.jetpackcompose.screens.GhiNhan
+import com.example.quanlybongda.ui.jetpackcompose.screens.HoSo
+import com.example.quanlybongda.ui.jetpackcompose.screens.LapLich
+import com.example.quanlybongda.ui.jetpackcompose.screens.Login
+import com.example.quanlybongda.ui.jetpackcompose.screens.SignIn3
+import com.example.quanlybongda.ui.jetpackcompose.screens.SignIn2
+
 
 
 @AndroidEntryPoint
@@ -36,13 +45,26 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+//            QuanLyBongDaTheme {
+//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+//                    Greeting(
+//                        name = "Android",
+//                        modifier = Modifier.padding(innerPadding)
+//                    )
+//                    HoSoScreen()
+//                }
+//            }
             QuanLyBongDaTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                // Gọi trực tiếp Composable màn hình của bạn ở đây
+//                BaoCao()
+//                GhiNhan()
+//                HoSo()
+//                LapLich()
+//                Login()
+//                SignIn3()
+//                SignIn2()
+
+
             }
         }
     }

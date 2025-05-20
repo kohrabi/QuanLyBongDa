@@ -42,7 +42,7 @@ const val MANCITY_LOGO_URL1 = "https://i.imgur.com/yiLJgk9.png"
 
 
 @Composable
-fun FinalScoreScreen() {
+fun GhiNhan() {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -213,8 +213,8 @@ fun StatisticRowUpdated(side: String, player: String, action: String, time: Stri
 
 @Preview(showBackground = true, backgroundColor = 0xFF1E1E2C)
 @Composable
-fun FinalScoreScreenPreview() {
+fun GhiNhanScreenPreview() {
     MaterialTheme {
-        FinalScoreScreen()
+        GhiNhan()
     }
 }

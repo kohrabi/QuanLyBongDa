@@ -245,7 +245,7 @@ fun SignIn3() { // Đổi tên hàm cho rõ nghĩa hơn, hoặc bạn giữ Sign
 
 @Preview(showBackground = true, backgroundColor = 0xFF101010) // Màu nền preview đậm hơn chút
 @Composable
-fun PlayerEditScreenPreview() { // Đổi tên hàm Preview
+fun SignInScreen3Preview() { // Đổi tên hàm Preview
     MaterialTheme { // Bọc trong MaterialTheme nếu bạn dùng các thành phần Material
         SignIn3()
     }
