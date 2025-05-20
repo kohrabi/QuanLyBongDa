@@ -33,6 +33,8 @@ import com.example.quanlybongda.ui.jetpackcompose.screens.LapLich
 import com.example.quanlybongda.ui.jetpackcompose.screens.Login
 import com.example.quanlybongda.ui.jetpackcompose.screens.SignIn3
 import com.example.quanlybongda.ui.jetpackcompose.screens.SignIn2
+import com.example.quanlybongda.ui.jetpackcompose.screens.TraCuu
+
 
 
 
@@ -56,14 +58,14 @@ class MainActivity : ComponentActivity() {
 //            }
             QuanLyBongDaTheme {
                 // Gọi trực tiếp Composable màn hình của bạn ở đây
-//                BaoCao()
+                BaoCao()
 //                GhiNhan()
 //                HoSo()
 //                LapLich()
 //                Login()
 //                SignIn3()
 //                SignIn2()
-
+//                TraCuu()
 
             }
         }

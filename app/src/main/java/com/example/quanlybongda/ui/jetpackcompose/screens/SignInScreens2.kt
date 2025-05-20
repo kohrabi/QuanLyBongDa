@@ -1,5 +1,6 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
+// import androidx.compose.foundation.BorderStroke // Không thấy sử dụng trong code này
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.* // Scaffold, ButtonDefaults, OutlinedButton, Text
@@ -10,8 +11,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.background
-import androidx.compose.foundation.rememberScrollState // Đã có
-import androidx.compose.foundation.verticalScroll // Đã có
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -23,111 +24,114 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-// import androidx.compose.material.MaterialTheme // Bạn có thể không cần import này trực tiếp ở đây nếu dùng theme mặc định
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.platform.LocalContext // Import LocalContext
-import coil.compose.AsyncImage // << IMPORT ASYNCIMAGE TỪ COIL
-import coil.request.ImageRequest // << IMPORT IMAGEREQUEST TỪ COIL
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.example.quanlybongda.R // << QUAN TRỌNG: Import R class của project
 
-// XÓA BỎ HOẶC COMMENT OUT CÁC DÒNG SAU:
+// Phần comment CoilImage cũ đã đúng khi bạn bỏ đi
 // @Composable
-// fun CoilImage(imageModel: () -> Any, imageOptions: ImageOptions, modifier: Modifier) {
-//     Box(modifier = modifier.background(Color.DarkGray).padding(4.dp)) {
-//         Text(
-//             "Ảnh (...)",
-//             color = Color.White,
-//             fontSize = 8.sp,
-//             modifier = Modifier.align(Alignment.Center)
-//         )
-//     }
-// }
-//
+// fun CoilImage(imageModel: () -> Any, imageOptions: ImageOptions, modifier: Modifier) { ... }
 // data class ImageOptions(val contentScale: ContentScale)
 
 @Composable
 fun SignIn2() {
-    val context = LocalContext.current // Lấy context ở đây để dùng cho các ImageRequest
+    val context = LocalContext.current
 
     Scaffold(
-        backgroundColor = Color(0xFFFFFFFF), // Nền trắng cho toàn bộ màn hình
+        backgroundColor = Color(0xFFFFFFFF),
         bottomBar = {
-            // 4. Thanh điều hướng dưới cùng - CỐ ĐỊNH
-//            Row(
-//                horizontalArrangement = Arrangement.SpaceAround,
-//                verticalAlignment = Alignment.CenterVertically,
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .background(color = Color(0xFF222232)) // Nền cho thanh điều hướng
-//                    .padding(vertical = 12.dp) // Padding dọc cho thanh điều hướng
-//            ) {
-//                val iconModifier = Modifier.size(24.dp) // Kích thước đồng nhất cho icon
-//
-//                AsyncImage( // THAY THẾ CoilImage bằng AsyncImage
-//                    model = ImageRequest.Builder(context) // Sử dụng context đã lấy
-//                        .data("file:///android_asset/SignIn2Assets/Home.png")
-//                        .crossfade(true)
-//                        .build(),
-//                    contentDescription = "Home Icon", // Thêm content description
-//                    contentScale = ContentScale.Fit,
-//                    modifier = iconModifier
-//                )
-//                AsyncImage( // THAY THẾ CoilImage bằng AsyncImage
-//                    model = ImageRequest.Builder(context)
-//                        .data("file:///android_asset/SignIn2Assets/List.png")
-//                        .crossfade(true)
-//                        .build(),
-//                    contentDescription = "Icon Nav 2", // Thêm content description
-//                    contentScale = ContentScale.Fit,
-//                    modifier = iconModifier
-//                )
-//                AsyncImage( // THAY THẾ CoilImage bằng AsyncImage
-//                    model = ImageRequest.Builder(context)
-//                        .data("file:///android_asset/SignIn2Assets/Clock.png")
-//                        .crossfade(true)
-//                        .build(),
-//                    contentDescription = "Icon Nav 3", // Thêm content description
-//                    contentScale = ContentScale.Fit,
-//                    modifier = iconModifier
-//                )
-//                AsyncImage( // THAY THẾ CoilImage bằng AsyncImage
-//                    model = ImageRequest.Builder(context)
-//                        .data("file:///android_asset/SignIn2Assets/Me.png")
-//                        .crossfade(true)
-//                        .build(),
-//                    contentDescription = "Icon Nav 4", // Thêm content description
-//                    contentScale = ContentScale.Fit,
-//                    modifier = iconModifier
-//                )
-//            }
+            // Phần bottomBar đã comment: Nếu bạn muốn dùng lại, hãy sửa như ví dụ dưới
+            /*
+            Row(
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = Color(0xFF222232))
+                    .padding(vertical = 12.dp)
+            ) {
+                val iconModifier = Modifier.size(24.dp)
 
+                // Giả sử bạn đã copy các icon từ assets vào drawable:
+                // home_icon.png, list_icon.png, clock_icon.png, me_icon.png
+
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(R.drawable.home_icon) // << THAY THẾ
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "Home Icon",
+                    contentScale = ContentScale.Fit,
+                    modifier = iconModifier
+                )
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(R.drawable.list_icon) // << THAY THẾ
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "List Icon",
+                    contentScale = ContentScale.Fit,
+                    modifier = iconModifier
+                )
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(R.drawable.clock_icon) // << THAY THẾ
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "Clock Icon",
+                    contentScale = ContentScale.Fit,
+                    modifier = iconModifier
+                )
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(R.drawable.me_icon) // << THAY THẾ
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "Profile Icon",
+                    contentScale = ContentScale.Fit,
+                    modifier = iconModifier
+                )
+            }
+            */
+
+            // BottomNavigation hiện tại đang sử dụng Material Icons, không cần thay đổi
             BottomNavigation(
                 backgroundColor = Color(0xFF1C1C2A),
                 contentColor = Color.White
             ) {
                 BottomNavigationItem(
-                    icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+                    icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
                     selected = true,
-                    onClick = { /* TODO */ }
+                    onClick = { /* TODO */ },
+                    selectedContentColor = Color.White,
+                    unselectedContentColor = Color.Gray
                 )
                 BottomNavigationItem(
-                    icon = { Icon(Icons.Default.List, contentDescription = "Ranking") },
+                    icon = { Icon(Icons.Filled.List, contentDescription = "Ranking") },
                     selected = false,
-                    onClick = { /* TODO */ }
+                    onClick = { /* TODO */ },
+                    selectedContentColor = Color.White,
+                    unselectedContentColor = Color.Gray
                 )
                 BottomNavigationItem(
-                    icon = { Icon(Icons.Default.Schedule, contentDescription = "Schedule") },
+                    icon = { Icon(Icons.Filled.Schedule, contentDescription = "Schedule") },
                     selected = false,
-                    onClick = { /* TODO */ }
+                    onClick = { /* TODO */ },
+                    selectedContentColor = Color.White,
+                    unselectedContentColor = Color.Gray
                 )
                 BottomNavigationItem(
-                    icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
+                    icon = { Icon(Icons.Filled.Person, contentDescription = "Profile") },
                     selected = false,
-                    onClick = { /* TODO */ }
+                    onClick = { /* TODO */ },
+                    selectedContentColor = Color.White,
+                    unselectedContentColor = Color.Gray
                 )
             }
         }
-    ) { innerPadding -> // innerPadding được cung cấp bởi Scaffold
-        // Nội dung chính của màn hình (phần card màu tối, có thể cuộn)
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -140,18 +144,18 @@ fun SignIn2() {
                 )
                 .verticalScroll(rememberScrollState())
         ) {
-            // 1. Phần hình ảnh và nội dung overlay
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(260.dp)
             ) {
-                AsyncImage( // THAY THẾ CoilImage bằng AsyncImage
+                AsyncImage(
                     model = ImageRequest.Builder(context)
-                        .data("https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/e79db67f-c718-419e-95d5-5e909f0fc46b")
+                        // .data("https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/e79db67f-c718-419e-95d5-5e909f0fc46b") // THAY THẾ
+                        .data(R.drawable.football_stadium) // << THAY BẰNG TÊN FILE DRAWABLE
                         .crossfade(true)
                         .build(),
-                    contentDescription = "Header Image", // Thêm content description
+                    contentDescription = "Header Image",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxSize()
@@ -168,24 +172,26 @@ fun SignIn2() {
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        AsyncImage( // THAY THẾ CoilImage bằng AsyncImage
+                        AsyncImage(
                             model = ImageRequest.Builder(context)
-                                .data("https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/a4b1923a-eaac-41ed-ae29-3988b8f62e18")
+                                // .data("https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/a4b1923a-eaac-41ed-ae29-3988b8f62e18") // THAY THẾ
+                                .data(R.drawable.football_stadium) // << THAY BẰNG TÊN FILE DRAWABLE
                                 .crossfade(true)
                                 .build(),
-                            contentDescription = "Overlay Logo 1", // Thêm content description
+                            contentDescription = "Overlay Logo 1",
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
                                 .width(54.dp)
                                 .height(21.dp)
                                 .clip(RoundedCornerShape(32.dp))
                         )
-                        AsyncImage( // THAY THẾ CoilImage bằng AsyncImage
+                        AsyncImage(
                             model = ImageRequest.Builder(context)
-                                .data("https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/9f4dccce-3e2e-4fc2-8444-7f5658f46138")
+                                // .data("https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/9f4dccce-3e2e-4fc2-8444-7f5658f46138") // THAY THẾ
+                                .data(R.drawable.football_stadium) // << THAY BẰNG TÊN FILE DRAWABLE
                                 .crossfade(true)
                                 .build(),
-                            contentDescription = "Overlay Logo 2", // Thêm content description
+                            contentDescription = "Overlay Logo 2",
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
                                 .width(66.dp)
@@ -214,7 +220,6 @@ fun SignIn2() {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 2. Phần "Home Stadium"
             Column(
                 modifier = Modifier.padding(horizontal = 16.dp)
             ) {
@@ -237,7 +242,6 @@ fun SignIn2() {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // 3. Phần Button "ADD"
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -245,37 +249,30 @@ fun SignIn2() {
             ) {
                 OutlinedButton(
                     onClick = { println("Pressed!") },
-                    border = BorderStroke(0.dp, Color.Transparent),
+                    border = BorderStroke(0.dp, Color.Transparent), // Không viền
                     colors = ButtonDefaults.outlinedButtonColors(
-                        backgroundColor = Color.Transparent
+                        backgroundColor = Color.Transparent // Nền trong suốt để thấy Brush
                     ),
-                    contentPadding = PaddingValues(),
+                    contentPadding = PaddingValues(), // Bỏ padding mặc định
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp)
-                        .clip(shape = RoundedCornerShape(7.dp))
-                        .background(
+                        .clip(shape = RoundedCornerShape(7.dp)) // Bo góc cho button
+                        .background( // Áp dụng Brush cho nền
                             brush = Brush.horizontalGradient(
                                 colors = listOf(Color(0xFF4568DC), Color(0xFFB06AB3))
                             )
                         )
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        Text(
-                            "ADD",
-                            color = Color(0xFFFFFFFF),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    // Nội dung của Button (Text "ADD")
+                    Text(
+                        "ADD",
+                        color = Color(0xFFFFFFFF),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
-
-            // Spacer ở cuối nội dung cuộn để tạo khoảng trống nếu nội dung ngắn
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
@@ -284,5 +281,8 @@ fun SignIn2() {
 @Preview(showBackground = true, backgroundColor = 0xFF000000)
 @Composable
 fun SignInScreen2Preview() {
+    // Bạn có thể bọc trong MaterialTheme nếu muốn xem trước với theme của ứng dụng
+    // MaterialTheme {
     SignIn2()
+    // }
 }
