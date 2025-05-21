@@ -5,16 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,8 +18,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -36,7 +29,11 @@ import androidx.navigation.compose.rememberNavController
 import com.example.quanlybongda.ui.jetpackcompose.screens.BaoCaoScreen
 import com.example.quanlybongda.ui.jetpackcompose.screens.GhiNhanScreen
 import com.example.quanlybongda.ui.jetpackcompose.screens.HoSoScreen
+import com.example.quanlybongda.ui.jetpackcompose.screens.Input.BanThangInputScreen
 import com.example.quanlybongda.ui.jetpackcompose.screens.LapLichScreen
+import com.example.quanlybongda.ui.jetpackcompose.screens.Input.CauThuInputScreen
+import com.example.quanlybongda.ui.jetpackcompose.screens.Input.DoiBongInputScreen
+import com.example.quanlybongda.ui.jetpackcompose.screens.Input.LichThiDauInputScreen
 import com.example.quanlybongda.ui.jetpackcompose.screens.SignInScreen
 import com.example.quanlybongda.ui.jetpackcompose.screens.SignUpScreen
 
@@ -69,6 +66,10 @@ fun AppNavigation() {
         "ghiNhan",
         "hoSo",
         "lapLich",
+        "cauThu",
+        "banThang",
+        "doiBong",
+        "lichThiDau",
     )
 
     Scaffold(
@@ -134,6 +135,10 @@ fun AppNavigation() {
             composable("ghiNhan") { GhiNhanScreen(Modifier) }
             composable("hoSo") { HoSoScreen(Modifier) }
             composable("lapLich") { LapLichScreen(navController, Modifier) }
+            composable("cauThu") { CauThuInputScreen() }
+            composable("doiBong") { DoiBongInputScreen() }
+            composable("banThang") { BanThangInputScreen() }
+            composable("lichThiDau") { LichThiDauInputScreen() }
         }
     }
 }
