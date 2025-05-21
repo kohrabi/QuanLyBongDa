@@ -1,62 +1,52 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
-
+// Các import của bạn giữ nguyên, đảm bảo có:
+import androidx.compose.foundation.Image // Giữ lại nếu bạn có dùng Image với painterResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-
 import androidx.compose.material.* // Material 2 components
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home // Icon cho BottomBar
 import androidx.compose.material.icons.filled.List // Icon cho BottomBar (ví dụ cho Ranking/Standings)
 import androidx.compose.material.icons.filled.Schedule // Icon cho BottomBar (ví dụ cho Schedule)
 import androidx.compose.material.icons.filled.Person // Icon cho BottomBar
-// Bỏ các import không cần thiết hoặc đã được thay thế
-// import com.skydoves.landscapist.ImageOptions // Không dùng nữa
-// import com.skydoves.landscapist.coil3.CoilImage // Không dùng nữa
-import androidx.compose.runtime.* // Thêm lại các import cơ bản nếu thiếu
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-
+import androidx.compose.ui.res.painterResource // Sẽ cần nếu dùng Image composable với drawable
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage // Sử dụng AsyncImage của Coil
-
 import coil.request.ImageRequest
-
+import com.example.quanlybongda.R // Quan trọng: Import R để truy cập resources
 
 // Màu sắc (giữ nguyên hoặc điều chỉnh)
-val standingsScreenBackground = Color(0xFF0D0D12) // Màu nền tối hơn theo image_5afbae.png
-val standingsContentBg = Color(0xFF181A20) // Màu nền cho phần nội dung chính
-val standingsCardBg = Color(0xFF222232) // Màu nền cho thẻ bảng xếp hạng
+val standingsScreenBackground = Color(0xFF0D0D12)
+val standingsContentBg = Color(0xFF181A20)
+val standingsCardBg = Color(0xFF222232)
 val standingsTextWhite = Color.White
 val standingsTextAccent = Color(0xFFD1B4FF)
 val standingsTextMuted = Color(0xFFA0A3BD)
 
-// URL Placeholder - BẠN CẦN THAY THẾ
-const val BACKGROUND_IMAGE_URL_STANDINGS = "https://i.imgur.com/your_stadium_background.png" // Thay bằng ảnh nền sân vận động mờ
-const val ARSENAL_LOGO_URL = "https://i.imgur.com/1ZQZ1Zm.png"
-const val MANCITY_LOGO_URL = "https://i.imgur.com/HhJY7Zm.png"
-const val LEEDS_LOGO_URL = "https://i.imgur.com/UKY1ZmX.png"
-const val TOTTENHAM_LOGO_URL = "https://i.imgur.com/WfJH7Zm.png"
-const val BRIGHTON_LOGO_URL = "https://i.imgur.com/3YkH7Zm.png"
+// KHÔNG CẦN URL PLACEHOLDER NỮA
 
 @Composable
 fun BaoCaoScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
 
-    Scaffold( // SỬ DỤNG SCAFFOLD
-        backgroundColor = standingsScreenBackground, // Màu nền tối cho toàn bộ màn hình
+    Scaffold(
+        backgroundColor = standingsScreenBackground,
         topBar = {
             StandingsTopAppBar(modifier) // TopAppBar chứa tiêu đề "Standings"
         },
@@ -67,32 +57,38 @@ fun BaoCaoScreen(modifier: Modifier = Modifier) {
         Box(modifier = modifier.fillMaxSize().padding(innerPadding)) { // Box chứa ảnh nền và nội dung
             // Ảnh nền (nếu có)
             AsyncImage(
-                model = ImageRequest.Builder(context).data(BACKGROUND_IMAGE_URL_STANDINGS).crossfade(true).build(),
+                // model = ImageRequest.Builder(context).data(R.drawable.your_stadium_background_drawable_name).crossfade(true).build(),
+                // Hoặc đơn giản hơn nếu chỉ cần crossfade:
+                model = R.drawable.football_stadium, // << THAY THẾ TÊN FILE DRAWABLE CỦA BẠN
                 contentDescription = "Background",
                 contentScale = ContentScale.Crop,
                 modifier = modifier.fillMaxSize(),
-                alpha = 0.15f // Làm mờ ảnh nền đi nhiều
+                alpha = 0.3f, // Giữ nguyên hoặc điều chỉnh alpha
+                // Thêm crossfade nếu muốn hiệu ứng mờ dần khi tải
+                // Để dùng crossfade trực tiếp với AsyncImage, Coil phiên bản mới có thể hỗ trợ tham số crossfade
+                // Hoặc giữ ImageRequest.Builder nếu bạn cần nhiều tùy chỉnh hơn:
+                // model = ImageRequest.Builder(context)
+                //    .data(R.drawable.stadium_background) // << THAY THẾ TÊN FILE DRAWABLE
+                //    .crossfade(true)
+                //    .build(),
             )
 
-            // Column nội dung chính, có thể cuộn
             Column(
                 modifier = modifier
                     .fillMaxSize()
-                    .padding(horizontal = 14.dp) // Padding ngang cho nội dung
+                    .padding(horizontal = 14.dp)
                     .verticalScroll(rememberScrollState())
             ) {
                 // Khoảng cách từ TopAppBar xuống nội dung
                 Spacer(modifier = modifier.height(24.dp)) // << TĂNG KHOẢNG CÁCH NÀY
 
-                // Card container cho bảng xếp hạng
                 Column(
                     modifier = modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp)) // Bo góc cho card
-                        .background(standingsContentBg.copy(alpha = 0.7f)) // Nền tối hơn, hơi trong suốt cho card
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(standingsContentBg.copy(alpha = 0.7f))
                         .padding(16.dp)
                 ) {
-                    // Header row: "Table Standings" và "See All"
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
@@ -101,7 +97,7 @@ fun BaoCaoScreen(modifier: Modifier = Modifier) {
                         Text(
                             text = "Table Standings",
                             color = standingsTextWhite,
-                            fontSize = 16.sp, // Tăng font một chút
+                            fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
@@ -119,13 +115,13 @@ fun BaoCaoScreen(modifier: Modifier = Modifier) {
 
                     Spacer(modifier = modifier.height(12.dp))
 
-                    // Dữ liệu các đội
+                    // Dữ liệu các đội - THAY THẾ URL BẰNG RESOURCE ID
                     val teams = listOf(
-                        Team("Arsenal", ARSENAL_LOGO_URL, 3, 0, 0, 9, League.CHAMPIONS),
-                        Team("Man City", MANCITY_LOGO_URL, 2, 1, 0, 7, League.CHAMPIONS),
-                        Team("Leeds United", LEEDS_LOGO_URL, 2, 1, 0, 7, League.CHAMPIONS),
-                        Team("Tottenham", TOTTENHAM_LOGO_URL, 1, 2, 0, 5, League.EUROPA),
-                        Team("Brighton", BRIGHTON_LOGO_URL, 1, 1, 1, 4, League.EUROPA)
+                        Team("Arsenal", R.drawable.arsenal_logo, 3, 0, 0, 9, League.CHAMPIONS), // << THAY TÊN FILE
+                        Team("Man City", R.drawable.mancity_logo, 2, 1, 0, 7, League.CHAMPIONS), // << THAY TÊN FILE
+                        Team("Leeds United", R.drawable.leeds_united_logo, 2, 1, 0, 7, League.CHAMPIONS), // << THAY TÊN FILE
+                        Team("Tottenham", R.drawable.tottenham_logo, 1, 2, 0, 5, League.EUROPA), // << THAY TÊN FILE
+                        Team("Brighton", R.drawable.brighton_logo, 1, 1, 1, 4, League.EUROPA) // << THAY TÊN FILE
                     )
 
                     teams.forEachIndexed { index, team ->
@@ -153,7 +149,7 @@ fun StandingsTopAppBar(modifier : Modifier) {
             Text(
                 text = "Standings",
                 color = standingsTextWhite,
-                fontSize = 18.sp, // Có thể tăng nếu muốn
+                fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center, // Căn giữa tiêu đề
                 modifier = modifier.fillMaxWidth() // Cho Text chiếm hết chiều rộng để căn giữa hoạt động
@@ -170,7 +166,7 @@ fun StandingsListHeader(modifier : Modifier) { // Đổi tên từ StandingsTabl
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(bottom = 8.dp), // Padding dưới cho header
+            .padding(bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Spacer để căn chỉnh với chấm tròn và logo ở các hàng dữ liệu
@@ -191,7 +187,7 @@ fun StandingsListRow(context: android.content.Context, team: Team, modifier : Mo
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp) // Giảm padding dọc chút
+            .padding(vertical = 6.dp)
     ) {
         Box(
             modifier = modifier
@@ -203,10 +199,17 @@ fun StandingsListRow(context: android.content.Context, team: Team, modifier : Mo
         )
         Spacer(modifier = modifier.width(8.dp))
         AsyncImage(
-            model = ImageRequest.Builder(context).data(team.logoUrl).crossfade(true).build(),
+            // model = ImageRequest.Builder(context).data(team.logoResId).crossfade(true).build(),
+            // Hoặc đơn giản hơn:
+            model = team.logoResId, // << SỬ DỤNG RESOURCE ID TỪ TEAM
             contentDescription = "${team.name} Logo",
             contentScale = ContentScale.Fit,
-            modifier = modifier.size(20.dp) // Kích thước logo
+            modifier = modifier.size(20.dp)
+            // Thêm crossfade nếu muốn, tương tự như ảnh nền
+            // model = ImageRequest.Builder(context)
+            //    .data(team.logoResId)
+            //    .crossfade(true)
+            //    .build(),
         )
         Spacer(modifier = modifier.width(8.dp))
         Text(
@@ -244,32 +247,31 @@ fun StandingsBottomNavigationBar(modifier : Modifier) { // Bottom Navigation Bar
     var selectedItem by remember { mutableStateOf(0) } // 0 là Home, 1 là Standings (ví dụ)
     val items = listOf(
         "Home" to Icons.Filled.Home,
-        "Standings" to Icons.Filled.List, // Icon cho Bảng xếp hạng
+        "Standings" to Icons.Filled.List,
         "Schedule" to Icons.Filled.Schedule,
         "Profile" to Icons.Filled.Person
     )
 
     BottomNavigation(
-        backgroundColor = standingsContentBg.copy(alpha = 0.9f), // Màu nền cho BottomNav
-        contentColor = standingsTextMuted // Màu mặc định cho icon không được chọn
+        backgroundColor = standingsContentBg.copy(alpha = 0.9f),
+        contentColor = standingsTextMuted
     ) {
         items.forEachIndexed { index, item ->
             BottomNavigationItem(
                 icon = { Icon(item.second, contentDescription = item.first) },
                 selected = selectedItem == index,
                 onClick = { selectedItem = index /* TODO: Handle navigation */ },
-                selectedContentColor = Color.White, // Màu icon được chọn
+                selectedContentColor = Color.White,
                 unselectedContentColor = standingsTextMuted
             )
         }
     }
 }
 
-
-// Data class và Enum (giữ nguyên)
+// Data class và Enum
 data class Team(
     val name: String,
-    val logoUrl: String,
+    val logoResId: Int, // << THAY ĐỔI TỪ String SANG Int
     val w: Int,
     val d: Int,
     val l: Int,

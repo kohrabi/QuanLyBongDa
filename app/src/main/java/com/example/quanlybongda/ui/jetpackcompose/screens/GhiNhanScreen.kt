@@ -23,7 +23,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import androidx.compose.foundation.layout.size
+// import androidx.compose.foundation.Image // Đã có ở trên, không cần import lại
+// import androidx.compose.foundation.layout.size // Đã có trong layout.*
 
 import com.example.quanlybongda.R // << QUAN TRỌNG: Import lớp R của dự án bạn
 
@@ -34,10 +35,10 @@ val fullTimeColor = Color(0xFF4CFF89)
 val textWhiteColor = Color.White
 val textMutedColor = Color(0xFFA0A3BD)
 
-// URL Placeholder - BẠN CẦN THAY THẾ BẰNG URL THỰC TẾ
-const val BACKGROUND_IMAGE_URL = "https://i.imgur.com/your_background_image.png"
-const val FCB_LOGO_URL = "https://i.imgur.com/nWgD6YI.png"
-const val MANCITY_LOGO_URL1 = "https://i.imgur.com/yiLJgk9.png"
+// BỎ URL PLACEHOLDER KHÔNG CẦN THIẾT
+// const val BACKGROUND_IMAGE_URL = "https://i.imgur.com/your_background_image.png"
+// const val FCB_LOGO_URL = "https://i.imgur.com/nWgD6YI.png" // Không dùng trong GhiNhan()
+// const val MANCITY_LOGO_URL1 = "https://i.imgur.com/yiLJgk9.png" // Không dùng trong GhiNhan()
 
 
 @Composable
@@ -48,7 +49,8 @@ fun GhiNhanScreen(modifier: Modifier = Modifier) {
             .background(darkScreenBackground)
     ) {
         Image(
-            painter = rememberAsyncImagePainter(BACKGROUND_IMAGE_URL),
+            // painter = rememberAsyncImagePainter(BACKGROUND_IMAGE_URL), // THAY THẾ DÒNG NÀY
+            painter = rememberAsyncImagePainter(R.drawable.football_stadium), // << THAY BẰNG TÊN FILE DRAWABLE CỦA BẠN
             contentDescription = "Background Stadium",
             contentScale = ContentScale.Crop,
             modifier = modifier.fillMaxSize(),
@@ -95,7 +97,6 @@ fun GhiNhanScreen(modifier: Modifier = Modifier) {
             // Khoảng cách giữa TopBar và Full Time
             Spacer(modifier = modifier.height(30.dp)) // << SỬA: Tăng khoảng cách
 
-            // Full Time
             Text(
                 text = "Full Time",
                 color = fullTimeColor,
@@ -106,36 +107,33 @@ fun GhiNhanScreen(modifier: Modifier = Modifier) {
             // Khoảng cách giữa Full Time và Khu vực tỷ số
             Spacer(modifier = modifier.height(20.dp)) // << SỬA: Tăng khoảng cách
 
-            // Team Logos and Score
             Row(
                 modifier = modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp), // << SỬA: Thêm padding dọc để "to hơn"
+                    .padding(vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
-                    painter = rememberAsyncImagePainter(R.drawable.logo_barca),
-                    contentDescription = "FCB Logo",
-                    modifier = modifier.size(70.dp) // << SỬA: Có thể tăng kích thước logo nếu muốn vùng này to hơn
+                    painter = rememberAsyncImagePainter(R.drawable.arsenal_logo_4x), // Giả sử đây là logo đội 1
+                    contentDescription = "Team 1 Logo", // Sửa contentDescription cho phù hợp
+                    modifier = modifier.size(70.dp)
                 )
                 Text(
                     text = "2 - 2",
                     color = scoreColor,
-                    fontSize = 40.sp,    // << SỬA: Tăng kích thước tỷ số nếu muốn
+                    fontSize = 40.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Image(
-                    painter = rememberAsyncImagePainter(R.drawable.logo_barca),
-                    contentDescription = "ManCity Logo",
-                    modifier = modifier.size(70.dp) // << SỬA: Có thể tăng kích thước logo
+                    painter = rememberAsyncImagePainter(R.drawable.mancity_logo_4x), // << THAY BẰNG LOGO ĐỘI 2, ví dụ: R.drawable.logo_mancity
+                    contentDescription = "Team 2 Logo", // Sửa contentDescription cho phù hợp
+                    modifier = modifier.size(70.dp)
                 )
             }
 
-            // Khoảng cách giữa Khu vực tỷ số và Statistic Title
-            Spacer(modifier = modifier.height(32.dp)) // << SỬA: Tăng khoảng cách
+            Spacer(modifier = modifier.height(32.dp))
 
-            // Statistic Title
             Text(
                 text = "Statistic Match",
                 color = textWhiteColor,
@@ -145,11 +143,10 @@ fun GhiNhanScreen(modifier: Modifier = Modifier) {
 
             Spacer(modifier = modifier.height(16.dp))
 
-            // Match statistics list
             val stats = listOf(
                 Triple("L", "Depay", "66’"),
                 Triple("R", "Depay", "73’"),
-                Triple("R", "Depay", "76’"), // Đổi "L" thành "R" cho giống ảnh thiết kế
+                Triple("R", "Depay", "76’"),
                 Triple("L", "Depay", "79’"),
                 Triple("R", "Depay", "89’")
             )
@@ -170,11 +167,9 @@ fun StatisticRowUpdated(side: String, player: String, action: String, time: Stri
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 10.dp), // Tăng padding dọc cho mỗi dòng thống kê
+            .padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Sử dụng weight để chia đều không gian hơn, thay vì width cố định cho tất cả trừ player
-        // Hoặc đặt width cố định nhưng đảm bảo tổng không vượt quá và căn chỉnh đúng
         Text(
             text = side,
             color = textMutedColor,

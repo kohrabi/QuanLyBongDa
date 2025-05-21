@@ -1,15 +1,16 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
+import androidx.compose.foundation.Image // Giữ lại nếu có dùng Image với painterResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material.* // Material 2 components
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.ArrowBack // Nên dùng filled hoặc outlined nhất quán
+import androidx.compose.material.icons.filled.MoreVert  // Nên dùng filled hoặc outlined nhất quán
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,36 +23,34 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import androidx.compose.ui.tooling.preview.Preview
-
+import com.example.quanlybongda.R // << QUAN TRỌNG: Import lớp R của dự án bạn
 
 @Composable
 fun HoSoScreen(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF0A0F24))
+            .background(Color(0xFF0A0F24)) // Nền chính của màn hình là màu đặc
     ) {
-
-
         Column(
             modifier = modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            TopBar(modifier)
+            HoSoTopBar(modifier) // Đổi tên TopBar để tránh trùng lặp nếu có TopBar khác trong cùng package
 
-            PlayerCard(
+            PlayerCardHoSo( // Đổi tên PlayerCard để tránh trùng lặp
                 team = "Barcelona",
                 name = "Frenkie De Jong",
                 score = "9",
                 modifier
             )
 
-            TeamRow(
+            TeamRowHoSo( // Đổi tên TeamRow để tránh trùng lặp
                 teamName = "Manchester City",
                 score = "2",
-                logoUrl = "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg",
-                modifier
+                // logoUrl = "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg" // THAY THẾ DÒNG NÀY
+                logoResId = R.drawable.mancity_logo // << THAY BẰNG TÊN FILE DRAWABLE CỦA BẠN
             )
 
             // List of Players
@@ -68,7 +67,7 @@ fun HoSoScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun TopBar(modifier: Modifier) {
+fun HoSoTopBar(modifier: Modifier) { // Đổi tên từ TopBar
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -77,19 +76,20 @@ fun TopBar(modifier: Modifier) {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Icon(
-            imageVector = Icons.Default.ArrowBack,
+            imageVector = Icons.Filled.ArrowBack, // Sử dụng Icons.Filled cho nhất quán
             contentDescription = "Back",
             tint = Color.White
         )
         Text(
-            text = "Goals Scored",
+            text = "Goals Scored", // Tiêu đề này có thể cần thay đổi cho màn hình "Hồ Sơ"
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f) // Để Text chiếm không gian và tự căn giữa
         )
         Icon(
-            imageVector = Icons.Default.MoreVert,
+            imageVector = Icons.Filled.MoreVert, // Sử dụng Icons.Filled cho nhất quán
             contentDescription = "Menu",
             tint = Color.White
         )
@@ -97,7 +97,8 @@ fun TopBar(modifier: Modifier) {
 }
 
 @Composable
-fun PlayerCard(team: String, name: String, score: String, modifier: Modifier) {
+fun PlayerCardHoSo(team: String, name: String, score: String, modifier: Modifier) { // Đổi tên từ PlayerCard
+    // Nội dung PlayerCard này không có hình ảnh, giữ nguyên nếu đây là thiết kế
     Box(
         modifier = modifier
             .padding(horizontal = 24.dp, vertical = 16.dp)
@@ -121,7 +122,7 @@ fun PlayerCard(team: String, name: String, score: String, modifier: Modifier) {
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Goals Score",
+                text = "Goals Score", // Label này có thể cần thay đổi
                 color = Color(0xFFDADADA),
                 fontSize = 12.sp,
                 modifier = modifier.padding(top = 6.dp)
@@ -138,7 +139,7 @@ fun PlayerCard(team: String, name: String, score: String, modifier: Modifier) {
 }
 
 @Composable
-fun TeamRow(teamName: String, score: String, logoUrl: String, modifier: Modifier) {
+fun TeamRowHoSo(teamName: String, score: String, logoResId: Int, modifier: Modifier) { // Đổi tên và thay logoUrl thành logoResId
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -146,8 +147,8 @@ fun TeamRow(teamName: String, score: String, logoUrl: String, modifier: Modifier
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
-            model = logoUrl,
-            contentDescription = null,
+            model = logoResId, // << SỬ DỤNG RESOURCE ID
+            contentDescription = "$teamName Logo", // Cung cấp contentDescription tốt hơn
             modifier = modifier
                 .size(40.dp)
                 .clip(CircleShape),
@@ -171,7 +172,7 @@ fun TeamRow(teamName: String, score: String, logoUrl: String, modifier: Modifier
 }
 
 @Composable
-fun PlayerRow(name: String, goals: String, modifier: Modifier) {
+fun PlayerRowHoSo(name: String, goals: String, modifier: Modifier) { // Đổi tên từ PlayerRow
     Row(
         modifier = modifier
             .fillMaxWidth()
