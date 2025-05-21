@@ -1,6 +1,5 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
-import androidx.compose.material.OutlinedButton
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,34 +17,62 @@ import androidx.compose.ui.text.input.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.quanlybongda.Database.AppDatabase
+import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.Database.verifyEmailInput
+import com.example.quanlybongda.Database.verifyUsernameInput
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import okhttp3.Dispatcher
 
 @Composable
-fun Login() {
+fun SignUpScreen(
+    navController : NavController,
+    modifier: Modifier = Modifier,
+    viewModel: DatabaseViewModel = hiltViewModel(),
+) {
+    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
+
+    val onSignUpClick : () -> Unit = {
+        scope.launch {
+            viewModel.createUser(email, username, password);
+            navController.navigate("login");
+        }
+    };
+
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
     ) {
         // Background Image with overlay
-//        Image(
-//            painter = rememberAsyncImagePainter("https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/a7195ab3-99b7-49a3-923e-03620d8eb0f5"),
-//            contentDescription = null,
-//            contentScale = ContentScale.Crop,
-//            modifier = Modifier.fillMaxSize()
-//        )
+        Image(
+            painter = rememberAsyncImagePainter("https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/a7195ab3-99b7-49a3-923e-03620d8eb0f5"),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = modifier.fillMaxSize()
+        )
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
-                .background(Color(0xFF222232)) // dark overlay
+                .background(Color(0xCC000000)) // dark overlay
         )
 
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .padding(24.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = modifier.height(40.dp))
 
             Column {
                 Text(
@@ -60,19 +87,46 @@ fun Login() {
                     fontSize = 26.sp,
                     fontWeight = FontWeight.ExtraBold
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = modifier.height(12.dp))
                 Text(
-                    text = "Enter your email address and password to use the application",
+                    text = "Enter your email address, username and password to sign up",
                     color = Color.LightGray,
                     fontSize = 14.sp
                 )
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = modifier.height(24.dp))
 
+
+                // Email
                 OutlinedTextField(
-                    value = "Charlie Westervelt",
-                    onValueChange = {},
+                    value = email,
+                    onValueChange = {
+                        email = it
+                        verifyEmailInput(email)
+                    },
+                    label = { Text("Email") },
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFF222232), shape = RoundedCornerShape(6.dp)),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
+                        textColor = Color.White,
+                        cursorColor = Color.White,
+                        focusedLabelColor = Color.White,
+                        unfocusedLabelColor = Color.LightGray
+                    )
+                )
+                Spacer(modifier = modifier.height(16.dp))
+
+                // Username
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = {
+                        username = it
+                        verifyUsernameInput(username)
+                    },
                     label = { Text("Username") },
-                    modifier = Modifier
+                    modifier = modifier
                         .fillMaxWidth()
                         .background(Color(0xFF222232), shape = RoundedCornerShape(6.dp)),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -85,12 +139,12 @@ fun Login() {
                     )
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = modifier.height(16.dp))
 
                 var passwordVisible by remember { mutableStateOf(false) }
                 OutlinedTextField(
-                    value = "password123",
-                    onValueChange = {},
+                    value = password,
+                    onValueChange = { password = it },
                     label = { Text("Password") },
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
@@ -102,7 +156,7 @@ fun Login() {
                             Icon(imageVector = image, contentDescription = null, tint = Color.LightGray)
                         }
                     },
-                    modifier = Modifier
+                    modifier = modifier
                         .fillMaxWidth()
                         .background(Color(0xFF222232), shape = RoundedCornerShape(6.dp)),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -115,37 +169,33 @@ fun Login() {
                     )
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = modifier.height(16.dp))
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = modifier.fillMaxWidth()
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(checked = true, onCheckedChange = {}, colors = CheckboxDefaults.colors(Color.White))
-                        Text("Remember Me", color = Color.White, fontSize = 14.sp)
-                    }
                     Text(
                         text = "Forget Password?",
                         color = Color(0xFFB06AB3),
                         fontSize = 14.sp,
-                        modifier = Modifier.clickable {}
+                        modifier = modifier.clickable {}
                     )
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = modifier.height(24.dp))
 
                 Button(
-                    onClick = {},
-                    modifier = Modifier
+                    onClick = onSignUpClick,
+                    modifier = modifier
                         .fillMaxWidth()
                         .height(50.dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                     contentPadding = PaddingValues()
                 ) {
                     Box(
-                        modifier = Modifier
+                        modifier = modifier
                             .background(
                                 brush = Brush.horizontalGradient(
                                     colors = listOf(Color(0xFF4568DC), Color(0xFFB06AB3))
@@ -155,26 +205,28 @@ fun Login() {
                             .fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("SIGN IN", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text("SIGN UP", color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 }
             }
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = modifier.fillMaxWidth().padding(vertical = 46.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Don't have an account? ",
+                    text = "Have an account? ",
                     color = Color.LightGray,
                     fontSize = 14.sp
                 )
                 Text(
-                    text = "Register Now",
+                    text = "Login Now",
                     color = Color(0xFFB06AB3),
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
-                    modifier = Modifier.clickable {}
+                    modifier = modifier.clickable {
+                        navController.navigate("login")
+                    }
                 )
             }
         }
@@ -183,6 +235,6 @@ fun Login() {
 
 @Preview(showBackground = true, backgroundColor = 0xFF000000)
 @Composable
-fun LoginScreenPreview() { // << ĐỔI TÊN HÀM PREVIEW
-    Login() // Gọi Composable chính
+fun SignUpPreview() { // << ĐỔI TÊN HÀM PREVIEW
+    SignUpScreen(rememberNavController(), Modifier) // Gọi Composable chính
 }

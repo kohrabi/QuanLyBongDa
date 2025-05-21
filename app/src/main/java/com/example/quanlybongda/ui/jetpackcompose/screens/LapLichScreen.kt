@@ -2,6 +2,9 @@ package com.example.quanlybongda.ui.jetpackcompose.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -9,6 +12,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.* // Import tất cả icon filled cho dễ
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,15 +22,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.Database.DateConverter
+import com.example.quanlybongda.Database.Schema.CauThu
+import com.example.quanlybongda.Database.Schema.DoiBong
+import com.example.quanlybongda.Database.Schema.LichThiDau
+import java.time.format.DateTimeFormatter
 
 
 // Màu sắc từ thiết kế
@@ -45,8 +55,25 @@ val textGreenAccent = Color(0xFF4CFF89)
 val textScoreColor = Color(0xFFE0FF00) // Màu vàng chanh cho tỷ số, điều chỉnh lại cho khớp
 
 @Composable
-fun LapLich() {
+fun LapLichScreen(
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    viewModel: DatabaseViewModel = hiltViewModel()
+) {
     val context = LocalContext.current
+    var lichThiDaus by remember { mutableStateOf(listOf<LichThiDau>()) }
+    var doiBongs by remember { mutableStateOf(listOf<DoiBong>()) }
+    val state = rememberLazyListState()
+
+    LaunchedEffect(Unit) {
+        lichThiDaus = viewModel.lichThiDauDAO.selectAllLichThiDau().subList(0, 5);
+        doiBongs = viewModel.doiBongDAO.selectAllDoiBong();
+        for (lichThiDau in lichThiDaus) {
+            lichThiDau.tenDoiMot = doiBongs.find { it.maDoi == lichThiDau.doiMot }!!.tenDoi;
+            lichThiDau.tenDoiHai = doiBongs.find { it.maDoi == lichThiDau.doiHai }!!.tenDoi;
+            lichThiDau.tenDoiThang = doiBongs.find { it.maDoi == lichThiDau.doiThang }!!.tenDoi;
+        }
+    }
 
     Scaffold(
         backgroundColor = screenBgColor,
@@ -76,12 +103,13 @@ fun LapLich() {
             MatchScheduleHeader()
             Spacer(modifier = Modifier.height(16.dp))
 
-            MatchInfoRowNoLogos("Chelsea", "27 Aug 2022\n01:40", "Leicester")
-            Spacer(modifier = Modifier.height(12.dp))
-            MatchInfoRowNoLogos("Brighton", "27 Aug 2022\n00:10", "Leeds United")
-            Spacer(modifier = Modifier.height(12.dp))
-            MatchInfoRowNoLogos("Man City", "29 Aug 2022\n19.40", "Crystal Palace")
-            Spacer(modifier = Modifier.height(16.dp))
+            lichThiDaus.forEach({ lichThiDau ->
+                MatchInfoRowNoLogos(
+                    lichThiDau.tenDoiMot.toString(),
+                    DateConverter.LocalDateTimeToString(lichThiDau.ngayGioThucTe),
+                    lichThiDau.tenDoiHai.toString())
+                Spacer(modifier = Modifier.height(12.dp))
+            });
         }
     }
 }
@@ -284,6 +312,6 @@ fun AppBottomNavigationBar(context: android.content.Context) {
 @Composable
 fun LapLichScreenPreview() {
     MaterialTheme {
-        LapLich()
+        LapLichScreen(rememberNavController())
     }
 }

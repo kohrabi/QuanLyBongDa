@@ -1,39 +1,44 @@
 package com.example.quanlybongda
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
 import dagger.hilt.android.AndroidEntryPoint
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.quanlybongda.Database.Schema.CauThu
-import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
-import com.example.quanlybongda.ui.jetpackcompose.screens.BaoCao
-import com.example.quanlybongda.ui.jetpackcompose.screens.GhiNhan
-import com.example.quanlybongda.ui.jetpackcompose.screens.HoSo
-import com.example.quanlybongda.ui.jetpackcompose.screens.LapLich
-import com.example.quanlybongda.ui.jetpackcompose.screens.Login
-import com.example.quanlybongda.ui.jetpackcompose.screens.SignIn3
-import com.example.quanlybongda.ui.jetpackcompose.screens.SignIn2
-
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.example.quanlybongda.ui.jetpackcompose.screens.BaoCaoScreen
+import com.example.quanlybongda.ui.jetpackcompose.screens.GhiNhanScreen
+import com.example.quanlybongda.ui.jetpackcompose.screens.HoSoScreen
+import com.example.quanlybongda.ui.jetpackcompose.screens.LapLichScreen
+import com.example.quanlybongda.ui.jetpackcompose.screens.SignInScreen
+import com.example.quanlybongda.ui.jetpackcompose.screens.SignUpScreen
 
 
 @AndroidEntryPoint
@@ -45,50 +50,90 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-//            QuanLyBongDaTheme {
-//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//                    Greeting(
-//                        name = "Android",
-//                        modifier = Modifier.padding(innerPadding)
-//                    )
-//                    HoSoScreen()
-//                }
-//            }
             QuanLyBongDaTheme {
-                // Gọi trực tiếp Composable màn hình của bạn ở đây
-//                BaoCao()
-//                GhiNhan()
-//                HoSo()
-//                LapLich()
-//                Login()
-//                SignIn3()
-//                SignIn2()
-
-
+                AppNavigation();
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier, viewModel: DatabaseViewModel = hiltViewModel()) {
-//    var cauThu by remember { mutableStateOf<List<CauThu>>(listOf()) }
+fun AppNavigation() {
+    val navController = rememberNavController();
+    var selectedItem by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
-        val test = viewModel.selectAllUserGroupWithRole();
-        Log.d("AY", test.toString());
-    }
-
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
+    val topLevelRoutes = listOf(
+        "login",
+        "signUp",
+        "baoCao",
+        "ghiNhan",
+        "hoSo",
+        "lapLich",
     )
-}
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    QuanLyBongDaTheme {
-        Greeting("Android")
+    Scaffold(
+        bottomBar = {
+//            BottomNavigation(
+//                backgroundColor = Color(0xFF1C1C2A),
+//                contentColor = Color.White
+//            ) {
+//                BottomNavigationItem(
+//                    icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+//                    selected = true,
+//                    onClick = { /* TODO */ }
+//                )
+//                BottomNavigationItem(
+//                    icon = { Icon(Icons.Default.List, contentDescription = "Ranking") },
+//                    selected = false,
+//                    onClick = { /* TODO */ }
+//                )
+//                BottomNavigationItem(
+//                    icon = { Icon(Icons.Default.Schedule, contentDescription = "Schedule") },
+//                    selected = false,
+//                    onClick = { /* TODO */ }
+//                )
+//                BottomNavigationItem(
+//                    icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
+//                    selected = false,
+//                    onClick = { /* TODO */ }
+//                )
+//            }
+            BottomNavigation {
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentDestination = navBackStackEntry?.destination
+                topLevelRoutes.forEach { topLevelRoute ->
+                    BottomNavigationItem(
+                        icon = { Icon(Icons.Filled.Favorite, contentDescription = null) },
+                        label = { Text(topLevelRoute) },
+                        selected = selectedItem == topLevelRoute,
+                        onClick = {
+                            selectedItem = topLevelRoute
+                            navController.navigate(topLevelRoute) {
+                                // Pop up to the start destination of the graph to
+                                // avoid building up a large stack of destinations
+                                // on the back stack as users select items
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                // Avoid multiple copies of the same destination when
+                                // reselecting the same item
+                                launchSingleTop = true
+                                // Restore state when reselecting a previously selected item
+                                restoreState = true
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    ) { it
+        NavHost(navController = navController,startDestination = "login") {
+            composable("login") { SignInScreen(navController, Modifier) }
+            composable("signUp") { SignUpScreen(navController, Modifier) }
+            composable("baoCao") { BaoCaoScreen(Modifier) }
+            composable("ghiNhan") { GhiNhanScreen(Modifier) }
+            composable("hoSo") { HoSoScreen(Modifier) }
+            composable("lapLich") { LapLichScreen(navController, Modifier) }
+        }
     }
 }

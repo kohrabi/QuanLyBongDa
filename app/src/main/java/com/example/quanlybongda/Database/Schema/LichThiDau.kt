@@ -82,12 +82,12 @@ data class LichThiDau(
     val maTT : Int,
     @ColumnInfo(defaultValue = "false")
     val deleted : Boolean?,
-
-//    @Ignore val tenDoiMot: String?,
-//    @Ignore val tenDoiHai: String?,
-//    @Ignore val tenDoiThang: String?,
-//    @Ignore val tenMG: String?,
-)
+) {
+    @Ignore var tenDoiMot: String? = null;
+    @Ignore var tenDoiHai: String? = null;
+    @Ignore var tenDoiThang: String? = null;
+    @Ignore var tenMG: String? = null;
+}
 
 @Entity(
     indices = arrayOf(Index(value=["BackupID"], name="LichThiDauBackup_BackupID_unique", unique = true))

@@ -23,7 +23,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 
 import com.example.quanlybongda.R // << QUAN TRỌNG: Import lớp R của dự án bạn
@@ -42,9 +41,9 @@ const val MANCITY_LOGO_URL1 = "https://i.imgur.com/yiLJgk9.png"
 
 
 @Composable
-fun GhiNhan() {
+fun GhiNhanScreen(modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(darkScreenBackground)
     ) {
@@ -52,12 +51,12 @@ fun GhiNhan() {
             painter = rememberAsyncImagePainter(BACKGROUND_IMAGE_URL),
             contentDescription = "Background Stadium",
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier.fillMaxSize(),
             alpha = 0.3f
         )
 
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 12.dp)
                 .verticalScroll(rememberScrollState()),
@@ -65,7 +64,7 @@ fun GhiNhan() {
         ) {
             // Top Bar
             Row(
-                modifier = Modifier
+                modifier = modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -94,7 +93,7 @@ fun GhiNhan() {
             }
 
             // Khoảng cách giữa TopBar và Full Time
-            Spacer(modifier = Modifier.height(30.dp)) // << SỬA: Tăng khoảng cách
+            Spacer(modifier = modifier.height(30.dp)) // << SỬA: Tăng khoảng cách
 
             // Full Time
             Text(
@@ -105,11 +104,11 @@ fun GhiNhan() {
             )
 
             // Khoảng cách giữa Full Time và Khu vực tỷ số
-            Spacer(modifier = Modifier.height(20.dp)) // << SỬA: Tăng khoảng cách
+            Spacer(modifier = modifier.height(20.dp)) // << SỬA: Tăng khoảng cách
 
             // Team Logos and Score
             Row(
-                modifier = Modifier
+                modifier = modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp), // << SỬA: Thêm padding dọc để "to hơn"
                 horizontalArrangement = Arrangement.SpaceEvenly,
@@ -118,7 +117,7 @@ fun GhiNhan() {
                 Image(
                     painter = rememberAsyncImagePainter(R.drawable.logo_barca),
                     contentDescription = "FCB Logo",
-                    modifier = Modifier.size(70.dp) // << SỬA: Có thể tăng kích thước logo nếu muốn vùng này to hơn
+                    modifier = modifier.size(70.dp) // << SỬA: Có thể tăng kích thước logo nếu muốn vùng này to hơn
                 )
                 Text(
                     text = "2 - 2",
@@ -129,12 +128,12 @@ fun GhiNhan() {
                 Image(
                     painter = rememberAsyncImagePainter(R.drawable.logo_barca),
                     contentDescription = "ManCity Logo",
-                    modifier = Modifier.size(70.dp) // << SỬA: Có thể tăng kích thước logo
+                    modifier = modifier.size(70.dp) // << SỬA: Có thể tăng kích thước logo
                 )
             }
 
             // Khoảng cách giữa Khu vực tỷ số và Statistic Title
-            Spacer(modifier = Modifier.height(32.dp)) // << SỬA: Tăng khoảng cách
+            Spacer(modifier = modifier.height(32.dp)) // << SỬA: Tăng khoảng cách
 
             // Statistic Title
             Text(
@@ -144,7 +143,7 @@ fun GhiNhan() {
                 fontWeight = FontWeight.SemiBold
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = modifier.height(16.dp))
 
             // Match statistics list
             val stats = listOf(
@@ -155,21 +154,21 @@ fun GhiNhan() {
                 Triple("R", "Depay", "89’")
             )
 
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = modifier.fillMaxWidth()) {
                 stats.forEach { (side, player, time) ->
                     // Sử dụng một action placeholder, bạn có thể thay đổi nếu cần
-                    StatisticRowUpdated(side = side, player = player, action = "A", time = time)
+                    StatisticRowUpdated(side = side, player = player, action = "A", time = time, modifier)
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = modifier.height(16.dp))
         }
     }
 }
 
 @Composable
-fun StatisticRowUpdated(side: String, player: String, action: String, time: String) {
+fun StatisticRowUpdated(side: String, player: String, action: String, time: String, modifier: Modifier) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 10.dp), // Tăng padding dọc cho mỗi dòng thống kê
         verticalAlignment = Alignment.CenterVertically
@@ -181,7 +180,7 @@ fun StatisticRowUpdated(side: String, player: String, action: String, time: Stri
             color = textMutedColor,
             fontWeight = FontWeight.Normal,
             fontSize = 14.sp,
-            modifier = Modifier.weight(0.15f), // Cột Side
+            modifier = modifier.weight(0.15f), // Cột Side
             textAlign = TextAlign.Center
         )
         Text(
@@ -189,14 +188,14 @@ fun StatisticRowUpdated(side: String, player: String, action: String, time: Stri
             color = textWhiteColor,
             fontWeight = FontWeight.SemiBold,
             fontSize = 15.sp,
-            modifier = Modifier.weight(0.5f).padding(start = 8.dp) // Cột Player, chiếm nhiều không gian nhất
+            modifier = modifier.weight(0.5f).padding(start = 8.dp) // Cột Player, chiếm nhiều không gian nhất
         )
         Text(
             text = action,
             color = textMutedColor,
             fontWeight = FontWeight.Normal,
             fontSize = 14.sp,
-            modifier = Modifier.weight(0.15f), // Cột Action
+            modifier = modifier.weight(0.15f), // Cột Action
             textAlign = TextAlign.Center
         )
         Text(
@@ -204,7 +203,7 @@ fun StatisticRowUpdated(side: String, player: String, action: String, time: Stri
             color = textMutedColor,
             fontWeight = FontWeight.Normal,
             fontSize = 14.sp,
-            modifier = Modifier.weight(0.2f), // Cột Time
+            modifier = modifier.weight(0.2f), // Cột Time
             textAlign = TextAlign.End
         )
     }
@@ -213,8 +212,8 @@ fun StatisticRowUpdated(side: String, player: String, action: String, time: Stri
 
 @Preview(showBackground = true, backgroundColor = 0xFF1E1E2C)
 @Composable
-fun GhiNhanScreenPreview() {
+fun FinalScoreScreenPreview() {
     MaterialTheme {
-        GhiNhan()
+        GhiNhanScreen(Modifier)
     }
 }

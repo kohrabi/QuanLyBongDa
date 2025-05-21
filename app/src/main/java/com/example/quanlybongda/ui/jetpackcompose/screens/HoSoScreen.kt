@@ -1,6 +1,5 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -26,50 +25,52 @@ import androidx.compose.ui.tooling.preview.Preview
 
 
 @Composable
-fun HoSo() {
+fun HoSoScreen(modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(Color(0xFF0A0F24))
     ) {
 
 
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            TopBar()
+            TopBar(modifier)
 
             PlayerCard(
                 team = "Barcelona",
                 name = "Frenkie De Jong",
-                score = "9"
+                score = "9",
+                modifier
             )
 
             TeamRow(
                 teamName = "Manchester City",
                 score = "2",
-                logoUrl = "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg"
+                logoUrl = "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg",
+                modifier
             )
 
             // List of Players
-            PlayerRow("Cooper Calzoni", "4")
-            PlayerRow("Alfredo Saris", "4")
-            PlayerRow("Jakob Levin", "4")
-            PlayerRow("Alfonso Kenter", "3")
-            PlayerRow("Emerson Septimus", "3")
-            PlayerRow("Brandon Vaccaro", "2")
+            PlayerRow("Cooper Calzoni", "4", modifier)
+            PlayerRow("Alfredo Saris", "4", modifier)
+            PlayerRow("Jakob Levin", "4", modifier)
+            PlayerRow("Alfonso Kenter", "3", modifier)
+            PlayerRow("Emerson Septimus", "3", modifier)
+            PlayerRow("Brandon Vaccaro", "2", modifier)
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = modifier.height(24.dp))
         }
     }
 }
 
 @Composable
-fun TopBar() {
+fun TopBar(modifier: Modifier) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -96,9 +97,9 @@ fun TopBar() {
 }
 
 @Composable
-fun PlayerCard(team: String, name: String, score: String) {
+fun PlayerCard(team: String, name: String, score: String, modifier: Modifier) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .padding(horizontal = 24.dp, vertical = 16.dp)
             .clip(RoundedCornerShape(24.dp))
             .background(Color(0xFF1B2038))
@@ -123,23 +124,23 @@ fun PlayerCard(team: String, name: String, score: String) {
                 text = "Goals Score",
                 color = Color(0xFFDADADA),
                 fontSize = 12.sp,
-                modifier = Modifier.padding(top = 6.dp)
+                modifier = modifier.padding(top = 6.dp)
             )
             Text(
                 text = score,
                 color = Color(0xFFFF9E0D),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = modifier.padding(top = 4.dp)
             )
         }
     }
 }
 
 @Composable
-fun TeamRow(teamName: String, score: String, logoUrl: String) {
+fun TeamRow(teamName: String, score: String, logoUrl: String, modifier: Modifier) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -147,7 +148,7 @@ fun TeamRow(teamName: String, score: String, logoUrl: String) {
         AsyncImage(
             model = logoUrl,
             contentDescription = null,
-            modifier = Modifier
+            modifier = modifier
                 .size(40.dp)
                 .clip(CircleShape),
             contentScale = ContentScale.Fit
@@ -156,7 +157,7 @@ fun TeamRow(teamName: String, score: String, logoUrl: String) {
             text = teamName,
             color = Color.White,
             fontSize = 14.sp,
-            modifier = Modifier
+            modifier = modifier
                 .weight(1f)
                 .padding(start = 12.dp)
         )
@@ -170,15 +171,15 @@ fun TeamRow(teamName: String, score: String, logoUrl: String) {
 }
 
 @Composable
-fun PlayerRow(name: String, goals: String) {
+fun PlayerRow(name: String, goals: String, modifier: Modifier) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 28.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .size(36.dp)
                 .clip(CircleShape)
                 .background(Color(0xFF414158))
@@ -187,7 +188,7 @@ fun PlayerRow(name: String, goals: String) {
             text = name,
             color = Color.White,
             fontSize = 14.sp,
-            modifier = Modifier
+            modifier = modifier
                 .weight(1f)
                 .padding(start = 12.dp)
         )
@@ -204,6 +205,6 @@ fun PlayerRow(name: String, goals: String) {
 @Composable
 fun HoSoScreenPreview() {
     MaterialTheme {
-        HoSo()
+        HoSoScreen(Modifier)
     }
 }

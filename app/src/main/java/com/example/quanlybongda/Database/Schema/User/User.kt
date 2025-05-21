@@ -25,12 +25,12 @@ import java.time.LocalDateTime
 )
 data class User(
     @PrimaryKey(autoGenerate = true)
-    val id: Int,
+    val id: Int = 0,
     val email : String,
     val passwordHash : String,
     val username : String,
     @ColumnInfo(defaultValue = "1")
-    val groupId : Int,
+    val groupId : Int = 1,
 )
 
 @Entity
