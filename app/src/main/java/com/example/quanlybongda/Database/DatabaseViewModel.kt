@@ -2,6 +2,7 @@ package com.example.quanlybongda.Database
 
 import android.app.Application
 import android.provider.ContactsContract.CommonDataKinds.Email
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.quanlybongda.Database.DAO.*
@@ -9,6 +10,7 @@ import com.example.quanlybongda.Database.DAO.User.*
 import com.example.quanlybongda.Database.ReturnTypes.*
 import com.example.quanlybongda.Database.Schema.User.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
@@ -62,6 +64,40 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
             san = sanNha?.tenSan ?: "" ,
             ngayGio = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(lichThiDau.ngayGioThucTe).toString()
         )
+    }
+
+    suspend fun selectBXHDoiNgay(ngay : LocalDate) : List<BangXepHangNgay> {
+        // Tat ca cac doi co tran co trung
+        var result = mutableListOf<BangXepHangNgay>();
+
+        val selectDoi = lichThiDauDAO.selectLichThiDauTrongNgay(ngay);
+
+        // Chuyen no thanh set
+        val doiCoTranTrongNgay = selectDoi.flatMap { listOf(it.doiMot, it.doiHai) }.toSet();
+        for (doiCoTran in doiCoTranTrongNgay) {
+            val doi = doiBongDAO.selectDoiBongMaDoi(doiCoTran);
+            if (doi == null) {
+                Log.e("TAG", "Khong ton tai doi bong nay");
+                continue;
+            }
+
+            val soTran = lichThiDauDAO.countLichThiDauMaDoi(doiCoTran, ngay);
+            val soTranThang = lichThiDauDAO.countLichThiDauThangMaDoi(doiCoTran, ngay);
+            val soTranThua = lichThiDauDAO.countLichThiDauThuaMaDoi(doiCoTran, ngay);
+            val soTranHoa = soTran - soTranThang - soTranThua;
+            val doiBXH  = BangXepHangNgay(
+                maDoi = doi.maDoi,
+                tenDoi = doi.tenDoi,
+                soTran = soTran,
+                soTranThang = soTranThang,
+                soTranThua = soTranThua,
+                soTranHoa = soTranHoa,
+                hieuSo = soTranThang * 3 + soTranHoa * 1 + soTranThua * 0,
+                hang = 0
+            )
+            result.add(doiBXH);
+        }
+        return result;
     }
 
 //    suspend fun checkPageViewable(groupId : Int, pageName: String) : Boolean {

@@ -130,7 +130,7 @@ fun AppNavigation() {
         NavHost(navController = navController,startDestination = "login") {
             composable("login") { SignInScreen(navController, Modifier) }
             composable("signUp") { SignUpScreen(navController, Modifier) }
-            composable("baoCao") { BaoCaoScreen(Modifier) }
+            composable("baoCao") { BaoCaoScreen(navController, Modifier) }
             composable("ghiNhan") { GhiNhanScreen(Modifier) }
             composable("hoSo") { HoSoScreen(Modifier) }
             composable("lapLich") { LapLichScreen(navController, Modifier) }

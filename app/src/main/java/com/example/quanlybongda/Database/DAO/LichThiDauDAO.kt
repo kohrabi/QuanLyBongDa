@@ -6,6 +6,8 @@ import androidx.room.Query
 import androidx.room.Upsert
 import com.example.quanlybongda.Database.Schema.LichThiDau
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 
 @Dao
@@ -25,13 +27,45 @@ interface LichThiDauDAO {
     @Query("SELECT * FROM LichThiDau WHERE maTD=:maTD LIMIT 1")
     suspend fun selectLichThiDauMaTD(maTD: Int) : LichThiDau?;
 
-    @Query("SELECT LTD.* FROM LichThiDau AS LTD " +
-            "INNER JOIN DoiBong AS DB1 ON DB1.maDoi=LTD.doiMot " +
-            "INNER JOIN DoiBong AS DB2 ON DB2.maDoi=LTD.doiHai  " +
-            "INNER JOIN DoiBong AS DBT ON DBT.maDoi=LTD.doiThang  " +
-            "WHERE LTD.maMG=:maMG " +
-            "GROUP BY LTD.maTD ")
+    @Query("""SELECT LTD.* FROM LichThiDau AS LTD
+           INNER JOIN DoiBong AS DB1 ON DB1.maDoi=LTD.doiMot
+           INNER JOIN DoiBong AS DB2 ON DB2.maDoi=LTD.doiHai
+           INNER JOIN DoiBong AS DBT ON DBT.maDoi=LTD.doiThang
+           WHERE LTD.maMG=:maMG
+           GROUP BY LTD.maTD""")
     suspend fun selectAllLichThiDauWithName(maMG: Int) : List<LichThiDau>;
 
+    @Query("""
+        SELECT * FROM LichThiDau AS LTD
+        WHERE date(LTD.ngayGioThucTe)=date(:localDate)
+        GROUP BY LTD.doiMot, LTD.doiHai
+    """)
+    suspend fun selectLichThiDauTrongNgay(localDate : LocalDate) : List<LichThiDau>;
+
+
+    @Query("""
+        SELECT count(*) FROM LichThiDau AS LTD
+        WHERE date(LTD.ngayGioThucTe)=date(:localDate) AND (LTD.doiMot=:maDoi OR LTD.doiHai=:maDoi)
+        GROUP BY LTD.maTD
+    """)
+    suspend fun countLichThiDauMaDoi(maDoi : Int, localDate: LocalDate) : Int;
+
+
+    @Query("""
+        SELECT count(*) FROM LichThiDau AS LTD
+        WHERE date(LTD.ngayGioThucTe)=date(:localDate) AND LTD.doiThang = :maDoi
+        GROUP BY LTD.maTD
+    """)
+    suspend fun countLichThiDauThangMaDoi(maDoi : Int, localDate: LocalDate) : Int;
+
+
+    @Query("""
+        SELECT count(*) FROM LichThiDau AS LTD
+        WHERE date(LTD.ngayGioThucTe)=date(:localDate) AND 
+                (LTD.doiMot=:maDoi OR LTD.doiHai=:maDoi) AND
+                (LTD.doiThang IS NOT NULL AND LTD.doiThang<>:maDoi)
+        GROUP BY LTD.maTD
+    """)
+    suspend fun countLichThiDauThuaMaDoi(maDoi : Int, localDate: LocalDate) : Int;
 
 }

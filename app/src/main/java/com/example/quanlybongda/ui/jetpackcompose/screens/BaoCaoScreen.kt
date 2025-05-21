@@ -1,7 +1,6 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
 // Các import của bạn giữ nguyên, đảm bảo có:
-import androidx.compose.foundation.Image // Giữ lại nếu bạn có dùng Image với painterResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -21,15 +20,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource // Sẽ cần nếu dùng Image composable với drawable
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage // Sử dụng AsyncImage của Coil
-import coil.request.ImageRequest
+import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.Database.ReturnTypes.BangXepHangNgay
 import com.example.quanlybongda.R // Quan trọng: Import R để truy cập resources
+import java.time.LocalDate
 
 // Màu sắc (giữ nguyên hoặc điều chỉnh)
 val standingsScreenBackground = Color(0xFF0D0D12)
@@ -42,8 +45,17 @@ val standingsTextMuted = Color(0xFFA0A3BD)
 // KHÔNG CẦN URL PLACEHOLDER NỮA
 
 @Composable
-fun BaoCaoScreen(modifier: Modifier = Modifier) {
+fun BaoCaoScreen(
+    appController: NavController,
+    modifier: Modifier = Modifier,
+    viewModel: DatabaseViewModel = hiltViewModel(),
+) {
     val context = LocalContext.current
+    var teams by remember { mutableStateOf(listOf<BangXepHangNgay>()) }
+
+    LaunchedEffect(Unit) {
+        teams = viewModel.selectBXHDoiNgay(LocalDate.of(2025, 5, 11));
+    }
 
     Scaffold(
         backgroundColor = standingsScreenBackground,
@@ -116,13 +128,13 @@ fun BaoCaoScreen(modifier: Modifier = Modifier) {
                     Spacer(modifier = modifier.height(12.dp))
 
                     // Dữ liệu các đội - THAY THẾ URL BẰNG RESOURCE ID
-                    val teams = listOf(
-                        Team("Arsenal", R.drawable.arsenal_logo, 3, 0, 0, 9, League.CHAMPIONS), // << THAY TÊN FILE
-                        Team("Man City", R.drawable.mancity_logo, 2, 1, 0, 7, League.CHAMPIONS), // << THAY TÊN FILE
-                        Team("Leeds United", R.drawable.leeds_united_logo, 2, 1, 0, 7, League.CHAMPIONS), // << THAY TÊN FILE
-                        Team("Tottenham", R.drawable.tottenham_logo, 1, 2, 0, 5, League.EUROPA), // << THAY TÊN FILE
-                        Team("Brighton", R.drawable.brighton_logo, 1, 1, 1, 4, League.EUROPA) // << THAY TÊN FILE
-                    )
+//                    val teams = listOf(
+//                        Team("Arsenal", R.drawable.arsenal_logo, 3, 0, 0, 9, League.CHAMPIONS), // << THAY TÊN FILE
+//                        Team("Man City", R.drawable.mancity_logo, 2, 1, 0, 7, League.CHAMPIONS), // << THAY TÊN FILE
+//                        Team("Leeds United", R.drawable.leeds_united_logo, 2, 1, 0, 7, League.CHAMPIONS), // << THAY TÊN FILE
+//                        Team("Tottenham", R.drawable.tottenham_logo, 1, 2, 0, 5, League.EUROPA), // << THAY TÊN FILE
+//                        Team("Brighton", R.drawable.brighton_logo, 1, 1, 1, 4, League.EUROPA) // << THAY TÊN FILE
+//                    )
 
                     teams.forEachIndexed { index, team ->
                         StandingsListRow(context = context, team = team, modifier) // Đổi tên hàm
@@ -175,14 +187,14 @@ fun StandingsListHeader(modifier : Modifier) { // Đổi tên từ StandingsTabl
         Text("W", color = standingsTextMuted, fontSize = 11.sp, modifier = modifier.weight(0.6f), textAlign = TextAlign.Center)
         Text("D", color = standingsTextMuted, fontSize = 11.sp, modifier = modifier.weight(0.6f), textAlign = TextAlign.Center)
         Text("L", color = standingsTextMuted, fontSize = 11.sp, modifier = modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("Poin", color = standingsTextMuted, fontSize = 11.sp, modifier = modifier.weight(0.7f), textAlign = TextAlign.End)
+        Text("Point", color = standingsTextMuted, fontSize = 11.sp, modifier = modifier.weight(0.7f), textAlign = TextAlign.End)
 
     }
 }
 
 @Composable
 
-fun StandingsListRow(context: android.content.Context, team: Team, modifier : Modifier) { // Đổi tên từ TeamDataRow
+fun StandingsListRow(context: android.content.Context, team: BangXepHangNgay, modifier : Modifier) { // Đổi tên từ TeamDataRow
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
@@ -193,7 +205,7 @@ fun StandingsListRow(context: android.content.Context, team: Team, modifier : Mo
             modifier = modifier
                 .size(6.dp)
                 .background(
-                    color = if (team.league == League.CHAMPIONS) Color(0xFF5C7CFA) else Color(0xFFFF9F1C),
+                    color = if (true) Color(0xFF5C7CFA) else Color(0xFFFF9F1C),
                     shape = CircleShape
                 )
         )
@@ -201,8 +213,8 @@ fun StandingsListRow(context: android.content.Context, team: Team, modifier : Mo
         AsyncImage(
             // model = ImageRequest.Builder(context).data(team.logoResId).crossfade(true).build(),
             // Hoặc đơn giản hơn:
-            model = team.logoResId, // << SỬ DỤNG RESOURCE ID TỪ TEAM
-            contentDescription = "${team.name} Logo",
+            model = R.drawable.arsenal_logo, // << SỬ DỤNG RESOURCE ID TỪ TEAM
+            contentDescription = "${team.tenDoi} Logo",
             contentScale = ContentScale.Fit,
             modifier = modifier.size(20.dp)
             // Thêm crossfade nếu muốn, tương tự như ảnh nền
@@ -213,16 +225,16 @@ fun StandingsListRow(context: android.content.Context, team: Team, modifier : Mo
         )
         Spacer(modifier = modifier.width(8.dp))
         Text(
-            text = team.name,
+            text = team.tenDoi,
             color = standingsTextWhite,
             fontSize = 13.sp, // Tăng một chút
             fontWeight = FontWeight.SemiBold, // Đậm hơn chút
             modifier = modifier.weight(2.2f)
         )
-        Text("${team.w}", color = standingsTextWhite, fontSize = 13.sp, modifier = modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("${team.d}", color = standingsTextWhite, fontSize = 13.sp, modifier = modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("${team.l}", color = standingsTextWhite, fontSize = 13.sp, modifier = modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("${team.points}", color = standingsTextWhite, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = modifier.weight(0.7f), textAlign = TextAlign.End)
+        Text("${team.soTranThang}", color = standingsTextWhite, fontSize = 13.sp, modifier = modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("${team.soTranHoa}", color = standingsTextWhite, fontSize = 13.sp, modifier = modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("${team.soTranThua}", color = standingsTextWhite, fontSize = 13.sp, modifier = modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("${team.hieuSo}", color = standingsTextWhite, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = modifier.weight(0.7f), textAlign = TextAlign.End)
 
     }
 }
@@ -284,7 +296,7 @@ enum class League { CHAMPIONS, EUROPA }
 @Composable
 fun StandingsScreenPreview() {
     MaterialTheme { // Sử dụng MaterialTheme hoặc theme của bạn
-        BaoCaoScreen(Modifier)
+        BaoCaoScreen(rememberNavController())
 
     }
 }
