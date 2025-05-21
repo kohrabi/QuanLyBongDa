@@ -50,16 +50,17 @@ fun HoSoScreen(modifier: Modifier = Modifier) {
                 teamName = "Manchester City",
                 score = "2",
                 // logoUrl = "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg" // THAY THẾ DÒNG NÀY
-                logoResId = R.drawable.mancity_logo // << THAY BẰNG TÊN FILE DRAWABLE CỦA BẠN
+                logoResId = R.drawable.mancity_logo, // << THAY BẰNG TÊN FILE DRAWABLE CỦA BẠN
+                modifier
             )
 
             // List of Players
-            PlayerRow("Cooper Calzoni", "4", modifier)
-            PlayerRow("Alfredo Saris", "4", modifier)
-            PlayerRow("Jakob Levin", "4", modifier)
-            PlayerRow("Alfonso Kenter", "3", modifier)
-            PlayerRow("Emerson Septimus", "3", modifier)
-            PlayerRow("Brandon Vaccaro", "2", modifier)
+            PlayerRowHoSo("Cooper Calzoni", "4", modifier)
+            PlayerRowHoSo("Alfredo Saris", "4", modifier)
+            PlayerRowHoSo("Jakob Levin", "4", modifier)
+            PlayerRowHoSo("Alfonso Kenter", "3", modifier)
+            PlayerRowHoSo("Emerson Septimus", "3", modifier)
+            PlayerRowHoSo("Brandon Vaccaro", "2", modifier)
 
             Spacer(modifier = modifier.height(24.dp))
         }
