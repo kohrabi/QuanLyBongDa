@@ -1,8 +1,11 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
 // Các import của bạn giữ nguyên, đảm bảo có:
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -53,6 +56,15 @@ fun BaoCaoScreen(
     val context = LocalContext.current
     var teams by remember { mutableStateOf(listOf<BangXepHangNgay>()) }
 
+    // Dữ liệu các đội - THAY THẾ URL BẰNG RESOURCE ID
+    //                    val teams = listOf(
+    //                        Team("Arsenal", R.drawable.arsenal_logo, 3, 0, 0, 9, League.CHAMPIONS), // << THAY TÊN FILE
+    //                        Team("Man City", R.drawable.mancity_logo, 2, 1, 0, 7, League.CHAMPIONS), // << THAY TÊN FILE
+    //                        Team("Leeds United", R.drawable.leeds_united_logo, 2, 1, 0, 7, League.CHAMPIONS), // << THAY TÊN FILE
+    //                        Team("Tottenham", R.drawable.tottenham_logo, 1, 2, 0, 5, League.EUROPA), // << THAY TÊN FILE
+    //                        Team("Brighton", R.drawable.brighton_logo, 1, 1, 1, 4, League.EUROPA) // << THAY TÊN FILE
+    //                    )
+
     LaunchedEffect(Unit) {
         teams = viewModel.selectBXHDoiNgay(LocalDate.of(2025, 5, 11));
     }
@@ -66,7 +78,7 @@ fun BaoCaoScreen(
             StandingsBottomNavigationBar(modifier) // BottomBar chứa các icon điều hướng
         }
     ) { innerPadding -> // innerPadding được cung cấp bởi Scaffold
-        Box(modifier = modifier.fillMaxSize().padding(innerPadding)) { // Box chứa ảnh nền và nội dung
+        Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) { // Box chứa ảnh nền và nội dung
             // Ảnh nền (nếu có)
             AsyncImage(
                 // model = ImageRequest.Builder(context).data(R.drawable.your_stadium_background_drawable_name).crossfade(true).build(),
@@ -74,7 +86,7 @@ fun BaoCaoScreen(
                 model = R.drawable.football_stadium, // << THAY THẾ TÊN FILE DRAWABLE CỦA BẠN
                 contentDescription = "Background",
                 contentScale = ContentScale.Crop,
-                modifier = modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 alpha = 0.3f, // Giữ nguyên hoặc điều chỉnh alpha
                 // Thêm crossfade nếu muốn hiệu ứng mờ dần khi tải
                 // Để dùng crossfade trực tiếp với AsyncImage, Coil phiên bản mới có thể hỗ trợ tham số crossfade
@@ -85,71 +97,67 @@ fun BaoCaoScreen(
                 //    .build(),
             )
 
-            Column(
+            LazyColumn(
                 modifier = modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 14.dp)
-                    .verticalScroll(rememberScrollState())
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp),
+                contentPadding = PaddingValues(top = 24.dp, bottom = 16.dp)
             ) {
-                // Khoảng cách từ TopAppBar xuống nội dung
-                Spacer(modifier = modifier.height(24.dp)) // << TĂNG KHOẢNG CÁCH NÀY
+                item {
 
-                Column(
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(standingsContentBg.copy(alpha = 0.7f))
-                        .padding(16.dp)
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = modifier.fillMaxWidth()
+                    Column(
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(standingsContentBg.copy(alpha = 0.7f))
+                            .padding(16.dp)
                     ) {
-                        Text(
-                            text = "Table Standings",
-                            color = standingsTextWhite,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "See All",
-                            color = standingsTextAccent,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    Spacer(modifier = modifier.height(16.dp)) // Tăng khoảng cách
-
-                    // Tiêu đề các cột của bảng
-                    StandingsListHeader(modifier) // Đổi tên hàm cho rõ ràng
-
-                    Spacer(modifier = modifier.height(12.dp))
-
-                    // Dữ liệu các đội - THAY THẾ URL BẰNG RESOURCE ID
-//                    val teams = listOf(
-//                        Team("Arsenal", R.drawable.arsenal_logo, 3, 0, 0, 9, League.CHAMPIONS), // << THAY TÊN FILE
-//                        Team("Man City", R.drawable.mancity_logo, 2, 1, 0, 7, League.CHAMPIONS), // << THAY TÊN FILE
-//                        Team("Leeds United", R.drawable.leeds_united_logo, 2, 1, 0, 7, League.CHAMPIONS), // << THAY TÊN FILE
-//                        Team("Tottenham", R.drawable.tottenham_logo, 1, 2, 0, 5, League.EUROPA), // << THAY TÊN FILE
-//                        Team("Brighton", R.drawable.brighton_logo, 1, 1, 1, 4, League.EUROPA) // << THAY TÊN FILE
-//                    )
-
-                    teams.forEachIndexed { index, team ->
-                        StandingsListRow(context = context, team = team, modifier) // Đổi tên hàm
-                        if (index < teams.lastIndex) { // Thêm đường kẻ mờ giữa các hàng
-                            Divider(color = standingsTextMuted.copy(alpha = 0.2f), thickness = 0.5.dp, modifier = modifier.padding(vertical = 8.dp))
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Table Standings",
+                                color = standingsTextWhite,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "See All",
+                                color = standingsTextAccent,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
-                    }
 
-                    Spacer(modifier = modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(16.dp)) // Tăng khoảng cách
+
+                        // Tiêu đề các cột của bảng
+                        StandingsListHeader(modifier) // Đổi tên hàm cho rõ ràng
+
+                        Spacer(modifier = Modifier.height(12.dp))
+                    } // Kết thúc Card container
+                }
+
+                itemsIndexed(teams, key = { _, it -> it.maDoi}) { index, team ->
+                    StandingsListRow(context = context, team = team, modifier) // Đổi tên hàm
+                    if (index < teams.lastIndex) { // Thêm đường kẻ mờ giữa các hàng
+                        Divider(
+                            color = standingsTextMuted.copy(alpha = 0.2f),
+                            thickness = 0.5.dp,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+                } // Kết thúc Column nội dung chính
+
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     // Chú thích (Legend)
                     LeagueLegendStandings(modifier) // Đổi tên hàm
-                } // Kết thúc Card container
-                Spacer(modifier = modifier.height(16.dp)) // Khoảng trống ở cuối nội dung cuộn
-            } // Kết thúc Column nội dung chính
+                }
+            }
         } // Kết thúc Box chứa ảnh nền và nội dung
     } // Kết thúc Scaffold
 }
@@ -164,12 +172,12 @@ fun StandingsTopAppBar(modifier : Modifier) {
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center, // Căn giữa tiêu đề
-                modifier = modifier.fillMaxWidth() // Cho Text chiếm hết chiều rộng để căn giữa hoạt động
+                modifier = Modifier.fillMaxWidth() // Cho Text chiếm hết chiều rộng để căn giữa hoạt động
             )
         },
         backgroundColor = Color.Transparent, // Nền trong suốt để thấy ảnh nền/màu nền của Scaffold
         elevation = 0.dp, // Không có bóng đổ
-        modifier = modifier.padding(top = 8.dp) // Đẩy TopAppBar xuống một chút nếu hệ thống tự thêm padding
+        modifier = Modifier.padding(top = 8.dp) // Đẩy TopAppBar xuống một chút nếu hệ thống tự thêm padding
     )
 }
 
@@ -182,12 +190,12 @@ fun StandingsListHeader(modifier : Modifier) { // Đổi tên từ StandingsTabl
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Spacer để căn chỉnh với chấm tròn và logo ở các hàng dữ liệu
-        Spacer(modifier = modifier.width(6.dp + 8.dp + 20.dp + 8.dp)) // Kích thước chấm + padding + logo + padding
-        Text("Club", color = standingsTextMuted, fontSize = 11.sp, modifier = modifier.weight(2.2f)) // Điều chỉnh weight
-        Text("W", color = standingsTextMuted, fontSize = 11.sp, modifier = modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("D", color = standingsTextMuted, fontSize = 11.sp, modifier = modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("L", color = standingsTextMuted, fontSize = 11.sp, modifier = modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("Point", color = standingsTextMuted, fontSize = 11.sp, modifier = modifier.weight(0.7f), textAlign = TextAlign.End)
+        Spacer(modifier = Modifier.width(6.dp + 8.dp + 20.dp + 8.dp)) // Kích thước chấm + padding + logo + padding
+        Text("Club", color = standingsTextMuted, fontSize = 11.sp, modifier = Modifier.weight(2.2f)) // Điều chỉnh weight
+        Text("W", color = standingsTextMuted, fontSize = 11.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("D", color = standingsTextMuted, fontSize = 11.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("L", color = standingsTextMuted, fontSize = 11.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("Point", color = standingsTextMuted, fontSize = 11.sp, modifier = Modifier.weight(0.7f), textAlign = TextAlign.End)
 
     }
 }
@@ -209,32 +217,32 @@ fun StandingsListRow(context: android.content.Context, team: BangXepHangNgay, mo
                     shape = CircleShape
                 )
         )
-        Spacer(modifier = modifier.width(8.dp))
-        AsyncImage(
-            // model = ImageRequest.Builder(context).data(team.logoResId).crossfade(true).build(),
-            // Hoặc đơn giản hơn:
-            model = R.drawable.arsenal_logo, // << SỬ DỤNG RESOURCE ID TỪ TEAM
-            contentDescription = "${team.tenDoi} Logo",
-            contentScale = ContentScale.Fit,
-            modifier = modifier.size(20.dp)
-            // Thêm crossfade nếu muốn, tương tự như ảnh nền
-            // model = ImageRequest.Builder(context)
-            //    .data(team.logoResId)
-            //    .crossfade(true)
-            //    .build(),
-        )
-        Spacer(modifier = modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(8.dp))
+//        AsyncImage(
+//            // model = ImageRequest.Builder(context).data(team.logoResId).crossfade(true).build(),
+//            // Hoặc đơn giản hơn:
+//            model = R.drawable.arsenal_logo, // << SỬ DỤNG RESOURCE ID TỪ TEAM
+//            contentDescription = "${team.tenDoi} Logo",
+//            contentScale = ContentScale.Fit,
+//            modifier = Modifier.size(20.dp)
+//            // Thêm crossfade nếu muốn, tương tự như ảnh nền
+//            // model = ImageRequest.Builder(context)
+//            //    .data(team.logoResId)
+//            //    .crossfade(true)
+//            //    .build(),
+//        )
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = team.tenDoi,
             color = standingsTextWhite,
             fontSize = 13.sp, // Tăng một chút
             fontWeight = FontWeight.SemiBold, // Đậm hơn chút
-            modifier = modifier.weight(2.2f)
+            modifier = Modifier.weight(2.2f)
         )
-        Text("${team.soTranThang}", color = standingsTextWhite, fontSize = 13.sp, modifier = modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("${team.soTranHoa}", color = standingsTextWhite, fontSize = 13.sp, modifier = modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("${team.soTranThua}", color = standingsTextWhite, fontSize = 13.sp, modifier = modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("${team.hieuSo}", color = standingsTextWhite, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = modifier.weight(0.7f), textAlign = TextAlign.End)
+        Text("${team.soTranThang}", color = standingsTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("${team.soTranHoa}", color = standingsTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("${team.soTranThua}", color = standingsTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("${team.hieuSo}", color = standingsTextWhite, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(0.7f), textAlign = TextAlign.End)
 
     }
 }
@@ -243,12 +251,12 @@ fun StandingsListRow(context: android.content.Context, team: BangXepHangNgay, mo
 fun LeagueLegendStandings(modifier : Modifier) { // Đổi tên từ LeagueLegend
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.padding(top = 12.dp) // Giảm padding top
+        modifier = Modifier.padding(top = 12.dp) // Giảm padding top
     ) {
-        Box(modifier = modifier.size(6.dp).background(Color(0xFF5C7CFA), shape = CircleShape))
+        Box(modifier = Modifier.size(6.dp).background(Color(0xFF5C7CFA), shape = CircleShape))
         Text(" UEFA Champions League", color = standingsTextMuted, fontSize = 10.sp) // Màu chữ phụ
-        Spacer(modifier = modifier.width(12.dp))
-        Box(modifier = modifier.size(6.dp).background(Color(0xFFFF9F1C), shape = CircleShape))
+        Spacer(modifier = Modifier.width(12.dp))
+        Box(modifier = Modifier.size(6.dp).background(Color(0xFFFF9F1C), shape = CircleShape))
         Text(" Europa League", color = standingsTextMuted, fontSize = 10.sp) // Màu chữ phụ
     }
 }

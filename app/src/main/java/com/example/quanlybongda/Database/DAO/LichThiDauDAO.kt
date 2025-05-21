@@ -38,7 +38,6 @@ interface LichThiDauDAO {
     @Query("""
         SELECT * FROM LichThiDau AS LTD
         WHERE date(LTD.ngayGioThucTe)=date(:localDate)
-        GROUP BY LTD.doiMot, LTD.doiHai
     """)
     suspend fun selectLichThiDauTrongNgay(localDate : LocalDate) : List<LichThiDau>;
 
@@ -46,7 +45,6 @@ interface LichThiDauDAO {
     @Query("""
         SELECT count(*) FROM LichThiDau AS LTD
         WHERE date(LTD.ngayGioThucTe)=date(:localDate) AND (LTD.doiMot=:maDoi OR LTD.doiHai=:maDoi)
-        GROUP BY LTD.maTD
     """)
     suspend fun countLichThiDauMaDoi(maDoi : Int, localDate: LocalDate) : Int;
 
@@ -54,7 +52,6 @@ interface LichThiDauDAO {
     @Query("""
         SELECT count(*) FROM LichThiDau AS LTD
         WHERE date(LTD.ngayGioThucTe)=date(:localDate) AND LTD.doiThang = :maDoi
-        GROUP BY LTD.maTD
     """)
     suspend fun countLichThiDauThangMaDoi(maDoi : Int, localDate: LocalDate) : Int;
 
@@ -64,7 +61,6 @@ interface LichThiDauDAO {
         WHERE date(LTD.ngayGioThucTe)=date(:localDate) AND 
                 (LTD.doiMot=:maDoi OR LTD.doiHai=:maDoi) AND
                 (LTD.doiThang IS NOT NULL AND LTD.doiThang<>:maDoi)
-        GROUP BY LTD.maTD
     """)
     suspend fun countLichThiDauThuaMaDoi(maDoi : Int, localDate: LocalDate) : Int;
 
