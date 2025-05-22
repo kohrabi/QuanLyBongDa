@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
+import com.example.quanlybongda.Database.ReturnTypes.CauThuBanThang
 import com.example.quanlybongda.Database.ReturnTypes.CauThuViTri
 import com.example.quanlybongda.Database.Schema.CauThu
 
@@ -25,6 +26,14 @@ interface CauThuDAO {
         GROUP BY CT.maCT
     """)
     fun selectAllCauThuWithBanThang() : LiveData<List<CauThu>>;
+
+    @Query("""SELECT CT.*, SUM(LBT.diemBT) as banThang FROM CauThu AS CT
+        INNER JOIN BanThang AS BT ON BT.maCT=CT.maCT
+        INNER JOIN LoaiBT AS LBT ON LBT.maLBT=BT.maLBT
+        WHERE CT.maDoi = :maDoi AND LBT.diemBT > 0
+        GROUP BY CT.maCT
+    """)
+    suspend fun selectCauThuDoiBongWithBanThang(maDoi: Int) : List<CauThuBanThang>;
 
     @Query("""
         SELECT CT.*, VT.* FROM CauThu AS CT

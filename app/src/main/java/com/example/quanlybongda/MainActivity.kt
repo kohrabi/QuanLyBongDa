@@ -133,7 +133,7 @@ fun AppNavigation() {
             composable("signUp") { SignUpScreen(navController, Modifier) }
             composable("baoCao") { BaoCaoScreen(navController, Modifier) }
             composable("ghiNhan") { GhiNhanScreen(navController) }
-            composable("hoSo") { KetQuaTranDauScreen(Modifier) }
+            composable("hoSo") { KetQuaTranDauScreen(navController) }
             composable("lapLich") { LapLichScreen(navController, Modifier) }
             composable("cauThu") { CauThuInputScreen() }
             composable("doiBong") { DoiBongInputScreen() }

@@ -27,16 +27,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.Database.ReturnTypes.CauThuBanThang
 import com.example.quanlybongda.Database.Schema.CauThu
 import com.example.quanlybongda.R // << QUAN TRỌNG: Import lớp R của dự án bạn
+import kotlinx.coroutines.CoroutineScope
 
 @Composable
-fun KetQuaTranDauScreen(modifier: Modifier = Modifier) {
+fun KetQuaTranDauScreen(
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    viewModel: DatabaseViewModel = hiltViewModel()
+) {
 
-    var cauThus by remember { mutableStateOf(listOf<CauThu>()) }
+    var cauThus by remember { mutableStateOf(listOf<CauThuBanThang>()) }
 
     LaunchedEffect(Unit) {
-
+        val maDoi = 16;
+        cauThus = viewModel.cauThuDAO.selectCauThuDoiBongWithBanThang(maDoi);
+        cauThus = cauThus.sortedByDescending { it.banThang }
     }
 
     Box(
@@ -67,13 +79,9 @@ fun KetQuaTranDauScreen(modifier: Modifier = Modifier) {
             )
 
             // List of Players
-            PlayerRowHoSo("Cooper Calzoni", "4", modifier)
-            PlayerRowHoSo("Alfredo Saris", "4", modifier)
-            PlayerRowHoSo("Jakob Levin", "4", modifier)
-            PlayerRowHoSo("Alfonso Kenter", "3", modifier)
-            PlayerRowHoSo("Emerson Septimus", "3", modifier)
-            PlayerRowHoSo("Brandon Vaccaro", "2", modifier)
-
+            cauThus.forEach {
+                PlayerRowHoSo(it.cauThu.tenCT, it.banThang.toString(), modifier)
+            }
             Spacer(modifier = modifier.height(24.dp))
         }
     }
@@ -219,6 +227,6 @@ fun PlayerRowHoSo(name: String, goals: String, modifier: Modifier) { // Đổi t
 @Composable
 fun HoSoScreenPreview() {
     MaterialTheme {
-        KetQuaTranDauScreen(Modifier)
+        KetQuaTranDauScreen(rememberNavController())
     }
 }

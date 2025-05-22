@@ -42,8 +42,9 @@ data class CauThu(
     val soAo: Int,
     @ColumnInfo(defaultValue = "false")
     val deleted : Boolean?,
-//    @Ignore val banThang: Int,
-)
+) {
+    @Ignore var banThang : Int = 0;
+}
 
 @Entity(
     indices = arrayOf(Index(value=["BackupID"], name="CauThuBackup_BackupID_unique", unique = true))
