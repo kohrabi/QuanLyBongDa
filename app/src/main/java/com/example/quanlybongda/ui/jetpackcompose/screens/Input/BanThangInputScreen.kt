@@ -13,6 +13,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,11 +21,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.ui.jetpackcompose.screens.InputDropDownMenu
+import com.example.quanlybongda.ui.jetpackcompose.screens.OptionValue
+import kotlinx.coroutines.launch
+
 // import androidx.compose.ui.geometry.Offset // Cần nếu dùng Offset trong Brush
 
 @Composable
@@ -33,11 +37,40 @@ fun BanThangInputScreen(
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
-    var maDoi by remember { mutableStateOf("") }
-    var maCT by remember { mutableStateOf("") }
+    var doiBongOptions by remember { mutableStateOf(listOf<OptionValue>()) }
+    var cauThuDoiMotOptions by remember { mutableStateOf(listOf<OptionValue>()) }
+    var cauThuDoiHaiOptions by remember { mutableStateOf(listOf<OptionValue>()) }
+    var loaiBTOptions by remember { mutableStateOf(listOf<OptionValue>()) }
+
+    var doiBong by remember { mutableStateOf(OptionValue.DEFAULT) }
+    var cauThu by remember { mutableStateOf(OptionValue.DEFAULT) }
     var thoiDiem by remember { mutableStateOf("") }
-    var maLBT by remember { mutableStateOf("") }
+    var loaiBT by remember { mutableStateOf(OptionValue.DEFAULT) }
+
+    LaunchedEffect(Unit) {
+
+        launch {
+            loaiBTOptions = viewModel.banThangDAO.selectAllLoaiBT().map { OptionValue(it.maLBT, it.tenLBT) };
+        }
+        val maTD = 1;
+        val lichThiDau = viewModel.lichThiDauDAO.selectLichThiDauMaTD(maTD);
+        if (lichThiDau == null)
+            return@LaunchedEffect;
+        val doiBongs = mutableListOf<OptionValue>();
+        launch {
+            val doiMot = viewModel.doiBongDAO.selectDoiBongMaDoi(lichThiDau.doiMot)!!;
+//          if (doiMot != null)
+            doiBongs.add(OptionValue(doiMot.maDoi, doiMot.tenDoi));
+            cauThuDoiMotOptions = viewModel.cauThuDAO.selectCauThuDoiBong(doiMot.maDoi).map { OptionValue(it.maCT, it.tenCT) };
+        }
+        launch {
+            val doiHai = viewModel.doiBongDAO.selectDoiBongMaDoi(lichThiDau.doiHai)!!;
+//          if (doiHai != null)
+            doiBongs.add(OptionValue(doiHai.maDoi, doiHai.tenDoi));
+            doiBongOptions = doiBongs;
+            cauThuDoiHaiOptions = viewModel.cauThuDAO.selectCauThuDoiBong(doiHai.maDoi).map { OptionValue(it.maCT, it.tenCT) };
+        }
+    }
 
     Scaffold(
         backgroundColor = Color(0xFF181928),
@@ -49,56 +82,32 @@ fun BanThangInputScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(260.dp)
-//            ) {
-//                Column(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .padding(16.dp),
-//                    verticalArrangement = Arrangement.SpaceBetween
-//                ) {
-//                    Row(
-//                        horizontalArrangement = Arrangement.SpaceBetween,
-//                        verticalAlignment = Alignment.CenterVertically,
-//                        modifier = Modifier.fillMaxWidth()
-//                    ) {
-//                        AsyncImage(
-//                            model = ImageRequest.Builder(context)
-//                                //.data("https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/937dcb20-0c08-4765-8b8b-adfbcf74189f") // THAY THẾ
-//                                .data(R.drawable.football_stadium) // << THAY BẰNG TÊN FILE DRAWABLE CỦA BẠN
-//                                .crossfade(true).build(),
-//                            contentDescription = "Overlay Logo 1",
-//                            modifier = Modifier.width(54.dp).height(21.dp).clip(RoundedCornerShape(32.dp))
-//                        )
-//                        AsyncImage(
-//                            model = ImageRequest.Builder(context)
-//                                //.data("https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/5207b008-4e8b-40e8-a4c0-932a5065e653") // THAY THẾ
-//                                .data(R.drawable.football_stadium) // << THAY BẰNG TÊN FILE DRAWABLE CỦA BẠN
-//                                .crossfade(true).build(),
-//                            contentDescription = "Overlay Logo 2",
-//                            modifier = Modifier.width(66.dp).height(11.dp)
-//                        )
-//                    }
-//                    // Phần "Team Name" (nếu có)
-//                }
-//            }
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 24.dp)
             ) {
-                InputTextField(maDoi, "Mã đội", { maDoi = it })
+                InputDropDownMenu("Đội bóng", doiBongOptions, doiBong, { doiBong = it })
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputTextField(maCT, "Mã cầu thủ", { maCT = it })
+                InputDropDownMenu(
+                    name ="Cầu thủ",
+                    options = (
+                        if (doiBongOptions.size == 0)
+                            listOf();
+                        else if (doiBong.value == doiBongOptions[0].value)
+                            cauThuDoiMotOptions
+                        else cauThuDoiHaiOptions
+                    ),
+                    selectedOption =  cauThu,
+                    onOptionSelected = { cauThu = it })
                 Spacer(modifier = Modifier.height(16.dp))
-                InputTextField(thoiDiem, "Vòng Thi Đấu", { thoiDiem = it })
+
+                InputTextField(thoiDiem, "Thời điểm", { thoiDiem = it })
                 Spacer(modifier = Modifier.height(16.dp))
-                InputTextField(maLBT, "Mã loại bàn thắng", { maLBT = it })
+
+                InputDropDownMenu("Loại bàn thắng", loaiBTOptions, loaiBT, { loaiBT = it })
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(

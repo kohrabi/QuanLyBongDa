@@ -26,10 +26,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.quanlybongda.Database.DatabaseViewModel
-import com.example.quanlybongda.Database.Schema.Loai.LoaiCT
+import com.example.quanlybongda.ui.jetpackcompose.screens.InputDatePicker
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputDropDownMenu
 import com.example.quanlybongda.ui.jetpackcompose.screens.OptionValue
-import java.lang.StackWalker.Option
+import com.example.quanlybongda.ui.jetpackcompose.screens.convertLocalDateTimeToMillis
+import com.example.quanlybongda.ui.jetpackcompose.screens.convertMillisToLocalDateTime
+import java.time.LocalDateTime
 
 // import androidx.compose.ui.geometry.Offset // Cần nếu dùng Offset trong Brush
 
@@ -40,11 +42,12 @@ fun CauThuInputScreen(
     viewModel: DatabaseViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    var playerName by remember { mutableStateOf("") }
-    var birthday by remember { mutableStateOf("") }
-    var playerType by remember { mutableStateOf("") }
     var loaiCTOptions by remember { mutableStateOf(listOf<OptionValue>()) }
-    var notes by remember { mutableStateOf("") }
+
+    var tenCT by remember { mutableStateOf("") }
+    var ngaySinh by remember { mutableStateOf(LocalDateTime.now()) }
+    var loaiCT by remember { mutableStateOf(OptionValue(0, "")) }
+    var ghiChu by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         val loaiCTs = viewModel.cauThuDAO.selectAllLoaiCT();
@@ -111,17 +114,23 @@ fun CauThuInputScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 24.dp)
             ) {
-                InputTextField(playerName, "Tên cầu thủ", { playerName = it })
+                InputTextField(tenCT, "Tên cầu thủ", { tenCT = it })
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputTextField(birthday, "Ngày sinh", { birthday = it })
+                InputDatePicker("Ngày sinh",
+                    convertLocalDateTimeToMillis(ngaySinh),
+                    onDateSelected = {
+                        if (it != null)
+                            ngaySinh = convertMillisToLocalDateTime(it)
+                    },
+                    onDismiss = {}
+                )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputDropDownMenu("Loại cầu thủ", loaiCTOptions);
-//                InputTextField(playerType, "Loại cầu thủ", { playerType = it })
+                InputDropDownMenu("Loại cầu thủ", loaiCTOptions, loaiCT, { loaiCT = it });
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputTextField(notes, "Ghi chú", { notes = it }, modifier = Modifier.height(100.dp))
+                InputTextField(ghiChu, "Ghi chú", { ghiChu = it }, modifier = Modifier.height(100.dp))
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Row(

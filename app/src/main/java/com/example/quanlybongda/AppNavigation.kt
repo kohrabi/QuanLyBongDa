@@ -89,7 +89,7 @@ fun AppNavigation() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "baoCao",
+            startDestination = "banThangInput",
             Modifier.fillMaxSize().background(DarkColorScheme.background)
         ) {
             val modifier = Modifier.padding(innerPadding);

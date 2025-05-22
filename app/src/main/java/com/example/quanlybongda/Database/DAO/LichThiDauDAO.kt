@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
 import com.example.quanlybongda.Database.Schema.LichThiDau
+import com.example.quanlybongda.Database.Schema.Loai.VongTD
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -23,6 +24,9 @@ interface LichThiDauDAO {
 
     @Query("SELECT * FROM LichThiDau WHERE maTD=:maTD LIMIT 1")
     suspend fun selectLichThiDauMaTD(maTD: Int) : LichThiDau?;
+
+    @Query("SELECT * FROM VongTD")
+    suspend fun selectAllVongTD() : List<VongTD>;
 
     @Query("""SELECT LTD.* FROM LichThiDau AS LTD
            INNER JOIN DoiBong AS DB1 ON DB1.maDoi=LTD.doiMot

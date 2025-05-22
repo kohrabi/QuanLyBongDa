@@ -13,6 +13,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,6 +26,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.ui.jetpackcompose.screens.InputDropDownMenu
+import com.example.quanlybongda.ui.jetpackcompose.screens.OptionValue
+import java.lang.StackWalker.Option
+
 // import androidx.compose.ui.geometry.Offset // Cần nếu dùng Offset trong Brush
 
 @Composable
@@ -35,76 +40,16 @@ fun DoiBongInputScreen(
 ) {
     val context = LocalContext.current
     var tenDoi by remember { mutableStateOf("") }
-    var sanNha by remember { mutableStateOf("") }
+    var sanNhaOptions by remember { mutableStateOf(listOf<OptionValue>()) }
+    var sanNha by remember { mutableStateOf(OptionValue.DEFAULT) }
+
+    LaunchedEffect(Unit) {
+        sanNhaOptions = viewModel.sanNhaDAO.selectAllSanNha().map { OptionValue(it.maSan, it.tenSan) };
+    }
 
     Scaffold(
         backgroundColor = Color(0xFF181928),
-        bottomBar = {
-            // Thanh điều hướng dưới cùng (phần comment giữ nguyên, nếu bạn dùng lại thì cần sửa tương tự)
-            /*
-            Row(
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color = Color(0xFF222232))
-                    .padding(vertical = 12.dp)
-            ) {
-                val iconModifier = Modifier.size(24.dp)
-                // Nếu dùng lại phần này, các URL ở đây cũng cần đổi sang R.drawable
-                // Ví dụ "file:///android_asset/SignIn2Assets/Home.png" -> R.drawable.home_icon (sau khi copy file vào drawable)
-                val navIcons = listOf(
-                    R.drawable.home_icon_drawable to "Home", // Ví dụ thay thế
-                    R.drawable.nav_icon_2_drawable to "Nav Icon 2", // Ví dụ thay thế
-                    R.drawable.nav_icon_3_drawable to "Nav Icon 3", // Ví dụ thay thế
-                    R.drawable.nav_icon_4_drawable to "Nav Icon 4"  // Ví dụ thay thế
-                )
-                navIcons.forEach { (drawableId, description) ->
-                    AsyncImage(
-                        model = ImageRequest.Builder(context).data(drawableId).crossfade(true).build(),
-                        contentDescription = description,
-                        contentScale = ContentScale.Fit,
-                        modifier = iconModifier
-                    )
-                }
-            }
-            */
-
-//            BottomNavigation(
-//                backgroundColor = Color(0xFF1C1C2A), // Nền cho BottomNavigation
-//                contentColor = Color.White // Màu mặc định cho icon và text
-//            ) {
-//                // Sử dụng Icons.Filled hoặc Icons.Outlined cho nhất quán
-//                BottomNavigationItem(
-//                    icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
-//                    selected = true, // Mục này đang được chọn
-//                    onClick = { /* TODO: Handle navigation */ },
-//                    selectedContentColor = Color.White, // Màu khi được chọn
-//                    unselectedContentColor = Color.Gray // Màu khi không được chọn
-//                )
-//                BottomNavigationItem(
-//                    icon = { Icon(Icons.Filled.List, contentDescription = "Ranking") },
-//                    selected = false,
-//                    onClick = { /* TODO: Handle navigation */ },
-//                    selectedContentColor = Color.White,
-//                    unselectedContentColor = Color.Gray
-//                )
-//                BottomNavigationItem(
-//                    icon = { Icon(Icons.Filled.Schedule, contentDescription = "Schedule") },
-//                    selected = false,
-//                    onClick = { /* TODO: Handle navigation */ },
-//                    selectedContentColor = Color.White,
-//                    unselectedContentColor = Color.Gray
-//                )
-//                BottomNavigationItem(
-//                    icon = { Icon(Icons.Filled.Person, contentDescription = "Profile") },
-//                    selected = false,
-//                    onClick = { /* TODO: Handle navigation */ },
-//                    selectedContentColor = Color.White,
-//                    unselectedContentColor = Color.Gray
-//                )
-//            }
-        }
+        modifier = modifier
     ) { innerScaffoldPadding ->
         Column(
             modifier = Modifier
@@ -166,7 +111,7 @@ fun DoiBongInputScreen(
                 InputTextField(tenDoi, "Tên đội", { tenDoi = it })
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputTextField(sanNha, "Sân nhà", { sanNha = it })
+                InputDropDownMenu("Sân nhà", sanNhaOptions, sanNha, { sanNha = it })
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
