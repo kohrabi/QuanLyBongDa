@@ -1,6 +1,6 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens.Input
 
-import com.example.quanlybongda.ui.jetpackcompose.screens.TextField
+import com.example.quanlybongda.ui.jetpackcompose.screens.InputTextField
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -17,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,12 +24,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.example.quanlybongda.Database.DatabaseViewModel
-import com.example.quanlybongda.Database.Schema.BanThang
 // import androidx.compose.ui.geometry.Offset // Cần nếu dùng Offset trong Brush
-import com.example.quanlybongda.R // << QUAN TRỌNG: Đảm bảo bạn đã import R
 
 @Composable
 fun BanThangInputScreen(
@@ -96,14 +91,14 @@ fun BanThangInputScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 24.dp)
             ) {
-                TextField(maDoi, "Mã đội", { maDoi = it })
+                InputTextField(maDoi, "Mã đội", { maDoi = it })
                 Spacer(modifier = Modifier.height(16.dp))
 
-                TextField(maCT, "Mã cầu thủ", { maCT = it })
+                InputTextField(maCT, "Mã cầu thủ", { maCT = it })
                 Spacer(modifier = Modifier.height(16.dp))
-                TextField(thoiDiem, "Vòng Thi Đấu", { thoiDiem = it })
+                InputTextField(thoiDiem, "Vòng Thi Đấu", { thoiDiem = it })
                 Spacer(modifier = Modifier.height(16.dp))
-                TextField(maLBT, "Mã loại bàn thắng", { maLBT = it })
+                InputTextField(maLBT, "Mã loại bàn thắng", { maLBT = it })
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(

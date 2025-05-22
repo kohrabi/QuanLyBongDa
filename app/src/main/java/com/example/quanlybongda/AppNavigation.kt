@@ -21,10 +21,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.quanlybongda.ui.jetpackcompose.screens.*
 import com.example.quanlybongda.ui.jetpackcompose.screens.Input.*
 import com.example.quanlybongda.ui.theme.DarkColorScheme
@@ -43,8 +45,8 @@ fun AppNavigation() {
     val routes = listOf(
 //        BottomNavigationType("login", "Home", Icons.Default.Home),
 //        BottomNavigationType("signUp", ,),
-        BottomNavigationRoute("ghiNhan", "Home", Icons.Default.Home),
-        BottomNavigationRoute("baoCao", "Ranking", Icons.Default.List),
+//        BottomNavigationRoute("ghiNhan/1", "Home", Icons.Default.Home),
+        BottomNavigationRoute("baoCao", "Home", Icons.Default.Home),
         BottomNavigationRoute("lapLich", "Schedule", Icons.Default.Schedule),
         BottomNavigationRoute("hoSo", "Profile", Icons.Default.Person),
     )
@@ -87,14 +89,16 @@ fun AppNavigation() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "lapLich",
+            startDestination = "baoCao",
             Modifier.fillMaxSize().background(DarkColorScheme.background)
         ) {
             val modifier = Modifier.padding(innerPadding);
             composable("login") { LoginScreen(navController, modifier) }
             composable("signUp") { SignUpScreen(navController, modifier) }
             composable("baoCao") { BaoCaoScreen(navController, modifier) }
-            composable("ghiNhan") { GhiNhanScreen(navController, modifier) }
+            composable("ghiNhan/{maTD}", arguments = listOf(navArgument("maTD") { type = NavType.IntType})) { backStackEntry ->
+                GhiNhanScreen(backStackEntry.arguments?.getInt("maTD") ?: 1, navController, modifier)
+            }
             composable("hoSo") { KetQuaTranDauScreen(navController, modifier) }
             composable("lapLich") { LapLichScreen(navController, modifier) }
             composable("cauThuInput") { CauThuInputScreen(navController, modifier) }

@@ -1,6 +1,6 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens.Input
 
-import com.example.quanlybongda.ui.jetpackcompose.screens.TextField
+import com.example.quanlybongda.ui.jetpackcompose.screens.InputTextField
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -13,11 +13,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,11 +25,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.Database.Schema.Loai.LoaiCT
+import com.example.quanlybongda.ui.jetpackcompose.screens.InputDropDownMenu
+import com.example.quanlybongda.ui.jetpackcompose.screens.OptionValue
+import java.lang.StackWalker.Option
+
 // import androidx.compose.ui.geometry.Offset // Cần nếu dùng Offset trong Brush
-import com.example.quanlybongda.R // << QUAN TRỌNG: Đảm bảo bạn đã import R
 
 @Composable
 fun CauThuInputScreen(
@@ -41,76 +43,16 @@ fun CauThuInputScreen(
     var playerName by remember { mutableStateOf("") }
     var birthday by remember { mutableStateOf("") }
     var playerType by remember { mutableStateOf("") }
+    var loaiCTOptions by remember { mutableStateOf(listOf<OptionValue>()) }
     var notes by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        val loaiCTs = viewModel.cauThuDAO.selectAllLoaiCT();
+        loaiCTOptions = loaiCTs.map { OptionValue(value = it.maLCT, label = it.tenLCT) }
+    }
 
     Scaffold(
         backgroundColor = Color(0xFF181928),
-        bottomBar = {
-            // Thanh điều hướng dưới cùng (phần comment giữ nguyên, nếu bạn dùng lại thì cần sửa tương tự)
-            /*
-            Row(
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color = Color(0xFF222232))
-                    .padding(vertical = 12.dp)
-            ) {
-                val iconModifier = Modifier.size(24.dp)
-                // Nếu dùng lại phần này, các URL ở đây cũng cần đổi sang R.drawable
-                // Ví dụ "file:///android_asset/SignIn2Assets/Home.png" -> R.drawable.home_icon (sau khi copy file vào drawable)
-                val navIcons = listOf(
-                    R.drawable.home_icon_drawable to "Home", // Ví dụ thay thế
-                    R.drawable.nav_icon_2_drawable to "Nav Icon 2", // Ví dụ thay thế
-                    R.drawable.nav_icon_3_drawable to "Nav Icon 3", // Ví dụ thay thế
-                    R.drawable.nav_icon_4_drawable to "Nav Icon 4"  // Ví dụ thay thế
-                )
-                navIcons.forEach { (drawableId, description) ->
-                    AsyncImage(
-                        model = ImageRequest.Builder(context).data(drawableId).crossfade(true).build(),
-                        contentDescription = description,
-                        contentScale = ContentScale.Fit,
-                        modifier = iconModifier
-                    )
-                }
-            }
-            */
-
-//            BottomNavigation(
-//                backgroundColor = Color(0xFF1C1C2A), // Nền cho BottomNavigation
-//                contentColor = Color.White // Màu mặc định cho icon và text
-//            ) {
-//                // Sử dụng Icons.Filled hoặc Icons.Outlined cho nhất quán
-//                BottomNavigationItem(
-//                    icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
-//                    selected = true, // Mục này đang được chọn
-//                    onClick = { /* TODO: Handle navigation */ },
-//                    selectedContentColor = Color.White, // Màu khi được chọn
-//                    unselectedContentColor = Color.Gray // Màu khi không được chọn
-//                )
-//                BottomNavigationItem(
-//                    icon = { Icon(Icons.Filled.List, contentDescription = "Ranking") },
-//                    selected = false,
-//                    onClick = { /* TODO: Handle navigation */ },
-//                    selectedContentColor = Color.White,
-//                    unselectedContentColor = Color.Gray
-//                )
-//                BottomNavigationItem(
-//                    icon = { Icon(Icons.Filled.Schedule, contentDescription = "Schedule") },
-//                    selected = false,
-//                    onClick = { /* TODO: Handle navigation */ },
-//                    selectedContentColor = Color.White,
-//                    unselectedContentColor = Color.Gray
-//                )
-//                BottomNavigationItem(
-//                    icon = { Icon(Icons.Filled.Person, contentDescription = "Profile") },
-//                    selected = false,
-//                    onClick = { /* TODO: Handle navigation */ },
-//                    selectedContentColor = Color.White,
-//                    unselectedContentColor = Color.Gray
-//                )
-//            }
-        }
     ) { innerScaffoldPadding ->
         Column(
             modifier = Modifier
@@ -169,16 +111,17 @@ fun CauThuInputScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 24.dp)
             ) {
-                TextField(playerName, "Tên cầu thủ", { playerName = it })
+                InputTextField(playerName, "Tên cầu thủ", { playerName = it })
                 Spacer(modifier = Modifier.height(16.dp))
 
-                TextField(birthday, "Ngày sinh", { birthday = it })
+                InputTextField(birthday, "Ngày sinh", { birthday = it })
                 Spacer(modifier = Modifier.height(16.dp))
 
-                TextField(playerType, "Loại cầu thủ", { playerType = it })
+                InputDropDownMenu("Loại cầu thủ", loaiCTOptions);
+//                InputTextField(playerType, "Loại cầu thủ", { playerType = it })
                 Spacer(modifier = Modifier.height(16.dp))
 
-                TextField(notes, "Ghi chú", { notes = it }, modifier = Modifier.height(100.dp))
+                InputTextField(notes, "Ghi chú", { notes = it }, modifier = Modifier.height(100.dp))
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Row(

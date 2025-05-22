@@ -54,6 +54,7 @@ val textMutedColor = Color(0xFFA0A3BD)
 
 @Composable
 fun GhiNhanScreen(
+    maTD: Int,
     navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel()
@@ -64,7 +65,6 @@ fun GhiNhanScreen(
     var banThangs by remember { mutableStateOf(listOf<BanThang>()) }
 
     LaunchedEffect(Unit) {
-        val maTD = 1;
         lichThiDau = viewModel.lichThiDauDAO.selectLichThiDauMaTD(maTD);
         tiSoDoiMot =
             viewModel.banThangDAO.selectSoBanThangTranDauDoi(maTD, lichThiDau!!.doiMot) +
@@ -114,7 +114,7 @@ fun GhiNhanScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = { /* TODO: Handle back action */ }) {
+                IconButton(onClick = { navController.popBackStack() }) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Back",
@@ -128,10 +128,7 @@ fun GhiNhanScreen(
                     fontWeight = FontWeight.SemiBold
                 )
                 IconButton(onClick = { /* TODO: Handle info action */ }) {
-                    Icon(
-                        imageVector = Icons.Filled.Info,
-                        contentDescription = "Information",
-                        tint = textWhiteColor
+                    Box(Modifier
                     )
                 }
             }
@@ -242,6 +239,6 @@ fun StatisticRowUpdated(side: String, player: String, action: String, time: Stri
 @Composable
 fun FinalScoreScreenPreview() {
     MaterialTheme {
-        GhiNhanScreen(rememberNavController())
+        GhiNhanScreen(1, rememberNavController())
     }
 }

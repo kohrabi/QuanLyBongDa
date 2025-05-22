@@ -1,7 +1,10 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,12 +30,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.DateConverter
 import com.example.quanlybongda.Database.Schema.DoiBong
 import com.example.quanlybongda.Database.Schema.LichThiDau
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.internal.synchronized
+import kotlinx.coroutines.launch
 
 
 // Màu sắc từ thiết kế
@@ -62,12 +70,15 @@ fun LapLichScreen(
     val state = rememberLazyListState()
 
     LaunchedEffect(Unit) {
-        lichThiDaus = viewModel.lichThiDauDAO.selectAllLichThiDau().subList(0, 5);
+        lichThiDaus = viewModel.lichThiDauDAO.selectAllLichThiDau();
         doiBongs = viewModel.doiBongDAO.selectAllDoiBong();
         for (lichThiDau in lichThiDaus) {
             lichThiDau.tenDoiMot = doiBongs.find { it.maDoi == lichThiDau.doiMot }!!.tenDoi;
             lichThiDau.tenDoiHai = doiBongs.find { it.maDoi == lichThiDau.doiHai }!!.tenDoi;
-            lichThiDau.tenDoiThang = doiBongs.find { it.maDoi == lichThiDau.doiThang }!!.tenDoi;
+            if (lichThiDau.doiThang == null)
+                lichThiDau.tenDoiThang = "Hòa";
+            else
+                lichThiDau.tenDoiThang = doiBongs.find { it.maDoi == lichThiDau.doiThang }!!.tenDoi;
         }
     }
 
@@ -84,36 +95,41 @@ fun LapLichScreen(
         },
         modifier = modifier
     ) { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+//                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
         ) {
-            // Tăng khoảng cách giữa TopAppBar và FeaturedMatchCardUpdated
-            Spacer(modifier = Modifier.height(60.dp)) // << SỬA: Tăng khoảng cách
+            item {
+                // Tăng khoảng cách giữa TopAppBar và FeaturedMatchCardUpdated
+                Spacer(modifier = Modifier.height(60.dp)) // << SỬA: Tăng khoảng cách
 
-            FeaturedMatchCardUpdated(
-                team1Name = "Chelse",
-                team1Scorers = "De Jong 66’\nDepay 79’", // Giữ \n để xuống dòng tự nhiên
-                score = "2 - 2",
-                team2Name = "Leicester",
-                team2Scorers = "Alvarez 21’\nPalmer 70’" // Giữ \n
-            )
-            // Tăng khoảng cách giữa FeaturedMatchCardUpdated và MatchScheduleHeader
-            Spacer(modifier = Modifier.height(60.dp)) // << SỬA: Tăng khoảng cách
+                FeaturedMatchCardUpdated(
+                    team1Name = "Chelse",
+                    team1Scorers = "De Jong 66’\nDepay 79’", // Giữ \n để xuống dòng tự nhiên
+                    score = "2 - 2",
+                    team2Name = "Leicester",
+                    team2Scorers = "Alvarez 21’\nPalmer 70’" // Giữ \n
+                )
+                // Tăng khoảng cách giữa FeaturedMatchCardUpdated và MatchScheduleHeader
+                Spacer(modifier = Modifier.height(60.dp)) // << SỬA: Tăng khoảng cách
 
-            MatchScheduleHeader()
-            Spacer(modifier = Modifier.height(16.dp))
+                MatchScheduleHeader()
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
-            lichThiDaus.forEach({ lichThiDau ->
+            items(lichThiDaus) { lichThiDau ->
                 MatchInfoRowNoLogos(
-                    lichThiDau.tenDoiMot.toString(),
+                    lichThiDau.tenDoiMot ?: "",
                     DateConverter.LocalDateTimeToString(lichThiDau.ngayGioThucTe),
-                    lichThiDau.tenDoiHai.toString())
+                    lichThiDau.tenDoiHai ?: "",
+                    onClick = {
+                        navController.navigate("ghiNhan/${lichThiDau.maTD}");
+                    })
                 Spacer(modifier = Modifier.height(12.dp))
-            });
+            };
         }
     }
 }
@@ -222,16 +238,16 @@ fun AppTopBar() {
         title = { },
         backgroundColor = screenBgColor,
         elevation = 0.dp,
-        navigationIcon = {
-            IconButton(onClick = { /* TODO */ }) {
-                Icon(Icons.Filled.Add, contentDescription = "Add", tint = textWhite)
-            }
-        },
-        actions = {
-            IconButton(onClick = { /* TODO */ }) {
-                Icon(Icons.Filled.Search, contentDescription = "Search", tint = textWhite)
-            }
-        },
+//        navigationIcon = {
+//            IconButton(onClick = { /* TODO */ }) {
+//                Icon(Icons.Filled.Add, contentDescription = "Add", tint = textWhite)
+//            }
+//        },
+//        actions = {
+//            IconButton(onClick = { /* TODO */ }) {
+//                Icon(Icons.Filled.Search, contentDescription = "Search", tint = textWhite)
+//            }
+//        },
         modifier = Modifier.padding(horizontal = 8.dp)
     )
 }
@@ -244,7 +260,7 @@ fun MatchScheduleHeader() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text("Match Schedule", color = textWhite, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        Text("See All", color = textSecondary, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+//        Text("See All", color = textSecondary, fontSize = 12.sp, fontWeight = FontWeight.Medium)
     }
 }
 
@@ -252,14 +268,16 @@ fun MatchScheduleHeader() {
 fun MatchInfoRowNoLogos(
     team1Name: String,
     matchDateTime: String,
-    team2Name: String
+    team2Name: String,
+    onClick : () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(cardBgColor)
-            .padding(horizontal = 16.dp, vertical = 20.dp),
+            .padding(horizontal = 16.dp, vertical = 20.dp)
+            .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(team1Name, color = textWhite, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f), textAlign = TextAlign.Start)

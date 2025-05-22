@@ -18,11 +18,8 @@ interface LichThiDauDAO {
     @Delete
     suspend fun deleteLichThiDau(vararg lichThiDau: LichThiDau);
 
-    @Query("SELECT * FROM LichThiDau")
+    @Query("SELECT * FROM LichThiDau ORDER BY maTD")
     suspend fun selectAllLichThiDau() : List<LichThiDau>;
-
-    @Query("SELECT * FROM LichThiDau")
-    fun selectAllLichThiDauFlow() : Flow<List<LichThiDau>>;
 
     @Query("SELECT * FROM LichThiDau WHERE maTD=:maTD LIMIT 1")
     suspend fun selectLichThiDauMaTD(maTD: Int) : LichThiDau?;

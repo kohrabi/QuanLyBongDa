@@ -8,6 +8,7 @@ import androidx.room.Upsert
 import com.example.quanlybongda.Database.ReturnTypes.CauThuBanThang
 import com.example.quanlybongda.Database.ReturnTypes.CauThuViTri
 import com.example.quanlybongda.Database.Schema.CauThu
+import com.example.quanlybongda.Database.Schema.Loai.LoaiCT
 
 @Dao
 interface CauThuDAO {
@@ -19,6 +20,9 @@ interface CauThuDAO {
 
     @Query("SELECT * FROM CauThu")
     suspend fun selectAlLCauThu() : List<CauThu>;
+
+    @Query("SELECT * FROM LoaiCT")
+    suspend fun selectAllLoaiCT() : List<LoaiCT>;
 
     @Query("""SELECT CT.*, SUM(CASE WHEN LBT.diemBT > 0 THEN LBT.diemBT END ) as banThang FROM CauThu AS CT
         LEFT JOIN BanThang AS BT ON BT.maCT=CT.maCT
