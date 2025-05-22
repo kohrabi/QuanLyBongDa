@@ -33,6 +33,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.ReturnTypes.CauThuBanThang
 import com.example.quanlybongda.Database.Schema.CauThu
+import com.example.quanlybongda.Database.Schema.DoiBong
 import com.example.quanlybongda.R // << QUAN TRỌNG: Import lớp R của dự án bạn
 import kotlinx.coroutines.CoroutineScope
 
@@ -44,10 +45,12 @@ fun KetQuaTranDauScreen(
 ) {
 
     var cauThus by remember { mutableStateOf(listOf<CauThuBanThang>()) }
+    var doiBong by remember { mutableStateOf<DoiBong?>(null) }
 
     LaunchedEffect(Unit) {
         val maDoi = 16;
         cauThus = viewModel.cauThuDAO.selectCauThuDoiBongWithBanThang(maDoi);
+        doiBong = viewModel.doiBongDAO.selectDoiBongMaDoi(maDoi);
         cauThus = cauThus.sortedByDescending { it.banThang }
     }
 
@@ -64,15 +67,15 @@ fun KetQuaTranDauScreen(
             HoSoTopBar(modifier) // Đổi tên TopBar để tránh trùng lặp nếu có TopBar khác trong cùng package
 
             PlayerCardHoSo( // Đổi tên PlayerCard để tránh trùng lặp
-                team = "Barcelona",
-                name = "Frenkie De Jong",
-                score = "9",
+                team = doiBong?.tenDoi ?: "",
+                name = cauThus.getOrNull(0)?.cauThu?.tenCT ?: "",
+                score = (cauThus.getOrNull(0)?.banThang ?: 0).toString(),
                 modifier
             )
 
             TeamRowHoSo( // Đổi tên TeamRow để tránh trùng lặp
-                teamName = "Manchester City",
-                score = "2",
+                teamName = doiBong?.tenDoi ?: "",
+                score = "",
                 // logoUrl = "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg" // THAY THẾ DÒNG NÀY
                 logoResId = R.drawable.mancity_logo, // << THAY BẰNG TÊN FILE DRAWABLE CỦA BẠN
                 modifier
@@ -167,14 +170,14 @@ fun TeamRowHoSo(teamName: String, score: String, logoResId: Int, modifier: Modif
             .padding(horizontal = 24.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AsyncImage(
-            model = logoResId, // << SỬ DỤNG RESOURCE ID
-            contentDescription = "$teamName Logo", // Cung cấp contentDescription tốt hơn
-            modifier = modifier
-                .size(40.dp)
-                .clip(CircleShape),
-            contentScale = ContentScale.Fit
-        )
+//        AsyncImage(
+//            model = logoResId, // << SỬ DỤNG RESOURCE ID
+//            contentDescription = "$teamName Logo", // Cung cấp contentDescription tốt hơn
+//            modifier = modifier
+//                .size(40.dp)
+//                .clip(CircleShape),
+//            contentScale = ContentScale.Fit
+//        )
         Text(
             text = teamName,
             color = Color.White,
@@ -197,15 +200,15 @@ fun PlayerRowHoSo(name: String, goals: String, modifier: Modifier) { // Đổi t
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 28.dp, vertical = 8.dp),
+            .padding(horizontal = 28.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = modifier
-                .size(36.dp)
-                .clip(CircleShape)
-                .background(Color(0xFF414158))
-        )
+//        Box(
+//            modifier = modifier
+//                .size(36.dp)
+//                .clip(CircleShape)
+//                .background(Color(0xFF414158))
+//        )
         Text(
             text = name,
             color = Color.White,
