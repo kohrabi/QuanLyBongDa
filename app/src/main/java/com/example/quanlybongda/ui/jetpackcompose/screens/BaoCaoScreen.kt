@@ -72,11 +72,9 @@ fun BaoCaoScreen(
     Scaffold(
         backgroundColor = standingsScreenBackground,
         topBar = {
-            StandingsTopAppBar(modifier) // TopAppBar chứa tiêu đề "Standings"
+            StandingsTopAppBar(Modifier) // TopAppBar chứa tiêu đề "Standings"
         },
-        bottomBar = {
-            StandingsBottomNavigationBar(modifier) // BottomBar chứa các icon điều hướng
-        }
+        modifier = modifier
     ) { innerPadding -> // innerPadding được cung cấp bởi Scaffold
         Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) { // Box chứa ảnh nền và nội dung
             // Ảnh nền (nếu có)
@@ -98,7 +96,7 @@ fun BaoCaoScreen(
             )
 
             LazyColumn(
-                modifier = modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 14.dp),
                 contentPadding = PaddingValues(top = 24.dp, bottom = 16.dp)
@@ -106,7 +104,7 @@ fun BaoCaoScreen(
                 item {
 
                     Column(
-                        modifier = modifier
+                        modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
                             .background(standingsContentBg.copy(alpha = 0.7f))
@@ -134,14 +132,14 @@ fun BaoCaoScreen(
                         Spacer(modifier = Modifier.height(16.dp)) // Tăng khoảng cách
 
                         // Tiêu đề các cột của bảng
-                        StandingsListHeader(modifier) // Đổi tên hàm cho rõ ràng
+                        StandingsListHeader(Modifier) // Đổi tên hàm cho rõ ràng
 
                         Spacer(modifier = Modifier.height(12.dp))
                     } // Kết thúc Card container
                 }
 
                 itemsIndexed(teams, key = { _, it -> it.maDoi}) { index, team ->
-                    StandingsListRow(context = context, team = team, modifier) // Đổi tên hàm
+                    StandingsListRow(context = context, team = team, Modifier) // Đổi tên hàm
                     if (index < teams.lastIndex) { // Thêm đường kẻ mờ giữa các hàng
                         Divider(
                             color = standingsTextMuted.copy(alpha = 0.2f),
@@ -163,7 +161,7 @@ fun BaoCaoScreen(
 }
 
 @Composable
-fun StandingsTopAppBar(modifier : Modifier) {
+fun StandingsTopAppBar(modifier : Modifier = Modifier) {
     TopAppBar(
         title = {
             Text(
@@ -182,9 +180,9 @@ fun StandingsTopAppBar(modifier : Modifier) {
 }
 
 @Composable
-fun StandingsListHeader(modifier : Modifier) { // Đổi tên từ StandingsTableHeader
+fun StandingsListHeader(modifier : Modifier = Modifier) { // Đổi tên từ StandingsTableHeader
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -202,7 +200,7 @@ fun StandingsListHeader(modifier : Modifier) { // Đổi tên từ StandingsTabl
 
 @Composable
 
-fun StandingsListRow(context: android.content.Context, team: BangXepHangNgay, modifier : Modifier) { // Đổi tên từ TeamDataRow
+fun StandingsListRow(context: android.content.Context, team: BangXepHangNgay, modifier : Modifier = Modifier) { // Đổi tên từ TeamDataRow
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
@@ -248,7 +246,7 @@ fun StandingsListRow(context: android.content.Context, team: BangXepHangNgay, mo
 }
 
 @Composable
-fun LeagueLegendStandings(modifier : Modifier) { // Đổi tên từ LeagueLegend
+fun LeagueLegendStandings(modifier : Modifier = Modifier) { // Đổi tên từ LeagueLegend
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(top = 12.dp) // Giảm padding top
@@ -262,7 +260,7 @@ fun LeagueLegendStandings(modifier : Modifier) { // Đổi tên từ LeagueLegen
 }
 
 @Composable
-fun StandingsBottomNavigationBar(modifier : Modifier) { // Bottom Navigation Bar
+fun StandingsBottomNavigationBar(modifier : Modifier = Modifier) { // Bottom Navigation Bar
     // Giả sử bạn muốn dùng Material 2 BottomNavigation
     var selectedItem by remember { mutableStateOf(0) } // 0 là Home, 1 là Standings (ví dụ)
     val items = listOf(

@@ -42,30 +42,28 @@ fun LoginScreen(
     }
 
     Box(
-        modifier = modifier
-            .padding()
-            .fillMaxSize()
+        modifier = modifier.fillMaxSize()
     ) {
         // Background Image with overlay
         Image(
             painter = rememberAsyncImagePainter("https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/a7195ab3-99b7-49a3-923e-03620d8eb0f5"),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize()
         )
         Box(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0xCC000000)) // dark overlay
         )
 
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(24.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Spacer(modifier = modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
             Column {
                 Text(
@@ -80,20 +78,20 @@ fun LoginScreen(
                     fontSize = 26.sp,
                     fontWeight = FontWeight.ExtraBold
                 )
-                Spacer(modifier = modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = "Enter your email address and password to use the application",
                     color = Color.LightGray,
                     fontSize = 14.sp
                 )
-                Spacer(modifier = modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 // Username
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
                     label = { Text("Username") },
-                    modifier = modifier
+                    modifier = Modifier
                         .fillMaxWidth()
                         .background(Color(0xFF222232), shape = RoundedCornerShape(6.dp)),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -106,7 +104,7 @@ fun LoginScreen(
                     )
                 )
 
-                Spacer(modifier = modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 var passwordVisible by remember { mutableStateOf(false) }
                 OutlinedTextField(
@@ -123,7 +121,7 @@ fun LoginScreen(
                             Icon(imageVector = image, contentDescription = null, tint = Color.LightGray)
                         }
                     },
-                    modifier = modifier
+                    modifier = Modifier
                         .fillMaxWidth()
                         .background(Color(0xFF222232), shape = RoundedCornerShape(6.dp)),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -136,12 +134,12 @@ fun LoginScreen(
                     )
                 )
 
-                Spacer(modifier = modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(checked = true, onCheckedChange = {}, colors = CheckboxDefaults.colors(Color.White))
@@ -151,22 +149,22 @@ fun LoginScreen(
                         text = "Forget Password?",
                         color = Color(0xFFB06AB3),
                         fontSize = 14.sp,
-                        modifier = modifier.clickable {}
+                        modifier = Modifier.clickable {}
                     )
                 }
 
-                Spacer(modifier = modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
                     onClick = onSignInClick,
-                    modifier = modifier
+                    modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                     contentPadding = PaddingValues()
                 ) {
                     Box(
-                        modifier = modifier
+                        modifier = Modifier
                             .background(
                                 brush = Brush.horizontalGradient(
                                     colors = listOf(Color(0xFF4568DC), Color(0xFFB06AB3))
@@ -182,7 +180,7 @@ fun LoginScreen(
             }
 
             Row(
-                modifier = modifier.fillMaxWidth().padding(vertical = 42.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 42.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
@@ -195,7 +193,7 @@ fun LoginScreen(
                     color = Color(0xFFB06AB3),
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
-                    modifier = modifier.clickable {
+                    modifier = Modifier.clickable {
                         navController.navigate("signUp");
                     }
                 )
@@ -207,5 +205,5 @@ fun LoginScreen(
 @Preview(showBackground = true, backgroundColor = 0xFF000000)
 @Composable
 fun LoginScreenPreview() { // << ĐỔI TÊN HÀM PREVIEW
-    LoginScreen(rememberNavController(), Modifier) // Gọi Composable chính
+    LoginScreen(rememberNavController()) // Gọi Composable chính
 }

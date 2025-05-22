@@ -60,17 +60,17 @@ fun KetQuaTranDauScreen(
             .background(Color(0xFF0A0F24)) // Nền chính của màn hình là màu đặc
     ) {
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            HoSoTopBar(modifier) // Đổi tên TopBar để tránh trùng lặp nếu có TopBar khác trong cùng package
+            HoSoTopBar(Modifier) // Đổi tên TopBar để tránh trùng lặp nếu có TopBar khác trong cùng package
 
             PlayerCardHoSo( // Đổi tên PlayerCard để tránh trùng lặp
                 team = doiBong?.tenDoi ?: "",
                 name = cauThus.getOrNull(0)?.cauThu?.tenCT ?: "",
                 score = (cauThus.getOrNull(0)?.banThang ?: 0).toString(),
-                modifier
+                Modifier
             )
 
             TeamRowHoSo( // Đổi tên TeamRow để tránh trùng lặp
@@ -78,22 +78,22 @@ fun KetQuaTranDauScreen(
                 score = "",
                 // logoUrl = "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg" // THAY THẾ DÒNG NÀY
                 logoResId = R.drawable.mancity_logo, // << THAY BẰNG TÊN FILE DRAWABLE CỦA BẠN
-                modifier
+                Modifier
             )
 
             // List of Players
             cauThus.forEach {
-                PlayerRowHoSo(it.cauThu.tenCT, it.banThang.toString(), modifier)
+                PlayerRowHoSo(it.cauThu.tenCT, it.banThang.toString(), Modifier)
             }
-            Spacer(modifier = modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
 
 @Composable
-fun HoSoTopBar(modifier: Modifier) { // Đổi tên từ TopBar
+fun HoSoTopBar(modifier: Modifier = Modifier) { // Đổi tên từ TopBar
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -121,10 +121,10 @@ fun HoSoTopBar(modifier: Modifier) { // Đổi tên từ TopBar
 }
 
 @Composable
-fun PlayerCardHoSo(team: String, name: String, score: String, modifier: Modifier) { // Đổi tên từ PlayerCard
+fun PlayerCardHoSo(team: String, name: String, score: String, modifier: Modifier = Modifier) { // Đổi tên từ PlayerCard
     // Nội dung PlayerCard này không có hình ảnh, giữ nguyên nếu đây là thiết kế
     Box(
-        modifier = modifier
+        modifier = Modifier
             .padding(horizontal = 24.dp, vertical = 16.dp)
             .clip(RoundedCornerShape(24.dp))
             .background(Color(0xFF1B2038))
@@ -149,23 +149,23 @@ fun PlayerCardHoSo(team: String, name: String, score: String, modifier: Modifier
                 text = "Goals Score", // Label này có thể cần thay đổi
                 color = Color(0xFFDADADA),
                 fontSize = 12.sp,
-                modifier = modifier.padding(top = 6.dp)
+                modifier = Modifier.padding(top = 6.dp)
             )
             Text(
                 text = score,
                 color = Color(0xFFFF9E0D),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
     }
 }
 
 @Composable
-fun TeamRowHoSo(teamName: String, score: String, logoResId: Int, modifier: Modifier) { // Đổi tên và thay logoUrl thành logoResId
+fun TeamRowHoSo(teamName: String, score: String, logoResId: Int, modifier: Modifier = Modifier) { // Đổi tên và thay logoUrl thành logoResId
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -182,7 +182,7 @@ fun TeamRowHoSo(teamName: String, score: String, logoResId: Int, modifier: Modif
             text = teamName,
             color = Color.White,
             fontSize = 14.sp,
-            modifier = modifier
+            modifier = Modifier
                 .weight(1f)
                 .padding(start = 12.dp)
         )
@@ -196,9 +196,9 @@ fun TeamRowHoSo(teamName: String, score: String, logoResId: Int, modifier: Modif
 }
 
 @Composable
-fun PlayerRowHoSo(name: String, goals: String, modifier: Modifier) { // Đổi tên từ PlayerRow
+fun PlayerRowHoSo(name: String, goals: String, modifier: Modifier = Modifier) { // Đổi tên từ PlayerRow
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 28.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -213,7 +213,7 @@ fun PlayerRowHoSo(name: String, goals: String, modifier: Modifier) { // Đổi t
             text = name,
             color = Color.White,
             fontSize = 14.sp,
-            modifier = modifier
+            modifier = Modifier
                 .weight(1f)
                 .padding(start = 12.dp)
         )

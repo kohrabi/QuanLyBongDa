@@ -1,0 +1,106 @@
+package com.example.quanlybongda
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.example.quanlybongda.ui.jetpackcompose.screens.*
+import com.example.quanlybongda.ui.jetpackcompose.screens.Input.*
+import com.example.quanlybongda.ui.theme.DarkColorScheme
+
+data class BottomNavigationRoute(
+    val name : String,
+    val description : String,
+    val icon : ImageVector
+)
+
+@Composable
+fun AppNavigation() {
+    val navController = rememberNavController();
+    var selectedItem by remember { mutableStateOf("") }
+
+    val routes = listOf(
+//        BottomNavigationType("login", "Home", Icons.Default.Home),
+//        BottomNavigationType("signUp", ,),
+        BottomNavigationRoute("ghiNhan", "Home", Icons.Default.Home),
+        BottomNavigationRoute("baoCao", "Ranking", Icons.Default.List),
+        BottomNavigationRoute("lapLich", "Schedule", Icons.Default.Schedule),
+        BottomNavigationRoute("hoSo", "Profile", Icons.Default.Person),
+    )
+
+    Scaffold(
+        bottomBar = {
+            BottomNavigation(
+                backgroundColor = standingsContentBg.copy(alpha = 0.9f),
+                contentColor = standingsTextMuted,
+            ) {
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentDestination = navBackStackEntry?.destination
+                routes.forEach { route ->
+                    BottomNavigationItem(
+                        icon = { Icon(route.icon, contentDescription = route.description) },
+                        selected = selectedItem == route.name,
+                        onClick = {
+                            selectedItem = route.name
+                            navController.navigate(route.name) {
+                                // Pop up to the start destination of the graph to
+                                // avoid building up a large stack of destinations
+                                // on the back stack as users select items
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                // Avoid multiple copies of the same destination when
+                                // reselecting the same item
+                                launchSingleTop = true
+                                // Restore state when reselecting a previously selected item
+                                restoreState = true
+                            }
+                        },
+                        selectedContentColor = Color.White,
+                        unselectedContentColor = standingsTextMuted,
+                        modifier = Modifier.padding(bottom = 24.dp)
+                    )
+                }
+            }
+        }
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = "lapLich",
+            Modifier.fillMaxSize().background(DarkColorScheme.background)
+        ) {
+            val modifier = Modifier.padding(innerPadding);
+            composable("login") { LoginScreen(navController, modifier) }
+            composable("signUp") { SignUpScreen(navController, modifier) }
+            composable("baoCao") { BaoCaoScreen(navController, modifier) }
+            composable("ghiNhan") { GhiNhanScreen(navController, modifier) }
+            composable("hoSo") { KetQuaTranDauScreen(navController, modifier) }
+            composable("lapLich") { LapLichScreen(navController, modifier) }
+            composable("cauThuInput") { CauThuInputScreen(navController, modifier) }
+            composable("doiBongInput") { DoiBongInputScreen(navController, modifier) }
+            composable("banThangInput") { BanThangInputScreen(navController, modifier) }
+            composable("lichThiDauInput") { LichThiDauInputScreen(navController, modifier) }
+        }
+    }
+}

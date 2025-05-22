@@ -50,29 +50,28 @@ fun SignUpScreen(
     };
 
     Box(
-        modifier = modifier
-            .fillMaxSize()
+        modifier = modifier.fillMaxSize()
     ) {
         // Background Image with overlay
         Image(
             painter = rememberAsyncImagePainter("https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/a7195ab3-99b7-49a3-923e-03620d8eb0f5"),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize()
         )
         Box(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0xCC000000)) // dark overlay
         )
 
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(24.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Spacer(modifier = modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
             Column {
                 Text(
@@ -87,13 +86,13 @@ fun SignUpScreen(
                     fontSize = 26.sp,
                     fontWeight = FontWeight.ExtraBold
                 )
-                Spacer(modifier = modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = "Enter your email address, username and password to sign up",
                     color = Color.LightGray,
                     fontSize = 14.sp
                 )
-                Spacer(modifier = modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
 
                 // Email
@@ -104,7 +103,7 @@ fun SignUpScreen(
                         verifyEmailInput(email)
                     },
                     label = { Text("Email") },
-                    modifier = modifier
+                    modifier = Modifier
                         .fillMaxWidth()
                         .background(Color(0xFF222232), shape = RoundedCornerShape(6.dp)),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -116,7 +115,7 @@ fun SignUpScreen(
                         unfocusedLabelColor = Color.LightGray
                     )
                 )
-                Spacer(modifier = modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // Username
                 OutlinedTextField(
@@ -126,7 +125,7 @@ fun SignUpScreen(
                         verifyUsernameInput(username)
                     },
                     label = { Text("Username") },
-                    modifier = modifier
+                    modifier = Modifier
                         .fillMaxWidth()
                         .background(Color(0xFF222232), shape = RoundedCornerShape(6.dp)),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -139,7 +138,7 @@ fun SignUpScreen(
                     )
                 )
 
-                Spacer(modifier = modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 var passwordVisible by remember { mutableStateOf(false) }
                 OutlinedTextField(
@@ -156,7 +155,7 @@ fun SignUpScreen(
                             Icon(imageVector = image, contentDescription = null, tint = Color.LightGray)
                         }
                     },
-                    modifier = modifier
+                    modifier = Modifier
                         .fillMaxWidth()
                         .background(Color(0xFF222232), shape = RoundedCornerShape(6.dp)),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -169,33 +168,33 @@ fun SignUpScreen(
                     )
                 )
 
-                Spacer(modifier = modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
                         text = "Forget Password?",
                         color = Color(0xFFB06AB3),
                         fontSize = 14.sp,
-                        modifier = modifier.clickable {}
+                        modifier = Modifier.clickable {}
                     )
                 }
 
-                Spacer(modifier = modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
                     onClick = onSignUpClick,
-                    modifier = modifier
+                    modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                     contentPadding = PaddingValues()
                 ) {
                     Box(
-                        modifier = modifier
+                        modifier = Modifier
                             .background(
                                 brush = Brush.horizontalGradient(
                                     colors = listOf(Color(0xFF4568DC), Color(0xFFB06AB3))
@@ -211,7 +210,7 @@ fun SignUpScreen(
             }
 
             Row(
-                modifier = modifier.fillMaxWidth().padding(vertical = 46.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 46.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
@@ -224,7 +223,7 @@ fun SignUpScreen(
                     color = Color(0xFFB06AB3),
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
-                    modifier = modifier.clickable {
+                    modifier = Modifier.clickable {
                         navController.navigate("login")
                     }
                 )

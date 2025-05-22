@@ -22,13 +22,21 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.example.quanlybongda.Database.DatabaseViewModel
 // import androidx.compose.ui.geometry.Offset // Cần nếu dùng Offset trong Brush
 import com.example.quanlybongda.R // << QUAN TRỌNG: Đảm bảo bạn đã import R
 
 @Composable
-fun CauThuInputScreen() {
+fun CauThuInputScreen(
+    appController: NavController,
+    modifier: Modifier = Modifier,
+    viewModel: DatabaseViewModel = hiltViewModel()
+) {
     val context = LocalContext.current
     var playerName by remember { mutableStateOf("") }
     var birthday by remember { mutableStateOf("") }
@@ -221,6 +229,6 @@ fun CauThuInputScreen() {
 @Composable
 fun SignInScreen3Preview() {
     MaterialTheme {
-        CauThuInputScreen()
+        CauThuInputScreen(rememberNavController())
     }
 }

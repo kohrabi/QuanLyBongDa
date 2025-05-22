@@ -95,12 +95,12 @@ fun GhiNhanScreen(
             painter = rememberAsyncImagePainter(R.drawable.football_stadium), // << THAY BẰNG TÊN FILE DRAWABLE CỦA BẠN
             contentDescription = "Background Stadium",
             contentScale = ContentScale.Crop,
-            modifier = modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             alpha = 0.3f
         )
 
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 12.dp)
                 .verticalScroll(rememberScrollState()),
@@ -108,7 +108,7 @@ fun GhiNhanScreen(
         ) {
             // Top Bar
             Row(
-                modifier = modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -137,7 +137,7 @@ fun GhiNhanScreen(
             }
 
             // Khoảng cách giữa TopBar và Full Time
-            Spacer(modifier = modifier.height(30.dp)) // << SỬA: Tăng khoảng cách
+            Spacer(modifier = Modifier.height(30.dp)) // << SỬA: Tăng khoảng cách
 
             Text(
                 text = "Full Time",
@@ -147,10 +147,10 @@ fun GhiNhanScreen(
             )
 
             // Khoảng cách giữa Full Time và Khu vực tỷ số
-            Spacer(modifier = modifier.height(20.dp)) // << SỬA: Tăng khoảng cách
+            Spacer(modifier = Modifier.height(20.dp)) // << SỬA: Tăng khoảng cách
 
             Row(
-                modifier = modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
@@ -159,7 +159,7 @@ fun GhiNhanScreen(
                 Image(
                     painter = rememberAsyncImagePainter(R.drawable.arsenal_logo_4x), // Giả sử đây là logo đội 1
                     contentDescription = "Team 1 Logo", // Sửa contentDescription cho phù hợp
-                    modifier = modifier.size(70.dp)
+                    modifier = Modifier.size(70.dp)
                 )
                 Text(
                     text = "$tiSoDoiMot - $tiSoDoiHai",
@@ -170,11 +170,11 @@ fun GhiNhanScreen(
                 Image(
                     painter = rememberAsyncImagePainter(R.drawable.mancity_logo_4x), // << THAY BẰNG LOGO ĐỘI 2, ví dụ: R.drawable.logo_mancity
                     contentDescription = "Team 2 Logo", // Sửa contentDescription cho phù hợp
-                    modifier = modifier.size(70.dp)
+                    modifier = Modifier.size(70.dp)
                 )
             }
 
-            Spacer(modifier = modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             Text(
                 text = "Statistic Match",
@@ -183,22 +183,22 @@ fun GhiNhanScreen(
                 fontWeight = FontWeight.SemiBold
             )
 
-            Spacer(modifier = modifier.height(16.dp))
-            Column(modifier = modifier.fillMaxWidth()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Column(modifier = Modifier.fillMaxWidth()) {
                 banThangs.forEach { it ->
                     // Sử dụng một action placeholder, bạn có thể thay đổi nếu cần
                     StatisticRowUpdated(side = it.side, player = it.tenCT, action = it.tenLBT, time = it.thoiDiem.toString(), modifier)
                 }
             }
-            Spacer(modifier = modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
 @Composable
-fun StatisticRowUpdated(side: String, player: String, action: String, time: String, modifier: Modifier) {
+fun StatisticRowUpdated(side: String, player: String, action: String, time: String, modifier: Modifier = Modifier) {
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -208,7 +208,7 @@ fun StatisticRowUpdated(side: String, player: String, action: String, time: Stri
             color = textMutedColor,
             fontWeight = FontWeight.Normal,
             fontSize = 14.sp,
-            modifier = modifier.weight(0.15f), // Cột Side
+            modifier = Modifier.weight(0.15f), // Cột Side
             textAlign = TextAlign.Center
         )
         Text(
@@ -216,14 +216,14 @@ fun StatisticRowUpdated(side: String, player: String, action: String, time: Stri
             color = textWhiteColor,
             fontWeight = FontWeight.SemiBold,
             fontSize = 15.sp,
-            modifier = modifier.weight(0.5f).padding(start = 8.dp) // Cột Player, chiếm nhiều không gian nhất
+            modifier = Modifier.weight(0.5f).padding(start = 8.dp) // Cột Player, chiếm nhiều không gian nhất
         )
         Text(
             text = action,
             color = textMutedColor,
             fontWeight = FontWeight.Normal,
             fontSize = 14.sp,
-            modifier = modifier.weight(0.15f), // Cột Action
+            modifier = Modifier.weight(0.15f), // Cột Action
             textAlign = TextAlign.Center
         )
         Text(
@@ -231,7 +231,7 @@ fun StatisticRowUpdated(side: String, player: String, action: String, time: Stri
             color = textMutedColor,
             fontWeight = FontWeight.Normal,
             fontSize = 14.sp,
-            modifier = modifier.weight(0.2f), // Cột Time
+            modifier = Modifier.weight(0.2f), // Cột Time
             textAlign = TextAlign.End
         )
     }
