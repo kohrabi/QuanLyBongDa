@@ -25,7 +25,7 @@ import com.example.quanlybongda.Database.DatabaseViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun SignInScreen(
+fun LoginScreen(
     navController : NavController,
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel()
@@ -207,5 +207,5 @@ fun SignInScreen(
 @Preview(showBackground = true, backgroundColor = 0xFF000000)
 @Composable
 fun LoginScreenPreview() { // << ĐỔI TÊN HÀM PREVIEW
-    SignInScreen(rememberNavController(), Modifier) // Gọi Composable chính
+    LoginScreen(rememberNavController(), Modifier) // Gọi Composable chính
 }

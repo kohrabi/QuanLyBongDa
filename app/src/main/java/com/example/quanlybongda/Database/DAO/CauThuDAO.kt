@@ -32,12 +32,18 @@ interface CauThuDAO {
         INNER JOIN ViTri AS VT ON VT.maVT = TGTD.maVT
         GROUP BY CT.maCT
     """)
-    fun selectCauThuTGTD(maTD : Int, maDoi : Int) : LiveData<List<CauThuViTri>>;
+    fun selectCauThuTGTDDB(maTD : Int, maDoi : Int) : LiveData<List<CauThuViTri>>;
 
     @Query("SELECT * FROM CauThu WHERE maDoi = :maDoi")
     suspend fun selectCauThuDoiBong(maDoi: Int) : List<CauThu>;
 
 
+    @Query("""
+        SELECT CT.* FROM CauThu AS CT
+        INNER JOIN ThamGiaTD AS TGTD ON TGTD.maTD = :maTD AND TGTD.maCT = CT.maCT
+        GROUP BY CT.maCT
+    """)
+    suspend fun selectCauThuTGTD(maTD : Int) : List<CauThu>;
 
 
 }

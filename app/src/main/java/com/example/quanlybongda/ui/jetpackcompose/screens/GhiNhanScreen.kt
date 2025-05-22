@@ -13,6 +13,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,7 +27,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.Database.Schema.BanThang
+import com.example.quanlybongda.Database.Schema.LichThiDau
 // import androidx.compose.foundation.Image // Đã có ở trên, không cần import lại
 // import androidx.compose.foundation.layout.size // Đã có trong layout.*
 
@@ -42,7 +53,38 @@ val textMutedColor = Color(0xFFA0A3BD)
 
 
 @Composable
-fun GhiNhanScreen(modifier: Modifier = Modifier) {
+fun GhiNhanScreen(
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    viewModel: DatabaseViewModel = hiltViewModel()
+) {
+    var lichThiDau by remember { mutableStateOf<LichThiDau?>(null) }
+    var tiSoDoiMot by remember { mutableStateOf(0) }
+    var tiSoDoiHai by remember { mutableStateOf(0) }
+    var banThangs by remember { mutableStateOf(listOf<BanThang>()) }
+
+    LaunchedEffect(Unit) {
+        val maTD = 1;
+        lichThiDau = viewModel.lichThiDauDAO.selectLichThiDauMaTD(maTD);
+        tiSoDoiMot =
+            viewModel.banThangDAO.selectSoBanThangTranDauDoi(maTD, lichThiDau!!.doiMot) +
+            viewModel.banThangDAO.selectSoBanThangPhanLuoiTranDauDoi(maTD, lichThiDau!!.doiHai);
+        tiSoDoiHai = viewModel.banThangDAO.selectSoBanThangTranDauDoi(maTD, lichThiDau!!.doiHai) +
+                viewModel.banThangDAO.selectSoBanThangPhanLuoiTranDauDoi(maTD, lichThiDau!!.doiMot);
+        banThangs = viewModel.banThangDAO.selectBanThang(maTD);
+        val loaiBTs = viewModel.banThangDAO.selectAllLoaiBT();
+        val cauThus = viewModel.cauThuDAO.selectCauThuTGTD(maTD);
+        for (banThang in banThangs) {
+            val cauThu = cauThus.find { banThang.maCT == it.maCT }!!;
+            if (cauThu.maDoi == lichThiDau!!.doiMot)
+                banThang.side = "L";
+            else if (cauThu.maDoi == lichThiDau!!.doiHai)
+                banThang.side = "R";
+            banThang.tenCT = cauThu.tenCT;
+            banThang.tenLBT = loaiBTs.find { banThang.maLBT == it.maLBT }!!.tenLBT;
+        }
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -120,7 +162,7 @@ fun GhiNhanScreen(modifier: Modifier = Modifier) {
                     modifier = modifier.size(70.dp)
                 )
                 Text(
-                    text = "2 - 2",
+                    text = "$tiSoDoiMot - $tiSoDoiHai",
                     color = scoreColor,
                     fontSize = 40.sp,
                     fontWeight = FontWeight.Bold
@@ -142,19 +184,10 @@ fun GhiNhanScreen(modifier: Modifier = Modifier) {
             )
 
             Spacer(modifier = modifier.height(16.dp))
-
-            val stats = listOf(
-                Triple("L", "Depay", "66’"),
-                Triple("R", "Depay", "73’"),
-                Triple("R", "Depay", "76’"),
-                Triple("L", "Depay", "79’"),
-                Triple("R", "Depay", "89’")
-            )
-
             Column(modifier = modifier.fillMaxWidth()) {
-                stats.forEach { (side, player, time) ->
+                banThangs.forEach { it ->
                     // Sử dụng một action placeholder, bạn có thể thay đổi nếu cần
-                    StatisticRowUpdated(side = side, player = player, action = "A", time = time, modifier)
+                    StatisticRowUpdated(side = it.side, player = it.tenCT, action = it.tenLBT, time = it.thoiDiem.toString(), modifier)
                 }
             }
             Spacer(modifier = modifier.height(16.dp))
@@ -209,6 +242,6 @@ fun StatisticRowUpdated(side: String, player: String, action: String, time: Stri
 @Composable
 fun FinalScoreScreenPreview() {
     MaterialTheme {
-        GhiNhanScreen(Modifier)
+        GhiNhanScreen(rememberNavController())
     }
 }

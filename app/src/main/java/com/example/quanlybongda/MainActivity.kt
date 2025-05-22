@@ -28,13 +28,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.quanlybongda.ui.jetpackcompose.screens.BaoCaoScreen
 import com.example.quanlybongda.ui.jetpackcompose.screens.GhiNhanScreen
-import com.example.quanlybongda.ui.jetpackcompose.screens.HoSoScreen
+import com.example.quanlybongda.ui.jetpackcompose.screens.KetQuaTranDauScreen
 import com.example.quanlybongda.ui.jetpackcompose.screens.Input.BanThangInputScreen
 import com.example.quanlybongda.ui.jetpackcompose.screens.LapLichScreen
 import com.example.quanlybongda.ui.jetpackcompose.screens.Input.CauThuInputScreen
 import com.example.quanlybongda.ui.jetpackcompose.screens.Input.DoiBongInputScreen
 import com.example.quanlybongda.ui.jetpackcompose.screens.Input.LichThiDauInputScreen
-import com.example.quanlybongda.ui.jetpackcompose.screens.SignInScreen
+import com.example.quanlybongda.ui.jetpackcompose.screens.LoginScreen
 import com.example.quanlybongda.ui.jetpackcompose.screens.SignUpScreen
 
 
@@ -129,11 +129,11 @@ fun AppNavigation() {
         }
     ) { it
         NavHost(navController = navController,startDestination = "login") {
-            composable("login") { SignInScreen(navController, Modifier) }
+            composable("login") { LoginScreen(navController, Modifier) }
             composable("signUp") { SignUpScreen(navController, Modifier) }
             composable("baoCao") { BaoCaoScreen(navController, Modifier) }
-            composable("ghiNhan") { GhiNhanScreen(Modifier) }
-            composable("hoSo") { HoSoScreen(Modifier) }
+            composable("ghiNhan") { GhiNhanScreen(navController) }
+            composable("hoSo") { KetQuaTranDauScreen(Modifier) }
             composable("lapLich") { LapLichScreen(navController, Modifier) }
             composable("cauThu") { CauThuInputScreen() }
             composable("doiBong") { DoiBongInputScreen() }

@@ -1,6 +1,5 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
-import androidx.compose.foundation.Image // Giữ lại nếu có dùng Image với painterResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -12,6 +11,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack // Nên dùng filled hoặc outlined nhất quán
 import androidx.compose.material.icons.filled.MoreVert  // Nên dùng filled hoặc outlined nhất quán
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,10 +27,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.quanlybongda.Database.Schema.CauThu
 import com.example.quanlybongda.R // << QUAN TRỌNG: Import lớp R của dự án bạn
 
 @Composable
-fun HoSoScreen(modifier: Modifier = Modifier) {
+fun KetQuaTranDauScreen(modifier: Modifier = Modifier) {
+
+    var cauThus by remember { mutableStateOf(listOf<CauThu>()) }
+
+    LaunchedEffect(Unit) {
+
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -207,6 +219,6 @@ fun PlayerRowHoSo(name: String, goals: String, modifier: Modifier) { // Đổi t
 @Composable
 fun HoSoScreenPreview() {
     MaterialTheme {
-        HoSoScreen(Modifier)
+        KetQuaTranDauScreen(Modifier)
     }
 }
