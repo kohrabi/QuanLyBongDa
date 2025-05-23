@@ -1,33 +1,34 @@
 package com.example.quanlybongda
 
-import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
-import androidx.core.view.WindowInsetsCompat
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.quanlybongda.Database.DatabaseViewModel
-import com.example.quanlybongda.ui.theme.DarkColorScheme
 import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
 import dagger.hilt.android.AndroidEntryPoint
-
+import com.example.quanlybongda.ui.jetpackcompose.screens.BaoCao
+import com.example.quanlybongda.ui.jetpackcompose.screens.GhiNhan
+import com.example.quanlybongda.ui.jetpackcompose.screens.HoSo
+import com.example.quanlybongda.ui.jetpackcompose.screens.LapLich
+import com.example.quanlybongda.ui.jetpackcompose.screens.Login
+import com.example.quanlybongda.ui.jetpackcompose.screens.SignIn3
+import com.example.quanlybongda.ui.jetpackcompose.screens.SignIn2
+import com.example.quanlybongda.ui.jetpackcompose.screens.TraCuu
+import com.example.quanlybongda.ui.jetpackcompose.screens.MuaGiai
+import com.example.quanlybongda.ui.jetpackcompose.screens.DoiBong
+import com.example.quanlybongda.ui.jetpackcompose.screens.TaoDoiBong
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -36,46 +37,62 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(DarkColorScheme.surfaceContainer.toArgb())
-        )
+        enableEdgeToEdge()
+
+        // Đảm bảo thanh trạng thái được hiển thị
+        WindowCompat.setDecorFitsSystemWindows(window, true)
 
         setContent {
             QuanLyBongDaTheme {
-                AppNavigation();
-//                StatusBarProtection();
+                // Lấy chiều cao của thanh trạng thái
+                val density = LocalDensity.current
+                val statusBarHeight = with(density) {
+                    WindowInsets.statusBars.getTop(density).toDp()
+                }
+
+                // Khoảng cách bổ sung giữa thanh trạng thái và giao diện
+                val additionalSpacing = 8.dp
+
+                // Bao bọc giao diện chính để thêm padding phía trên
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = statusBarHeight + additionalSpacing)
+                ) {
+//                    BaoCao()
+//                    GhiNhan()
+//                    HoSo()
+//                    LapLich()
+//                    Login()
+//                    SignIn3()
+//                    SignIn2()
+//                    TraCuu()
+//                    MuaGiai()
+                    DoiBong()
+//                    TaoDoiBong()
+                }
             }
         }
     }
 }
 
 @Composable
-private fun StatusBarProtection(
-    color: Color = DarkColorScheme.primary,
-    heightProvider: () -> Float = calculateGradientHeight(),
-) {
-
-    Canvas(Modifier.fillMaxSize()) {
-        val calculatedHeight = heightProvider()
-        val gradient = Brush.verticalGradient(
-            colors = listOf(
-                color.copy(alpha = 1f),
-                color.copy(alpha = .8f),
-                Color.Transparent
-            ),
-            startY = 0f,
-            endY = calculatedHeight
-        )
-        drawRect(
-            brush = gradient,
-            size = Size(size.width, calculatedHeight),
-        )
+fun Greeting(name: String, modifier: Modifier = Modifier, viewModel: DatabaseViewModel = hiltViewModel()) {
+    LaunchedEffect(Unit) {
+        val test = viewModel.selectAllUserGroupWithRole()
+        Log.d("AY", test.toString())
     }
+
+    Text(
+        text = "Hello $name!",
+        modifier = modifier
+    )
 }
 
+@Preview(showBackground = true)
 @Composable
-fun calculateGradientHeight(): () -> Float {
-    val statusBars = WindowInsets.statusBars
-    val density = LocalDensity.current
-    return { statusBars.getTop(density).times(1.2f) }
+fun GreetingPreview() {
+    QuanLyBongDaTheme {
+        Greeting("Android")
+    }
 }
