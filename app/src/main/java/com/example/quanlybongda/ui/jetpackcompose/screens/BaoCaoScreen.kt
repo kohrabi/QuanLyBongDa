@@ -1,19 +1,18 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
-// Các import của bạn giữ nguyên, đảm bảo có:
-import androidx.compose.foundation.Image // Giữ lại nếu bạn có dùng Image với painterResource
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.* // Material 2 components
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home // Icon cho BottomBar
-import androidx.compose.material.icons.filled.List // Icon cho BottomBar (ví dụ cho Ranking/Standings)
-import androidx.compose.material.icons.filled.Schedule // Icon cho BottomBar (ví dụ cho Schedule)
-import androidx.compose.material.icons.filled.Person // Icon cho BottomBar
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,17 +21,22 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource // Sẽ cần nếu dùng Image composable với drawable
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage // Sử dụng AsyncImage của Coil
+import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.example.quanlybongda.R // Quan trọng: Import R để truy cập resources
+import com.example.quanlybongda.R
 
-// Màu sắc (giữ nguyên hoặc điều chỉnh)
+// Thêm import cần thiết để lấy chiều cao thanh trạng thái
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
+
+// Màu sắc
 val standingsScreenBackground = Color(0xFF0D0D12)
 val standingsContentBg = Color(0xFF181A20)
 val standingsCardBg = Color(0xFF222232)
@@ -40,38 +44,43 @@ val standingsTextWhite = Color.White
 val standingsTextAccent = Color(0xFFD1B4FF)
 val standingsTextMuted = Color(0xFFA0A3BD)
 
-// KHÔNG CẦN URL PLACEHOLDER NỮA
-
 @Composable
 fun BaoCao() {
     val context = LocalContext.current
 
+    // Lấy chiều cao của thanh trạng thái
+    val density = LocalDensity.current
+    val statusBarHeight = with(density) {
+        WindowInsets.statusBars.getTop(density).toDp()
+    }
+
+    // Khoảng cách bổ sung giữa thanh trạng thái và giao diện
+    val additionalSpacing = 8.dp
+
     Scaffold(
         backgroundColor = standingsScreenBackground,
         topBar = {
-            StandingsTopAppBar()
+            StandingsTopAppBar(statusBarHeight = statusBarHeight + additionalSpacing)
         },
         bottomBar = {
             StandingsBottomNavigationBar()
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-            // Ảnh nền từ drawable
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(top = statusBarHeight + additionalSpacing) // Đẩy nội dung xuống dưới thanh trạng thái + khoảng cách bổ sung
+        ) {
             AsyncImage(
-                // model = ImageRequest.Builder(context).data(R.drawable.your_stadium_background_drawable_name).crossfade(true).build(),
-                // Hoặc đơn giản hơn nếu chỉ cần crossfade:
-                model = R.drawable.football_stadium, // << THAY THẾ TÊN FILE DRAWABLE CỦA BẠN
+                model = ImageRequest.Builder(context)
+                    .data(R.drawable.football_stadium)
+                    .crossfade(true)
+                    .build(),
                 contentDescription = "Background",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
-                alpha = 0.3f, // Giữ nguyên hoặc điều chỉnh alpha
-                // Thêm crossfade nếu muốn hiệu ứng mờ dần khi tải
-                // Để dùng crossfade trực tiếp với AsyncImage, Coil phiên bản mới có thể hỗ trợ tham số crossfade
-                // Hoặc giữ ImageRequest.Builder nếu bạn cần nhiều tùy chỉnh hơn:
-                // model = ImageRequest.Builder(context)
-                //    .data(R.drawable.stadium_background) // << THAY THẾ TÊN FILE DRAWABLE
-                //    .crossfade(true)
-                //    .build(),
+                alpha = 0.3f
             )
 
             Column(
@@ -112,19 +121,22 @@ fun BaoCao() {
                     StandingsListHeader()
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Dữ liệu các đội - THAY THẾ URL BẰNG RESOURCE ID
                     val teams = listOf(
-                        Team("Arsenal", R.drawable.arsenal_logo, 3, 0, 0, 9, League.CHAMPIONS), // << THAY TÊN FILE
-                        Team("Man City", R.drawable.mancity_logo, 2, 1, 0, 7, League.CHAMPIONS), // << THAY TÊN FILE
-                        Team("Leeds United", R.drawable.leeds_united_logo, 2, 1, 0, 7, League.CHAMPIONS), // << THAY TÊN FILE
-                        Team("Tottenham", R.drawable.tottenham_logo, 1, 2, 0, 5, League.EUROPA), // << THAY TÊN FILE
-                        Team("Brighton", R.drawable.brighton_logo, 1, 1, 1, 4, League.EUROPA) // << THAY TÊN FILE
+                        Team("Arsenal", R.drawable.arsenal_logo, 3, 0, 0, 9, League.CHAMPIONS),
+                        Team("Man City", R.drawable.mancity_logo, 2, 1, 0, 7, League.CHAMPIONS),
+                        Team("Leeds United", R.drawable.leeds_united_logo, 2, 1, 0, 7, League.CHAMPIONS),
+                        Team("Tottenham", R.drawable.tottenham_logo, 1, 2, 0, 5, League.EUROPA),
+                        Team("Brighton", R.drawable.brighton_logo, 1, 1, 1, 4, League.EUROPA)
                     )
 
                     teams.forEachIndexed { index, team ->
                         StandingsListRow(context = context, team = team)
                         if (index < teams.lastIndex) {
-                            Divider(color = standingsTextMuted.copy(alpha = 0.2f), thickness = 0.5.dp, modifier = Modifier.padding(vertical = 8.dp))
+                            Divider(
+                                color = standingsTextMuted.copy(alpha = 0.2f),
+                                thickness = 0.5.dp,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
                         }
                     }
 
@@ -138,22 +150,23 @@ fun BaoCao() {
 }
 
 @Composable
-fun StandingsTopAppBar() {
-    TopAppBar(
-        title = {
-            Text(
-                text = "Standings",
-                color = standingsTextWhite,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-        },
-        backgroundColor = Color.Transparent,
-        elevation = 0.dp,
-        modifier = Modifier.padding(top = 8.dp)
-    )
+fun StandingsTopAppBar(statusBarHeight: androidx.compose.ui.unit.Dp) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = statusBarHeight, bottom = 8.dp), // Đẩy tiêu đề xuống dưới thanh trạng thái
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Standings",
+            color = standingsTextWhite,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
 }
 
 @Composable
@@ -191,17 +204,10 @@ fun StandingsListRow(context: android.content.Context, team: Team) {
         )
         Spacer(modifier = Modifier.width(8.dp))
         AsyncImage(
-            // model = ImageRequest.Builder(context).data(team.logoResId).crossfade(true).build(),
-            // Hoặc đơn giản hơn:
-            model = team.logoResId, // << SỬ DỤNG RESOURCE ID TỪ TEAM
+            model = team.logoResId,
             contentDescription = "${team.name} Logo",
             contentScale = ContentScale.Fit,
             modifier = Modifier.size(20.dp)
-            // Thêm crossfade nếu muốn, tương tự như ảnh nền
-            // model = ImageRequest.Builder(context)
-            //    .data(team.logoResId)
-            //    .crossfade(true)
-            //    .build(),
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
@@ -261,13 +267,14 @@ fun StandingsBottomNavigationBar() {
 // Data class và Enum
 data class Team(
     val name: String,
-    val logoResId: Int, // << THAY ĐỔI TỪ String SANG Int
+    val logoResId: Int,
     val w: Int,
     val d: Int,
     val l: Int,
     val points: Int,
     val league: League
 )
+
 enum class League { CHAMPIONS, EUROPA }
 
 @Preview(showBackground = true, backgroundColor = 0xFF0D0D12)
