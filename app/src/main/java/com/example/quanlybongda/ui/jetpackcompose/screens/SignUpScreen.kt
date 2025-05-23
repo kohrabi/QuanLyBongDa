@@ -21,25 +21,33 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.quanlybongda.Database.AppDatabase
 import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.Database.verifyEmailInput
+import com.example.quanlybongda.Database.verifyUsernameInput
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import okhttp3.Dispatcher
 
 @Composable
-fun LoginScreen(
+fun SignUpScreen(
     navController : NavController,
     modifier: Modifier = Modifier,
-    viewModel: DatabaseViewModel = hiltViewModel()
+    viewModel: DatabaseViewModel = hiltViewModel(),
 ) {
     var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val scope = rememberCoroutineScope();
+    val scope = rememberCoroutineScope()
 
-    val onSignInClick : () -> Unit = {
+    val onSignUpClick : () -> Unit = {
         scope.launch {
-            // TODO: Sign in
-            navController.navigate("hoSo");
+            viewModel.createUser(email, username, password);
+            navController.navigate("login");
         }
-    }
+    };
 
     Box(
         modifier = modifier.fillMaxSize()
@@ -80,16 +88,42 @@ fun LoginScreen(
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "Enter your email address and password to use the application",
+                    text = "Enter your email address, username and password to sign up",
                     color = Color.LightGray,
                     fontSize = 14.sp
                 )
                 Spacer(modifier = Modifier.height(24.dp))
 
+
+                // Email
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = {
+                        email = it
+                        verifyEmailInput(email)
+                    },
+                    label = { Text("Email") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFF222232), shape = RoundedCornerShape(6.dp)),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
+                        textColor = Color.White,
+                        cursorColor = Color.White,
+                        focusedLabelColor = Color.White,
+                        unfocusedLabelColor = Color.LightGray
+                    )
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
                 // Username
                 OutlinedTextField(
                     value = username,
-                    onValueChange = { username = it },
+                    onValueChange = {
+                        username = it
+                        verifyUsernameInput(username)
+                    },
                     label = { Text("Username") },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -134,17 +168,13 @@ fun LoginScreen(
                     )
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(checked = true, onCheckedChange = {}, colors = CheckboxDefaults.colors(Color.White))
-                        Text("Remember Me", color = Color.White, fontSize = 14.sp)
-                    }
                     Text(
                         text = "Forget Password?",
                         color = Color(0xFFB06AB3),
@@ -156,7 +186,7 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
-                    onClick = onSignInClick,
+                    onClick = onSignUpClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
@@ -174,27 +204,27 @@ fun LoginScreen(
                             .fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("SIGN IN", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text("SIGN UP", color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 }
             }
 
             Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 42.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 46.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Don't have an account? ",
+                    text = "Have an account? ",
                     color = Color.LightGray,
                     fontSize = 14.sp
                 )
                 Text(
-                    text = "Register Now",
+                    text = "Login Now",
                     color = Color(0xFFB06AB3),
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
                     modifier = Modifier.clickable {
-                        navController.navigate("signUp");
+                        navController.navigate("login")
                     }
                 )
             }
@@ -204,6 +234,6 @@ fun LoginScreen(
 
 @Preview(showBackground = true, backgroundColor = 0xFF000000)
 @Composable
-fun LoginScreenPreview() { // << ĐỔI TÊN HÀM PREVIEW
-    LoginScreen(rememberNavController()) // Gọi Composable chính
+fun SignUpPreview() { // << ĐỔI TÊN HÀM PREVIEW
+    SignUpScreen(rememberNavController(), Modifier) // Gọi Composable chính
 }

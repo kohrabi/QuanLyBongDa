@@ -1,13 +1,13 @@
 package com.example.quanlybongda.Database.ReturnTypes
 
+import androidx.room.ColumnInfo
 import androidx.room.Embedded
-import androidx.room.Relation
 import com.example.quanlybongda.Database.Schema.CauThu
-import com.example.quanlybongda.Database.Schema.Loai.ViTri
+import java.time.LocalDate
 
-data class CauThuViTri(
+data class CauThuBanThang(
     @Embedded
     val cauThu: CauThu,
-    @Embedded
-    val viThu: ViTri
+    @ColumnInfo
+    val banThang: Int,
 )

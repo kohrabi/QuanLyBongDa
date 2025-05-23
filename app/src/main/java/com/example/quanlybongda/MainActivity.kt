@@ -12,7 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp // Thêm import này để sử dụng dp
+import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.quanlybongda.Database.DatabaseViewModel
@@ -51,7 +51,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 // Khoảng cách bổ sung giữa thanh trạng thái và giao diện
-                val additionalSpacing = 8.dp // Đã sửa lỗi bằng cách thêm import dp
+                val additionalSpacing = 8.dp
 
                 // Bao bọc giao diện chính để thêm padding phía trên
                 Box(
@@ -68,8 +68,8 @@ class MainActivity : ComponentActivity() {
 //                    SignIn2()
 //                    TraCuu()
 //                    MuaGiai()
-//                    DoiBong()
-                    TaoDoiBong()
+                    DoiBong()
+//                    TaoDoiBong()
                 }
             }
         }

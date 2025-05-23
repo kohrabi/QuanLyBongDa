@@ -1,39 +1,34 @@
 package com.example.quanlybongda.Database
 
 import android.app.Application
+import android.provider.ContactsContract.CommonDataKinds.Email
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.quanlybongda.Database.DAO.BanThangDAO
-import com.example.quanlybongda.Database.DAO.CauThuDAO
-import com.example.quanlybongda.Database.DAO.DoiBongDAO
-import com.example.quanlybongda.Database.DAO.LichThiDauDAO
-import com.example.quanlybongda.Database.DAO.MuaGiaiDAO
-import com.example.quanlybongda.Database.DAO.SanNhaDAO
-import com.example.quanlybongda.Database.DAO.ThamSoDAO
-import com.example.quanlybongda.Database.DAO.ThePhatDAO
-import com.example.quanlybongda.Database.DAO.User.UserGroupDAO
-import com.example.quanlybongda.Database.DAO.User.UserRoleDAO
-import com.example.quanlybongda.Database.ReturnTypes.KetQuaTranDau
-import com.example.quanlybongda.Database.ReturnTypes.UserGroupRoles
-import com.example.quanlybongda.Database.Schema.User.HasRole
+import com.example.quanlybongda.Database.DAO.*
+import com.example.quanlybongda.Database.DAO.User.*
+import com.example.quanlybongda.Database.ReturnTypes.*
+import com.example.quanlybongda.Database.Schema.User.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @HiltViewModel
 class DatabaseViewModel @Inject constructor(application : Application) : ViewModel() {
 
-    private val cauThuDAO : CauThuDAO;
-    private val doiBongDAO : DoiBongDAO;
-    private val lichThiDauDAO : LichThiDauDAO;
-    private val muaGiaiDAO : MuaGiaiDAO;
-    private val sanNhaDAO : SanNhaDAO;
-    private val thamSoDAO : ThamSoDAO;
-    private val thePhatDAO : ThePhatDAO;
-    private val banThangDAO : BanThangDAO;
+    public val cauThuDAO : CauThuDAO;
+    public val doiBongDAO : DoiBongDAO;
+    public val lichThiDauDAO : LichThiDauDAO;
+    public val muaGiaiDAO : MuaGiaiDAO;
+    public val sanNhaDAO : SanNhaDAO;
+    public val thamSoDAO : ThamSoDAO;
+    public val thePhatDAO : ThePhatDAO;
+    public val banThangDAO : BanThangDAO;
 
-    private val userRoleDAO : UserRoleDAO;
-    private val userGroupDAO : UserGroupDAO;
+    public val userDAO : UserDAO;
+    public val userRoleDAO : UserRoleDAO;
+    public val userGroupDAO : UserGroupDAO;
 
     init {
         val appDatabase = AppDatabase.getDatabase(application);
@@ -47,6 +42,7 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
         banThangDAO = appDatabase.banThangDAO;
         userRoleDAO = appDatabase.userRoleDAO;
         userGroupDAO = appDatabase.userGroupDAO;
+        userDAO = appDatabase.userDAO;
     }
 
     suspend fun selectKetQuaThiDau(maTD: Int): KetQuaTranDau? {
@@ -68,6 +64,40 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
             san = sanNha?.tenSan ?: "" ,
             ngayGio = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(lichThiDau.ngayGioThucTe).toString()
         )
+    }
+
+    suspend fun selectBXHDoiNgay(ngay : LocalDate) : List<BangXepHangNgay> {
+        // Tat ca cac doi co tran co trung
+        var result = mutableListOf<BangXepHangNgay>();
+
+        val selectDoi = lichThiDauDAO.selectLichThiDauTrongNgay(ngay);
+
+        // Chuyen no thanh set
+        val doiCoTranTrongNgay = selectDoi.flatMap { listOf(it.doiMot, it.doiHai) }.toSet();
+        for (doiCoTran in doiCoTranTrongNgay) {
+            val doi = doiBongDAO.selectDoiBongMaDoi(doiCoTran);
+            if (doi == null) {
+                Log.e("TAG", "Khong ton tai doi bong nay");
+                continue;
+            }
+
+            val soTran = lichThiDauDAO.countLichThiDauMaDoi(doiCoTran, ngay);
+            val soTranThang = lichThiDauDAO.countLichThiDauThangMaDoi(doiCoTran, ngay);
+            val soTranThua = lichThiDauDAO.countLichThiDauThuaMaDoi(doiCoTran, ngay);
+            val soTranHoa = soTran - soTranThang - soTranThua;
+            val doiBXH  = BangXepHangNgay(
+                maDoi = doi.maDoi,
+                tenDoi = doi.tenDoi,
+                soTran = soTran,
+                soTranThang = soTranThang,
+                soTranThua = soTranThua,
+                soTranHoa = soTranHoa,
+                hieuSo = soTranThang * 3 + soTranHoa * 1 + soTranThua * 0,
+                hang = 0
+            )
+            result.add(doiBXH);
+        }
+        return result;
     }
 
 //    suspend fun checkPageViewable(groupId : Int, pageName: String) : Boolean {
@@ -108,7 +138,55 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
         if (rolesExcluded.size > 0) {
             userRoleDAO.deleteHasRole(rolesExcluded.map { value -> HasRole(groupId = groupId, roleId = value) });
         }
-
     }
 
+    suspend fun checkEmailAvailability(email: String) : Boolean {
+        val row = userDAO.selectUserFromEmail(email);
+        return row == null;
+    }
+
+    suspend fun createUser(email: String, username: String, password: String) : User? {
+        if (!verifyUsernameInput(username) ||
+            verifyEmailInput(username) ||
+            checkEmailAvailability(email))
+            return null;
+        val passwordHash = hashPassword(password);
+        val user = User(
+            email = email,
+            username = username,
+            passwordHash = passwordHash,
+        )
+        userDAO.upsertUser(user);
+        return user;
+    }
+
+    suspend fun updateUserPassword(userId: Int, password: String) {
+        val passwordHash = hashPassword(password);
+        userDAO.updateUserPasswordHash(userId, password);
+    }
+
+//    suspend fun updateUser(user: User) {
+//        db.update(UserTable)
+//            .set({ username: user.username, email: user.email, groupId: user.groupId }).where(eq(UserTable.id, user.id));
+//    }
+
+    suspend fun selectUserPasswordHash(userId: Int) : String? {
+        return userDAO.selectUserPasswordHash(userId);
+    }
+
+    suspend fun selectUserFromEmail(email : String) : User? {
+        return userDAO.selectUserFromEmail(email);
+    }
+
+    suspend fun selectUserFromUsername(username : String) : User? {
+        return userDAO.selectUserFromUsername(username);
+    }
+
+    suspend fun selectAllUser() : List<User> {
+        return userDAO.selectAllUsers();
+    }
+
+    suspend fun deleteUser(userId : Int) {
+        userDAO.deleteUser(userId);
+    }
 }

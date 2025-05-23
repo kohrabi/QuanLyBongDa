@@ -1,6 +1,5 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
-import androidx.compose.foundation.Image // Giữ lại nếu có dùng Image với painterResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -12,6 +11,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack // Nên dùng filled hoặc outlined nhất quán
 import androidx.compose.material.icons.filled.MoreVert  // Nên dùng filled hoặc outlined nhất quán
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,12 +27,35 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.Database.ReturnTypes.CauThuBanThang
+import com.example.quanlybongda.Database.Schema.CauThu
+import com.example.quanlybongda.Database.Schema.DoiBong
 import com.example.quanlybongda.R // << QUAN TRỌNG: Import lớp R của dự án bạn
+import kotlinx.coroutines.CoroutineScope
 
 @Composable
-fun HoSo() {
+fun KetQuaTranDauScreen(
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    viewModel: DatabaseViewModel = hiltViewModel()
+) {
+
+    var cauThus by remember { mutableStateOf(listOf<CauThuBanThang>()) }
+    var doiBong by remember { mutableStateOf<DoiBong?>(null) }
+
+    LaunchedEffect(Unit) {
+        val maDoi = 16;
+        cauThus = viewModel.cauThuDAO.selectCauThuDoiBongWithBanThang(maDoi);
+        doiBong = viewModel.doiBongDAO.selectDoiBongMaDoi(maDoi);
+        cauThus = cauThus.sortedByDescending { it.banThang }
+    }
+
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(Color(0xFF0A0F24)) // Nền chính của màn hình là màu đặc
     ) {
@@ -37,36 +64,34 @@ fun HoSo() {
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            HoSoTopBar() // Đổi tên TopBar để tránh trùng lặp nếu có TopBar khác trong cùng package
+            HoSoTopBar(Modifier) // Đổi tên TopBar để tránh trùng lặp nếu có TopBar khác trong cùng package
 
             PlayerCardHoSo( // Đổi tên PlayerCard để tránh trùng lặp
-                team = "Barcelona",
-                name = "Frenkie De Jong",
-                score = "9"
+                team = doiBong?.tenDoi ?: "",
+                name = cauThus.getOrNull(0)?.cauThu?.tenCT ?: "",
+                score = (cauThus.getOrNull(0)?.banThang ?: 0).toString(),
+                Modifier
             )
 
             TeamRowHoSo( // Đổi tên TeamRow để tránh trùng lặp
-                teamName = "Manchester City",
-                score = "2",
+                teamName = doiBong?.tenDoi ?: "",
+                score = "",
                 // logoUrl = "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg" // THAY THẾ DÒNG NÀY
-                logoResId = R.drawable.mancity_logo // << THAY BẰNG TÊN FILE DRAWABLE CỦA BẠN
+                logoResId = R.drawable.mancity_logo, // << THAY BẰNG TÊN FILE DRAWABLE CỦA BẠN
+                Modifier
             )
 
             // List of Players
-            PlayerRowHoSo("Cooper Calzoni", "4") // Đổi tên PlayerRow để tránh trùng lặp
-            PlayerRowHoSo("Alfredo Saris", "4")
-            PlayerRowHoSo("Jakob Levin", "4")
-            PlayerRowHoSo("Alfonso Kenter", "3")
-            PlayerRowHoSo("Emerson Septimus", "3")
-            PlayerRowHoSo("Brandon Vaccaro", "2")
-
+            cauThus.forEach {
+                PlayerRowHoSo(it.cauThu.tenCT, it.banThang.toString(), Modifier)
+            }
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
 
 @Composable
-fun HoSoTopBar() { // Đổi tên từ TopBar
+fun HoSoTopBar(modifier: Modifier = Modifier) { // Đổi tên từ TopBar
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -96,7 +121,7 @@ fun HoSoTopBar() { // Đổi tên từ TopBar
 }
 
 @Composable
-fun PlayerCardHoSo(team: String, name: String, score: String) { // Đổi tên từ PlayerCard
+fun PlayerCardHoSo(team: String, name: String, score: String, modifier: Modifier = Modifier) { // Đổi tên từ PlayerCard
     // Nội dung PlayerCard này không có hình ảnh, giữ nguyên nếu đây là thiết kế
     Box(
         modifier = Modifier
@@ -138,21 +163,21 @@ fun PlayerCardHoSo(team: String, name: String, score: String) { // Đổi tên t
 }
 
 @Composable
-fun TeamRowHoSo(teamName: String, score: String, logoResId: Int) { // Đổi tên và thay logoUrl thành logoResId
+fun TeamRowHoSo(teamName: String, score: String, logoResId: Int, modifier: Modifier = Modifier) { // Đổi tên và thay logoUrl thành logoResId
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AsyncImage(
-            model = logoResId, // << SỬ DỤNG RESOURCE ID
-            contentDescription = "$teamName Logo", // Cung cấp contentDescription tốt hơn
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape),
-            contentScale = ContentScale.Fit
-        )
+//        AsyncImage(
+//            model = logoResId, // << SỬ DỤNG RESOURCE ID
+//            contentDescription = "$teamName Logo", // Cung cấp contentDescription tốt hơn
+//            modifier = modifier
+//                .size(40.dp)
+//                .clip(CircleShape),
+//            contentScale = ContentScale.Fit
+//        )
         Text(
             text = teamName,
             color = Color.White,
@@ -171,19 +196,19 @@ fun TeamRowHoSo(teamName: String, score: String, logoResId: Int) { // Đổi tê
 }
 
 @Composable
-fun PlayerRowHoSo(name: String, goals: String) { // Đổi tên từ PlayerRow
+fun PlayerRowHoSo(name: String, goals: String, modifier: Modifier = Modifier) { // Đổi tên từ PlayerRow
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 28.dp, vertical = 8.dp),
+            .padding(horizontal = 28.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box( // Đây là placeholder, nếu muốn ảnh cầu thủ, bạn cần thêm AsyncImage
-            modifier = Modifier
-                .size(36.dp)
-                .clip(CircleShape)
-                .background(Color(0xFF414158))
-        )
+//        Box(
+//            modifier = modifier
+//                .size(36.dp)
+//                .clip(CircleShape)
+//                .background(Color(0xFF414158))
+//        )
         Text(
             text = name,
             color = Color.White,
@@ -204,7 +229,7 @@ fun PlayerRowHoSo(name: String, goals: String) { // Đổi tên từ PlayerRow
 @Preview(showBackground = true, backgroundColor = 0xFF0A0B0F)
 @Composable
 fun HoSoScreenPreview() {
-    MaterialTheme { // Nên bọc trong Theme của ứng dụng nếu có
-        HoSo()
+    MaterialTheme {
+        KetQuaTranDauScreen(rememberNavController())
     }
 }

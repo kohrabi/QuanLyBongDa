@@ -3,10 +3,10 @@ package com.example.quanlybongda.Database.Schema
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Ignore
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.example.quanlybongda.Database.Schema.Loai.LoaiBT
-import java.time.LocalDateTime
 
 @Entity(
     primaryKeys = arrayOf("maTD", "thoiDiem"),
@@ -39,7 +39,11 @@ data class BanThang(
     val maLBT: Int,
     @ColumnInfo(defaultValue = "false")
     val deleted : Boolean?,
-)
+) {
+    @Ignore var side : String = "";
+    @Ignore var tenCT : String = "";
+    @Ignore var tenLBT : String = "";
+}
 
 @Entity(
     indices = arrayOf(Index(value=["BackupID"], name="BanThangBackup_BackupID_unique", unique = true))

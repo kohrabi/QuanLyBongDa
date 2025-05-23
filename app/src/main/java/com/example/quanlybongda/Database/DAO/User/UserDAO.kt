@@ -13,14 +13,14 @@ interface UserDAO {
     @Upsert
     suspend fun upsertUser(vararg user : User);
 
-    @Delete
-    suspend fun deleteUser(vararg user: User);
-
-//    @Query("UPDATE User SET passwordHash=:passwordHash WHERE id=:id")
-//    suspend fun updateUserPasswordHash(id: Int, passwordHash: String);
+    @Query("DELETE FROM User WHERE id=:userId")
+    suspend fun deleteUser(userId : Int);
 
     @Query("SELECT * FROM User WHERE email=:email LIMIT 1")
     suspend fun selectUserFromEmail(email : String) : User?;
+
+    @Query("SELECT * FROM User WHERE username=:username LIMIT 1")
+    suspend fun selectUserFromUsername(username : String) : User?;
 
     @Query("SELECT passwordHash FROM User WHERE id=:id LIMIT 1")
     suspend fun selectUserPasswordHash(id: Int) : String?;
@@ -30,4 +30,8 @@ interface UserDAO {
 
     @Query("SELECT * FROM User")
     fun selectAllUserFlow() : Flow<List<User>>;
+
+    @Query("UPDATE User SET passwordHash=:passwordHash WHERE id=:userId")
+    suspend fun updateUserPasswordHash(userId: Int, passwordHash : String);
+
 }

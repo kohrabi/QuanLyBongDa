@@ -1,12 +1,11 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
-import androidx.compose.foundation.Image
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -17,20 +16,25 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.Database.ReturnTypes.BangXepHangNgay
 import com.example.quanlybongda.R
+import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
+import java.time.LocalDate
 
 // Thêm import cần thiết để lấy chiều cao thanh trạng thái
 import androidx.compose.foundation.layout.WindowInsets
@@ -45,8 +49,17 @@ val standingsTextAccent = Color(0xFFD1B4FF)
 val standingsTextMuted = Color(0xFFA0A3BD)
 
 @Composable
-fun BaoCao() {
+fun BaoCaoScreen(
+    appController: NavController,
+    modifier: Modifier = Modifier,
+    viewModel: DatabaseViewModel = hiltViewModel(),
+) {
     val context = LocalContext.current
+    var teams by remember { mutableStateOf(listOf<BangXepHangNgay>()) }
+
+    LaunchedEffect(Unit) {
+        teams = viewModel.selectBXHDoiNgay(LocalDate.of(2025, 5, 11))
+    }
 
     // Lấy chiều cao của thanh trạng thái
     val density = LocalDensity.current
@@ -70,7 +83,7 @@ fun BaoCao() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(top = statusBarHeight + additionalSpacing) // Đẩy nội dung xuống dưới thanh trạng thái + khoảng cách bổ sung
+                .padding(top = statusBarHeight + additionalSpacing)
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(context)
@@ -83,67 +96,60 @@ fun BaoCao() {
                 alpha = 0.3f
             )
 
-            Column(
+            LazyColumn(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 14.dp)
-                    .verticalScroll(rememberScrollState())
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp),
+                contentPadding = PaddingValues(top = 24.dp, bottom = 16.dp)
             ) {
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(standingsContentBg.copy(alpha = 0.7f))
-                        .padding(16.dp)
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(standingsContentBg.copy(alpha = 0.7f))
+                            .padding(16.dp)
                     ) {
-                        Text(
-                            text = "Table Standings",
-                            color = standingsTextWhite,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "See All",
-                            color = standingsTextAccent,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    StandingsListHeader()
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    val teams = listOf(
-                        Team("Arsenal", R.drawable.arsenal_logo, 3, 0, 0, 9, League.CHAMPIONS),
-                        Team("Man City", R.drawable.mancity_logo, 2, 1, 0, 7, League.CHAMPIONS),
-                        Team("Leeds United", R.drawable.leeds_united_logo, 2, 1, 0, 7, League.CHAMPIONS),
-                        Team("Tottenham", R.drawable.tottenham_logo, 1, 2, 0, 5, League.EUROPA),
-                        Team("Brighton", R.drawable.brighton_logo, 1, 1, 1, 4, League.EUROPA)
-                    )
-
-                    teams.forEachIndexed { index, team ->
-                        StandingsListRow(context = context, team = team)
-                        if (index < teams.lastIndex) {
-                            Divider(
-                                color = standingsTextMuted.copy(alpha = 0.2f),
-                                thickness = 0.5.dp,
-                                modifier = Modifier.padding(vertical = 8.dp)
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Table Standings",
+                                color = standingsTextWhite,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "See All",
+                                color = standingsTextAccent,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
                             )
                         }
-                    }
 
+                        Spacer(modifier = Modifier.height(16.dp))
+                        StandingsListHeader()
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+                }
+
+                itemsIndexed(teams, key = { _, it -> it.maDoi }) { index, team ->
+                    StandingsListRow(context = context, team = team)
+                    if (index < teams.lastIndex) {
+                        Divider(
+                            color = standingsTextMuted.copy(alpha = 0.2f),
+                            thickness = 0.5.dp,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+                }
+
+                item {
                     Spacer(modifier = Modifier.height(16.dp))
                     LeagueLegendStandings()
                 }
-                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
@@ -154,7 +160,7 @@ fun StandingsTopAppBar(statusBarHeight: androidx.compose.ui.unit.Dp) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = statusBarHeight, bottom = 8.dp), // Đẩy tiêu đề xuống dưới thanh trạng thái
+            .padding(top = statusBarHeight, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
@@ -170,9 +176,9 @@ fun StandingsTopAppBar(statusBarHeight: androidx.compose.ui.unit.Dp) {
 }
 
 @Composable
-fun StandingsListHeader() {
+fun StandingsListHeader(modifier: Modifier = Modifier) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -182,53 +188,47 @@ fun StandingsListHeader() {
         Text("W", color = standingsTextMuted, fontSize = 11.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
         Text("D", color = standingsTextMuted, fontSize = 11.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
         Text("L", color = standingsTextMuted, fontSize = 11.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("Poin", color = standingsTextMuted, fontSize = 11.sp, modifier = Modifier.weight(0.7f), textAlign = TextAlign.End)
+        Text("Point", color = standingsTextMuted, fontSize = 11.sp, modifier = Modifier.weight(0.7f), textAlign = TextAlign.End)
     }
 }
 
 @Composable
-fun StandingsListRow(context: android.content.Context, team: Team) {
+fun StandingsListRow(context: android.content.Context, team: BangXepHangNgay, modifier: Modifier = Modifier) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp)
     ) {
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .size(6.dp)
                 .background(
-                    color = if (team.league == League.CHAMPIONS) Color(0xFF5C7CFA) else Color(0xFFFF9F1C),
+                    color = if (true) Color(0xFF5C7CFA) else Color(0xFFFF9F1C),
                     shape = CircleShape
                 )
         )
         Spacer(modifier = Modifier.width(8.dp))
-        AsyncImage(
-            model = team.logoResId,
-            contentDescription = "${team.name} Logo",
-            contentScale = ContentScale.Fit,
-            modifier = Modifier.size(20.dp)
-        )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = team.name,
+            text = team.tenDoi,
             color = standingsTextWhite,
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.weight(2.2f)
         )
-        Text("${team.w}", color = standingsTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("${team.d}", color = standingsTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("${team.l}", color = standingsTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("${team.points}", color = standingsTextWhite, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(0.7f), textAlign = TextAlign.End)
+        Text("${team.soTranThang}", color = standingsTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("${team.soTranHoa}", color = standingsTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("${team.soTranThua}", color = standingsTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("${team.hieuSo}", color = standingsTextWhite, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(0.7f), textAlign = TextAlign.End)
     }
 }
 
 @Composable
-fun LeagueLegendStandings() {
+fun LeagueLegendStandings(modifier: Modifier = Modifier) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(top = 12.dp)
+        modifier = modifier.padding(top = 12.dp)
     ) {
         Box(modifier = Modifier.size(6.dp).background(Color(0xFF5C7CFA), shape = CircleShape))
         Text(" UEFA Champions League", color = standingsTextMuted, fontSize = 10.sp)
@@ -239,7 +239,7 @@ fun LeagueLegendStandings() {
 }
 
 @Composable
-fun StandingsBottomNavigationBar() {
+fun StandingsBottomNavigationBar(modifier: Modifier = Modifier) {
     var selectedItem by remember { mutableStateOf(0) }
     val items = listOf(
         "Home" to Icons.Filled.Home,
@@ -264,23 +264,10 @@ fun StandingsBottomNavigationBar() {
     }
 }
 
-// Data class và Enum
-data class Team(
-    val name: String,
-    val logoResId: Int,
-    val w: Int,
-    val d: Int,
-    val l: Int,
-    val points: Int,
-    val league: League
-)
-
-enum class League { CHAMPIONS, EUROPA }
-
 @Preview(showBackground = true, backgroundColor = 0xFF0D0D12)
 @Composable
-fun BaoCaoScreenPreview() {
-    MaterialTheme {
-        BaoCao()
+fun StandingsScreenPreview() {
+    QuanLyBongDaTheme {
+        BaoCaoScreen(rememberNavController())
     }
 }
