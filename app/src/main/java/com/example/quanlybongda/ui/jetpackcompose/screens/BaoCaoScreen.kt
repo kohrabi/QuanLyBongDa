@@ -39,6 +39,7 @@ import java.time.LocalDate
 // Thêm import cần thiết để lấy chiều cao thanh trạng thái
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 // Màu sắc
 val standingsScreenBackground = Color(0xFF0D0D12)

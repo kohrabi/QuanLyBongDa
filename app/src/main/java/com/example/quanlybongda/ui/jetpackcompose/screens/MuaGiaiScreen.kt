@@ -21,6 +21,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
 
 // Data class for Season information
@@ -34,7 +38,11 @@ data class Season(
 // Main Composable for the Football Season Selector Screen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MuaGiai() { // Đổi tên từ FootballSeasonSelectorScreen thành MuaGiai
+fun MuaGiaiScreen(
+    navController : NavController,
+    modifier: Modifier = Modifier,
+    viewModel: DatabaseViewModel = hiltViewModel(),
+) { // Đổi tên từ FootballSeasonSelectorScreen thành MuaGiai
     // State to hold the currently selected season ID
     var selectedSeason by remember { mutableStateOf<String?>(null) }
 
@@ -52,7 +60,8 @@ fun MuaGiai() { // Đổi tên từ FootballSeasonSelectorScreen thành MuaGiai
 
     // Main screen layout without bottomBar
     Scaffold(
-        containerColor = Color(0xFF121212)
+        containerColor = Color(0xFF121212),
+        modifier = modifier
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -175,6 +184,6 @@ fun SeasonCard(
 @Composable
 fun PreviewMuaGiai() { // Đổi tên từ PreviewFootballSeasonSelectorScreen thành PreviewMuaGiai
     QuanLyBongDaTheme {
-        MuaGiai()
+        MuaGiaiScreen(rememberNavController())
     }
 }

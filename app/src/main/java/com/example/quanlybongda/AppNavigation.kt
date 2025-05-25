@@ -27,6 +27,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.quanlybongda.Database.Schema.DoiBong
 import com.example.quanlybongda.ui.jetpackcompose.screens.*
 import com.example.quanlybongda.ui.jetpackcompose.screens.Input.*
 import com.example.quanlybongda.ui.theme.DarkColorScheme
@@ -101,6 +102,9 @@ fun AppNavigation() {
             }
             composable("hoSo") { KetQuaTranDauScreen(navController, modifier) }
             composable("lapLich") { LapLichScreen(navController, modifier) }
+            composable("muaGiai") { MuaGiaiScreen(navController, modifier) }
+            composable("doiBong") { DoiBongScreen(navController, modifier) }
+
             composable("cauThuInput") { CauThuInputScreen(navController, modifier) }
             composable("doiBongInput") { DoiBongInputScreen(navController, modifier) }
             composable("banThangInput") { BanThangInputScreen(navController, modifier) }

@@ -206,6 +206,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
 
 // Data class for Football Team information
@@ -217,7 +221,11 @@ data class FootballTeam(
 // Main Composable for the Football Team Screen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DoiBong() { // Đổi tên từ FootballTeamScreen thành DoiBong
+fun DoiBongScreen(
+    navController : NavController,
+    modifier: Modifier = Modifier,
+    viewModel: DatabaseViewModel = hiltViewModel(),
+) { // Đổi tên từ FootballTeamScreen thành DoiBong
     // List of football teams (sample data)
     val teams = remember {
         listOf(
@@ -229,7 +237,8 @@ fun DoiBong() { // Đổi tên từ FootballTeamScreen thành DoiBong
 
     // Main screen layout
     Scaffold(
-        containerColor = Color(0xFF121212) // Đặt màu nền trực tiếp, đồng nhất với các màn hình khác
+        containerColor = Color(0xFF121212), // Đặt màu nền trực tiếp, đồng nhất với các màn hình khác
+        modifier = modifier
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -335,6 +344,6 @@ fun TeamCard(team: FootballTeam) {
 @Composable
 fun PreviewDoiBong() { // Đổi tên từ PreviewFootballTeamScreen thành PreviewDoiBong
     QuanLyBongDaTheme {
-        DoiBong()
+        DoiBongScreen(rememberNavController())
     }
 }

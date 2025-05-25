@@ -1,34 +1,23 @@
 package com.example.quanlybongda
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
 import dagger.hilt.android.AndroidEntryPoint
-import com.example.quanlybongda.ui.jetpackcompose.screens.BaoCao
-import com.example.quanlybongda.ui.jetpackcompose.screens.GhiNhan
-import com.example.quanlybongda.ui.jetpackcompose.screens.HoSo
-import com.example.quanlybongda.ui.jetpackcompose.screens.LapLich
-import com.example.quanlybongda.ui.jetpackcompose.screens.Login
-import com.example.quanlybongda.ui.jetpackcompose.screens.SignIn3
-import com.example.quanlybongda.ui.jetpackcompose.screens.SignIn2
-import com.example.quanlybongda.ui.jetpackcompose.screens.TraCuu
-import com.example.quanlybongda.ui.jetpackcompose.screens.MuaGiai
-import com.example.quanlybongda.ui.jetpackcompose.screens.DoiBong
-import com.example.quanlybongda.ui.jetpackcompose.screens.TaoDoiBong
+import com.example.quanlybongda.ui.theme.DarkColorScheme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -44,55 +33,39 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             QuanLyBongDaTheme {
-                // Lấy chiều cao của thanh trạng thái
-                val density = LocalDensity.current
-                val statusBarHeight = with(density) {
-                    WindowInsets.statusBars.getTop(density).toDp()
-                }
-
-                // Khoảng cách bổ sung giữa thanh trạng thái và giao diện
-                val additionalSpacing = 8.dp
-
-                // Bao bọc giao diện chính để thêm padding phía trên
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = statusBarHeight + additionalSpacing)
-                ) {
-//                    BaoCao()
-//                    GhiNhan()
-//                    HoSo()
-//                    LapLich()
-//                    Login()
-//                    SignIn3()
-//                    SignIn2()
-//                    TraCuu()
-//                    MuaGiai()
-                    DoiBong()
-//                    TaoDoiBong()
-                }
+                AppNavigation();
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier, viewModel: DatabaseViewModel = hiltViewModel()) {
-    LaunchedEffect(Unit) {
-        val test = viewModel.selectAllUserGroupWithRole()
-        Log.d("AY", test.toString())
-    }
+private fun StatusBarProtection(
+    color: Color = DarkColorScheme.primary,
+    heightProvider: () -> Float = calculateGradientHeight(),
+) {
 
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+    Canvas(Modifier.fillMaxSize()) {
+        val calculatedHeight = heightProvider()
+        val gradient = Brush.verticalGradient(
+            colors = listOf(
+                color.copy(alpha = 1f),
+                color.copy(alpha = .8f),
+                Color.Transparent
+            ),
+            startY = 0f,
+            endY = calculatedHeight
+        )
+        drawRect(
+            brush = gradient,
+            size = Size(size.width, calculatedHeight),
+        )
+    }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    QuanLyBongDaTheme {
-        Greeting("Android")
-    }
+fun calculateGradientHeight(): () -> Float {
+    val statusBars = WindowInsets.statusBars
+    val density = LocalDensity.current
+    return { statusBars.getTop(density).times(1.2f) }
 }
