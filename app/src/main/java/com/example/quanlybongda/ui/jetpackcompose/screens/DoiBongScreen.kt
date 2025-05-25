@@ -71,11 +71,10 @@ fun DoiBongScreen(
         },
         containerColor = Color(0xFF121212), // Đặt màu nền trực tiếp, đồng nhất với các màn hình khác
         modifier = modifier
-    ) { paddingValues ->
+    ) { it
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .background(Color(0xFF121212)) // Đặt màu nền trực tiếp
                 .padding(horizontal = 16.dp), // Padding ngang cho toàn bộ nội dung
             horizontalAlignment = Alignment.CenterHorizontally
@@ -132,6 +131,8 @@ fun DoiBongScreen(
                     TeamCard(
                         team = doiBong,
                         onClick = {
+
+                            navController.navigate("cauThu/${doiBong.maDoi}");
                         })
                 }
             }

@@ -124,6 +124,9 @@ fun AppNavigation() {
             composable("lapLich") { LapLichScreen(navController, modifier) }
             composable("muaGiai") { MuaGiaiScreen(navController, modifier) }
             composable("doiBong") { DoiBongScreen(navController, modifier) }
+            composable("cauThu/{maDoi}", arguments = listOf(navArgument("maDoi") { type = NavType.IntType})) { backStackEntry ->
+                CauThuScreen(backStackEntry.arguments?.getInt("maDoi") ?: 0, navController, modifier)
+            }
 
             composable("cauThuInput") { CauThuInputScreen(navController, modifier) }
             composable("doiBongInput") { DoiBongInputScreen(navController, modifier) }

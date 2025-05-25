@@ -15,65 +15,57 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.quanlybongda.R
 import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
 
 // Thêm import cần thiết để lấy chiều cao thanh trạng thái
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
-
-// Data class for Player information
-data class Player(
-    val id: Int,
-    val name: String,
-    val goals: Int,
-    val position: String,
-    val birthDate: String,
-    val notes: String
-)
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.Database.DateConverter
+import com.example.quanlybongda.Database.Schema.CauThu
+import kotlinx.coroutines.launch
 
 // Main Composable for the Player List Screen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CauThu() {
-    // List of players (sample data)
-    val players = remember {
-        listOf(
-            Player(id = 1, name = "Craig Vetrovs", goals = 24, position = "Forward", birthDate = "01/01/1990", notes = "Good performer"),
-            Player(id = 2, name = "John Smith", goals = 18, position = "Midfielder", birthDate = "15/05/1992", notes = "Team captain"),
-            Player(id = 3, name = "Mike Johnson", goals = 12, position = "Defender", birthDate = "22/09/1995", notes = "Strong defense")
-        )
-    }
+fun CauThuScreen(
+    maDoi : Int,
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    viewModel: DatabaseViewModel = hiltViewModel(),
+) {
+    var cauThus by remember { mutableStateOf(listOf<CauThu>()) }
 
-    // Lấy chiều cao của thanh trạng thái
-    val density = LocalDensity.current
-    val statusBarHeight = with(density) {
-        WindowInsets.statusBars.getTop(density).toDp()
+    LaunchedEffect(Unit) {
+        viewModel.viewModelScope.launch {
+            cauThus = viewModel.cauThuDAO.selectCauThuDoiBong(maDoi);
+        }
     }
-
-    // Khoảng cách bổ sung giữa thanh trạng thái và giao diện
-    val additionalSpacing = 16.dp
 
     Scaffold(
-        containerColor = Color(0xFF1C1D2B)
-    ) { paddingValues ->
+        containerColor = Color(0xFF1C1D2B),
+        modifier = modifier
+    ) { it
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .background(Color(0xFF1C1D2B))
-                .padding(top = statusBarHeight + additionalSpacing)
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -117,8 +109,8 @@ fun CauThu() {
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(players) { player ->
-                    PlayerCard(player = player)
+                items(cauThus) { cauThu ->
+                    PlayerCard(player = cauThu)
                 }
             }
         }
@@ -127,7 +119,7 @@ fun CauThu() {
 
 // Composable for a single Player Card
 @Composable
-fun PlayerCard(player: Player) {
+fun PlayerCard(player: CauThu) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
@@ -159,7 +151,7 @@ fun PlayerCard(player: Player) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "${player.id}",
+                        text = "${player.maCT}",
                         style = TextStyle(
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
@@ -171,7 +163,7 @@ fun PlayerCard(player: Player) {
                 Spacer(modifier = Modifier.height(12.dp))
                 // Tên cầu thủ
                 Text(
-                    text = player.name,
+                    text = player.tenCT,
                     style = TextStyle(
                         fontSize = 14.02.sp,
                         lineHeight = 24.53.sp,
@@ -195,16 +187,16 @@ fun PlayerCard(player: Player) {
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 // Số bàn thắng (Goals)
-                Text(
-                    text = "${player.goals}",
-                    style = TextStyle(
-                        fontSize = 21.03.sp,
-                        lineHeight = 14.71.sp,
-                        fontWeight = FontWeight(600),
-                        color = Color(0xFFD2B5FF),
-                        textAlign = TextAlign.Start
-                    )
-                )
+//                Text(
+//                    text = "${player.goals}",
+//                    style = TextStyle(
+//                        fontSize = 21.03.sp,
+//                        lineHeight = 14.71.sp,
+//                        fontWeight = FontWeight(600),
+//                        color = Color(0xFFD2B5FF),
+//                        textAlign = TextAlign.Start
+//                    )
+//                )
             }
 
             // Phần bên phải: Position, Birth day, Note
@@ -215,21 +207,21 @@ fun PlayerCard(player: Player) {
                 horizontalAlignment = Alignment.Start
             ) {
                 // Vị trí (Player Type)
-                Text(
-                    text = player.position,
-                    style = TextStyle(
-                        fontSize = 14.02.sp,
-                        lineHeight = 24.53.sp,
-                        fontWeight = FontWeight(500),
-                        color = Color(0xFFFFFFFF),
-                        textAlign = TextAlign.Start,
-                        letterSpacing = 0.26.sp
-                    ),
-                    modifier = Modifier.padding(bottom = 12.dp)
-                )
+//                Text(
+//                    text = player.position,
+//                    style = TextStyle(
+//                        fontSize = 14.02.sp,
+//                        lineHeight = 24.53.sp,
+//                        fontWeight = FontWeight(500),
+//                        color = Color(0xFFFFFFFF),
+//                        textAlign = TextAlign.Start,
+//                        letterSpacing = 0.26.sp
+//                    ),
+//                    modifier = Modifier.padding(bottom = 12.dp)
+//                )
                 // Ngày sinh (Birth day)
                 Text(
-                    text = player.birthDate,
+                    text = DateConverter.LocalDateToString(player.ngaySinh),
                     style = TextStyle(
                         fontSize = 14.02.sp,
                         lineHeight = 24.53.sp,
@@ -242,7 +234,7 @@ fun PlayerCard(player: Player) {
                 )
                 // Ghi chú (Note)
                 Text(
-                    text = player.notes,
+                    text = player.ghiChu,
                     style = TextStyle(
                         fontSize = 14.02.sp,
                         lineHeight = 24.53.sp,
@@ -262,6 +254,6 @@ fun PlayerCard(player: Player) {
 @Composable
 fun PreviewCauThu() {
     QuanLyBongDaTheme {
-        CauThu()
+        CauThuScreen(1, rememberNavController())
     }
 }
