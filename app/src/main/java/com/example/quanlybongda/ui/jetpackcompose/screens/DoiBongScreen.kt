@@ -48,21 +48,14 @@ fun DoiBongScreen(
 ) { // Đổi tên từ FootballTeamScreen thành DoiBong
     // List of football teams (sample data)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-    val currentMuaGiai by viewModel.currentMuaGiai.collectAsState()
+    val currentMuaGiai by DatabaseViewModel.currentMuaGiai.collectAsState()
     var doiBongs by remember { mutableStateOf(listOf<DoiBong>()) }
 
     LaunchedEffect(Unit) {
         viewModel.viewModelScope.launch {
-            if (currentMuaGiai == null) {
-                doiBongs = viewModel.doiBongDAO.selectAllDoiBong();
-                val sanNha = viewModel.sanNhaDAO.selectAllSanNha();
-                for (doiBong in doiBongs) {
-                    doiBong.tenSan = sanNha.find { doiBong.maSan == it.maSan }!!.tenSan;
-                }
-            }
-            else {
+            if (currentMuaGiai != null) {
                 doiBongs = viewModel.doiBongDAO.selectDoiBongMuaGiai(currentMuaGiai!!.maMG);
-                val sanNha = viewModel.sanNhaDAO.selectSanNhaMaMG(currentMuaGiai!!.maMG);
+                val sanNha = viewModel.sanNhaDAO.selectAllSanNha();
                 for (doiBong in doiBongs) {
                     doiBong.tenSan = sanNha.find { doiBong.maSan == it.maSan }!!.tenSan;
                 }

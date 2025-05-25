@@ -72,26 +72,14 @@ fun LapLichScreen(
     viewModel: DatabaseViewModel = hiltViewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-    val currentMuaGiai by viewModel.currentMuaGiai.collectAsState()
+    val currentMuaGiai by DatabaseViewModel.currentMuaGiai.collectAsState()
     var lichThiDaus by remember { mutableStateOf(listOf<LichThiDau>()) }
     var doiBongs by remember { mutableStateOf(listOf<DoiBong>()) }
     val state = rememberLazyListState()
 
     LaunchedEffect(Unit) {
         viewModel.viewModelScope.launch {
-            if (currentMuaGiai == null) {
-                lichThiDaus = viewModel.lichThiDauDAO.selectAllLichThiDau();
-                doiBongs = viewModel.doiBongDAO.selectAllDoiBong();
-                for (lichThiDau in lichThiDaus) {
-                    lichThiDau.tenDoiMot = doiBongs.find { it.maDoi == lichThiDau.doiMot }!!.tenDoi;
-                    lichThiDau.tenDoiHai = doiBongs.find { it.maDoi == lichThiDau.doiHai }!!.tenDoi;
-                    if (lichThiDau.doiThang == null)
-                        lichThiDau.tenDoiThang = "Hòa";
-                    else
-                        lichThiDau.tenDoiThang = doiBongs.find { it.maDoi == lichThiDau.doiThang }!!.tenDoi;
-                }
-            }
-            else {
+            if (currentMuaGiai != null) {
                 lichThiDaus = viewModel.lichThiDauDAO.selectLichThiDauMaMG(currentMuaGiai!!.maMG);
                 doiBongs = viewModel.doiBongDAO.selectAllDoiBong();
                 for (lichThiDau in lichThiDaus) {

@@ -1,20 +1,16 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens // Giữ nguyên package của bạn
 
+// import androidx.compose.foundation.Image // Đã có ở trên, không cần import lại
+// import androidx.compose.foundation.layout.size // Đã có trong layout.*
+
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
@@ -30,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,17 +34,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.Schema.BanThang
 import com.example.quanlybongda.Database.Schema.LichThiDau
-// import androidx.compose.foundation.Image // Đã có ở trên, không cần import lại
-// import androidx.compose.foundation.layout.size // Đã có trong layout.*
-
-import com.example.quanlybongda.R // << QUAN TRỌNG: Import lớp R của dự án bạn
+import com.example.quanlybongda.MainActivity
+import com.example.quanlybongda.R
 import com.example.quanlybongda.ui.theme.DarkColorScheme
+import kotlinx.coroutines.launch
 
 // Màu sắc dựa trên thiết kế image_5022a5.png
 val darkScreenBackground = Color(0xFF1E1E2C)
@@ -77,23 +74,26 @@ fun GhiNhanScreen(
     var banThangs by remember { mutableStateOf(listOf<BanThang>()) }
 
     LaunchedEffect(Unit) {
-        lichThiDau = viewModel.lichThiDauDAO.selectLichThiDauMaTD(maTD);
-        tiSoDoiMot =
-            viewModel.banThangDAO.selectSoBanThangTranDauDoi(maTD, lichThiDau!!.doiMot) +
-            viewModel.banThangDAO.selectSoBanThangPhanLuoiTranDauDoi(maTD, lichThiDau!!.doiHai);
-        tiSoDoiHai = viewModel.banThangDAO.selectSoBanThangTranDauDoi(maTD, lichThiDau!!.doiHai) +
-                viewModel.banThangDAO.selectSoBanThangPhanLuoiTranDauDoi(maTD, lichThiDau!!.doiMot);
-        banThangs = viewModel.banThangDAO.selectBanThang(maTD);
-        val loaiBTs = viewModel.banThangDAO.selectAllLoaiBT();
-        val cauThus = viewModel.cauThuDAO.selectCauThuTGTD(maTD);
-        for (banThang in banThangs) {
-            val cauThu = cauThus.find { banThang.maCT == it.maCT }!!;
-            if (cauThu.maDoi == lichThiDau!!.doiMot)
-                banThang.side = "L";
-            else if (cauThu.maDoi == lichThiDau!!.doiHai)
-                banThang.side = "R";
-            banThang.tenCT = cauThu.tenCT;
-            banThang.tenLBT = loaiBTs.find { banThang.maLBT == it.maLBT }!!.tenLBT;
+        viewModel.viewModelScope.launch {
+            lichThiDau = viewModel.lichThiDauDAO.selectLichThiDauMaTD(maTD);
+            tiSoDoiMot =
+                viewModel.banThangDAO.selectSoBanThangTranDauDoi(maTD, lichThiDau!!.doiMot) +
+                viewModel.banThangDAO.selectSoBanThangPhanLuoiTranDauDoi(maTD, lichThiDau!!.doiHai);
+            tiSoDoiHai = viewModel.banThangDAO.selectSoBanThangTranDauDoi(maTD, lichThiDau!!.doiHai) +
+                    viewModel.banThangDAO.selectSoBanThangPhanLuoiTranDauDoi(maTD, lichThiDau!!.doiMot);
+            val banThangsTemp = viewModel.banThangDAO.selectBanThang(maTD);
+            val loaiBTs = viewModel.banThangDAO.selectAllLoaiBT();
+            val cauThus = viewModel.cauThuDAO.selectCauThuTGTD(maTD);
+            for (banThang in banThangsTemp) {
+                val cauThu = cauThus.find { banThang.maCT == it.maCT }!!;
+                if (cauThu.maDoi == lichThiDau!!.doiMot)
+                    banThang.side = "L";
+                else if (cauThu.maDoi == lichThiDau!!.doiHai)
+                    banThang.side = "R";
+                banThang.tenCT = cauThu.tenCT;
+                banThang.tenLBT = loaiBTs.find { banThang.maLBT == it.maLBT }!!.tenLBT;
+            }
+            banThangs = banThangsTemp;
         }
     }
 
@@ -189,7 +189,7 @@ fun GhiNhanScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                items (banThangs){ it ->
+                items (banThangs){
                     // Sử dụng một action placeholder, bạn có thể thay đổi nếu cần
                     StatisticRowUpdated(side = it.side, player = it.tenCT, action = it.tenLBT, time = it.thoiDiem.toString(), modifier)
                 }
@@ -220,7 +220,9 @@ fun StatisticRowUpdated(side: String, player: String, action: String, time: Stri
             color = textWhiteColor,
             fontWeight = FontWeight.SemiBold,
             fontSize = 15.sp,
-            modifier = Modifier.weight(0.5f).padding(start = 8.dp) // Cột Player, chiếm nhiều không gian nhất
+            modifier = Modifier
+                .weight(0.5f)
+                .padding(start = 8.dp) // Cột Player, chiếm nhiều không gian nhất
         )
         Text(
             text = action,

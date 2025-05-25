@@ -13,6 +13,7 @@ import com.example.quanlybongda.Database.Schema.User.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -21,8 +22,10 @@ import javax.inject.Inject
 @HiltViewModel
 class DatabaseViewModel @Inject constructor(application : Application) : ViewModel() {
 
-    private val _currentMuaGiai = MutableStateFlow<MuaGiai?>(null);
-    val currentMuaGiai : StateFlow<MuaGiai?> = _currentMuaGiai;
+    companion object {
+        private var _currentMuaGiai = MutableStateFlow<MuaGiai?>(null);
+        val currentMuaGiai : StateFlow<MuaGiai?> = _currentMuaGiai;
+    }
 
     public val cauThuDAO : CauThuDAO;
     public val doiBongDAO : DoiBongDAO;

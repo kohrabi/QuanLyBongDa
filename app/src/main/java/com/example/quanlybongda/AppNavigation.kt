@@ -1,5 +1,6 @@
 package com.example.quanlybongda
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -17,7 +18,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -26,6 +30,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.ui.jetpackcompose.screens.*
 import com.example.quanlybongda.ui.jetpackcompose.screens.Input.*
 import com.example.quanlybongda.ui.theme.DarkColorScheme
@@ -70,6 +75,9 @@ fun AppNavigation() {
         BottomNavigationRoute("muaGiai", "Mùa giải", Icons.Default.Star),
         BottomNavigationRoute("doiBong", "Đội bóng", Icons.Default.Groups),
     )
+    val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) {
+        "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner"
+    }
 
     Scaffold(
         bottomBar = {
@@ -110,7 +118,7 @@ fun AppNavigation() {
         NavHost(
             navController = navController,
             startDestination = homeRoute,
-            Modifier.fillMaxSize().background(DarkColorScheme.background)
+            modifier = Modifier.fillMaxSize().background(DarkColorScheme.background)
         ) {
             val modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding());
             composable("login") { LoginScreen(navController, modifier) }

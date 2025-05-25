@@ -59,7 +59,7 @@ fun MuaGiaiScreen(
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val context = LocalContext.current;
-    val selectedMuaGiai by viewModel.currentMuaGiai.collectAsState()
+    val selectedMuaGiai by DatabaseViewModel.currentMuaGiai.collectAsState()
     var muaGiais by remember { mutableStateOf(listOf<MuaGiai>()) }
     val coroutineScope = rememberCoroutineScope()
     // List of seasons with detailed information
