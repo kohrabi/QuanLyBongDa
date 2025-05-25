@@ -23,7 +23,7 @@ interface DoiBongDAO {
     suspend fun selectDoiBongMaDoi(maDoi: Int) : DoiBong?;
 
     @Query("SELECT * FROM DoiBong WHERE maMG = :maMG")
-    suspend fun selectDoiBongMuaGiai(maMG: Int) : DoiBong;
+    suspend fun selectDoiBongMuaGiai(maMG: Int) : List<DoiBong>;
 
     @Query("SELECT DoiBong.*, SanNha.* FROM DoiBong INNER JOIN SanNha ON SanNha.maSan=DoiBong.maSan")
     fun selectAllDoiBongWithTenSan() : LiveData<List<DoiBongTenSan>>;

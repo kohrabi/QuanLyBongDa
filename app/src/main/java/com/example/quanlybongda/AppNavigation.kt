@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -28,6 +29,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.quanlybongda.Database.Schema.DoiBong
+import com.example.quanlybongda.Database.Schema.MuaGiai
 import com.example.quanlybongda.ui.jetpackcompose.screens.*
 import com.example.quanlybongda.ui.jetpackcompose.screens.Input.*
 import com.example.quanlybongda.ui.theme.DarkColorScheme
@@ -37,6 +39,24 @@ data class BottomNavigationRoute(
     val description : String,
     val icon : ImageVector
 )
+
+val homeRoute = "baoCao";
+
+fun navigatePopUpTo(navController: NavController, routeName : String) {
+    navController.navigate(routeName) {
+        // Pop up to the start destination of the graph to
+        // avoid building up a large stack of destinations
+        // on the back stack as users select items
+        popUpTo(navController.graph.findStartDestination().id) {
+            saveState = true
+        }
+        // Avoid multiple copies of the same destination when
+        // reselecting the same item
+        launchSingleTop = true
+        // Restore state when reselecting a previously selected item
+        restoreState = true
+    }
+}
 
 @Composable
 fun AppNavigation() {
@@ -90,7 +110,7 @@ fun AppNavigation() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "banThangInput",
+            startDestination = "doiBong",
             Modifier.fillMaxSize().background(DarkColorScheme.background)
         ) {
             val modifier = Modifier.padding(innerPadding);
@@ -109,6 +129,7 @@ fun AppNavigation() {
             composable("doiBongInput") { DoiBongInputScreen(navController, modifier) }
             composable("banThangInput") { BanThangInputScreen(navController, modifier) }
             composable("lichThiDauInput") { LichThiDauInputScreen(navController, modifier) }
+            composable("muaGiaiInput") { MuaGiaiInputScreen(navController, modifier) }
         }
     }
 }

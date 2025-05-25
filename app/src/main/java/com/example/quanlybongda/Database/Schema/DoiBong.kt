@@ -36,7 +36,9 @@ data class DoiBong(
     val maMG : Int,
     @ColumnInfo(defaultValue = "false")
     val deleted : Boolean?,
-)
+) {
+    @Ignore var tenSan : String = ""
+}
 
 @Entity(
     indices = arrayOf(Index(value=["BackupID"], name="DoiBongBackup_BackupID_unique", unique = true))

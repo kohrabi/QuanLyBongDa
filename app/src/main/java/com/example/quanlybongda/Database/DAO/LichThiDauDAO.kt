@@ -25,6 +25,9 @@ interface LichThiDauDAO {
     @Query("SELECT * FROM LichThiDau WHERE maTD=:maTD LIMIT 1")
     suspend fun selectLichThiDauMaTD(maTD: Int) : LichThiDau?;
 
+    @Query("SELECT * FROM LichThiDau WHERE maMG=:maMG")
+    suspend fun selectLichThiDauMaMG(maMG: Int) : List<LichThiDau>;
+
     @Query("SELECT * FROM VongTD")
     suspend fun selectAllVongTD() : List<VongTD>;
 

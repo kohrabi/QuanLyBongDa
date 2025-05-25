@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,21 +65,38 @@ fun LapLichScreen(
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
+    val currentMuaGiai by viewModel.currentMuaGiai.collectAsState()
     var lichThiDaus by remember { mutableStateOf(listOf<LichThiDau>()) }
     var doiBongs by remember { mutableStateOf(listOf<DoiBong>()) }
     val state = rememberLazyListState()
 
     LaunchedEffect(Unit) {
-        lichThiDaus = viewModel.lichThiDauDAO.selectAllLichThiDau();
-        doiBongs = viewModel.doiBongDAO.selectAllDoiBong();
-        for (lichThiDau in lichThiDaus) {
-            lichThiDau.tenDoiMot = doiBongs.find { it.maDoi == lichThiDau.doiMot }!!.tenDoi;
-            lichThiDau.tenDoiHai = doiBongs.find { it.maDoi == lichThiDau.doiHai }!!.tenDoi;
-            if (lichThiDau.doiThang == null)
-                lichThiDau.tenDoiThang = "Hòa";
-            else
-                lichThiDau.tenDoiThang = doiBongs.find { it.maDoi == lichThiDau.doiThang }!!.tenDoi;
+        viewModel.viewModelScope.launch {
+            if (currentMuaGiai == null) {
+                lichThiDaus = viewModel.lichThiDauDAO.selectAllLichThiDau();
+                doiBongs = viewModel.doiBongDAO.selectAllDoiBong();
+                for (lichThiDau in lichThiDaus) {
+                    lichThiDau.tenDoiMot = doiBongs.find { it.maDoi == lichThiDau.doiMot }!!.tenDoi;
+                    lichThiDau.tenDoiHai = doiBongs.find { it.maDoi == lichThiDau.doiHai }!!.tenDoi;
+                    if (lichThiDau.doiThang == null)
+                        lichThiDau.tenDoiThang = "Hòa";
+                    else
+                        lichThiDau.tenDoiThang = doiBongs.find { it.maDoi == lichThiDau.doiThang }!!.tenDoi;
+                }
+            }
+            else {
+                lichThiDaus = viewModel.lichThiDauDAO.selectLichThiDauMaMG(currentMuaGiai!!.maMG);
+                doiBongs = viewModel.doiBongDAO.selectAllDoiBong();
+                for (lichThiDau in lichThiDaus) {
+                    lichThiDau.tenDoiMot = doiBongs.find { it.maDoi == lichThiDau.doiMot }!!.tenDoi;
+                    lichThiDau.tenDoiHai = doiBongs.find { it.maDoi == lichThiDau.doiHai }!!.tenDoi;
+                    if (lichThiDau.doiThang == null)
+                        lichThiDau.tenDoiThang = "Hòa";
+                    else
+                        lichThiDau.tenDoiThang = doiBongs.find { it.maDoi == lichThiDau.doiThang }!!.tenDoi;
+                }
+
+            }
         }
     }
 
@@ -86,12 +104,7 @@ fun LapLichScreen(
         backgroundColor = screenBgColor,
         topBar = { AppTopBar() },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navController.navigate("lichThiDauInput") },
-                modifier = Modifier
-            ) {
-                Icon(Icons.Filled.Add, "Lập lịch")
-            }
+            AddFloatingButton("Lập lịch", onClick = { navController.navigate("lichThiDauInput") })
         },
         modifier = modifier
     ) { innerPadding ->

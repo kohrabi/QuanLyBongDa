@@ -22,10 +22,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.Database.DateConverter
+import com.example.quanlybongda.Database.Schema.MuaGiai
+import com.example.quanlybongda.homeRoute
+import com.example.quanlybongda.navigatePopUpTo
+import com.example.quanlybongda.ui.theme.DarkColorScheme
 import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 // Data class for Season information
 data class Season(
@@ -42,32 +50,31 @@ fun MuaGiaiScreen(
     navController : NavController,
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel(),
-) { // Đổi tên từ FootballSeasonSelectorScreen thành MuaGiai
-    // State to hold the currently selected season ID
-    var selectedSeason by remember { mutableStateOf<String?>(null) }
-
+) {
+    val selectedMuaGiai by viewModel.currentMuaGiai.collectAsState()
+    var muaGiais by remember { mutableStateOf(listOf<MuaGiai>()) }
+    val coroutineScope = rememberCoroutineScope()
     // List of seasons with detailed information
-    val seasons = remember {
-        listOf(
-            Season(id = "2024-2025", name = "Premier League 2024-2025", startDate = "09/08/2024", endDate = "25/05/2025"),
-            Season(id = "2023-2024", name = "Premier League 2023-2024", startDate = "11/08/2023", endDate = "19/05/2024"),
-            Season(id = "2022-2023", name = "Premier League 2022-2023", startDate = "05/08/2022", endDate = "28/05/2023"),
-            Season(id = "2021-2022", name = "Premier League 2021-2022", startDate = "13/08/2021", endDate = "22/05/2022"),
-            Season(id = "2020-2021", name = "Premier League 2020-2021", startDate = "12/09/2020", endDate = "23/05/2021"),
-            Season(id = "2019-2020", name = "Premier League 2019-2020", startDate = "09/08/2019", endDate = "26/07/2020"),
-        )
+
+    LaunchedEffect(Unit) {
+        viewModel.viewModelScope.launch {
+            muaGiais = viewModel.muaGiaiDAO.selectAllMuaGiai();
+        }
     }
 
     // Main screen layout without bottomBar
     Scaffold(
-        containerColor = Color(0xFF121212),
+        floatingActionButton = {
+            AddFloatingButton("Tạo mùa giải", onClick = { navController.navigate("muaGiaiInput") })
+        },
+        containerColor = DarkColorScheme.background,
         modifier = modifier
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color(0xFF121212))
+                .background(DarkColorScheme.background)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -98,30 +105,19 @@ fun MuaGiaiScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(seasons) { season ->
+                items(muaGiais) { muaGiai ->
                     SeasonCard(
-                        season = season,
-                        isSelected = selectedSeason == season.id,
-                        onSeasonSelect = { selectedSeason = season.id }
+                        season = muaGiai,
+                        isSelected = selectedMuaGiai?.maMG == muaGiai.maMG,
+                        onSeasonSelect = {
+                            viewModel.selectMuaGiai(muaGiai)
+                            coroutineScope.launch {
+                                delay(500)
+                                navigatePopUpTo(navController, homeRoute);
+                            }
+                        }
                     )
                 }
-            }
-
-            // Display selected season (optional)
-            selectedSeason?.let {
-                Spacer(modifier = Modifier.height(20.dp))
-                Text(
-                    text = "Mùa giải được chọn: $it",
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF1E1E1E))
-                        .padding(12.dp)
-                        .shadow(4.dp, RoundedCornerShape(12.dp))
-                )
             }
         }
     }
@@ -130,7 +126,7 @@ fun MuaGiaiScreen(
 // Composable for a single Season Card
 @Composable
 fun SeasonCard(
-    season: Season,
+    season: MuaGiai,
     isSelected: Boolean,
     onSeasonSelect: () -> Unit
 ) {
@@ -153,7 +149,7 @@ fun SeasonCard(
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text = season.name,
+                text = season.tenMG,
                 color = Color.White,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -165,12 +161,12 @@ fun SeasonCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Bắt đầu: ${season.startDate}",
+                    text = "Bắt đầu: ${DateConverter.LocalDateToString(season.ngayDienRa)}",
                     color = Color.LightGray,
                     fontSize = 14.sp
                 )
                 Text(
-                    text = "Kết thúc: ${season.endDate}",
+                    text = "Kết thúc: ${DateConverter.LocalDateToString(season.ngayKetThuc)}",
                     color = Color.LightGray,
                     fontSize = 14.sp
                 )

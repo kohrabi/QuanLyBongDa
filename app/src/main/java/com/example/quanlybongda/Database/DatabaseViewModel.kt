@@ -8,14 +8,21 @@ import androidx.lifecycle.viewModelScope
 import com.example.quanlybongda.Database.DAO.*
 import com.example.quanlybongda.Database.DAO.User.*
 import com.example.quanlybongda.Database.ReturnTypes.*
+import com.example.quanlybongda.Database.Schema.MuaGiai
 import com.example.quanlybongda.Database.Schema.User.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @HiltViewModel
 class DatabaseViewModel @Inject constructor(application : Application) : ViewModel() {
+
+    private val _currentMuaGiai = MutableStateFlow<MuaGiai?>(null);
+    val currentMuaGiai : StateFlow<MuaGiai?> = _currentMuaGiai;
 
     public val cauThuDAO : CauThuDAO;
     public val doiBongDAO : DoiBongDAO;
@@ -64,6 +71,10 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
             san = sanNha?.tenSan ?: "" ,
             ngayGio = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(lichThiDau.ngayGioThucTe).toString()
         )
+    }
+
+    fun selectMuaGiai(muaGiai: MuaGiai) {
+        _currentMuaGiai.value = muaGiai;
     }
 
     suspend fun selectBXHDoiNgay(ngay : LocalDate) : List<BangXepHangNgay> {

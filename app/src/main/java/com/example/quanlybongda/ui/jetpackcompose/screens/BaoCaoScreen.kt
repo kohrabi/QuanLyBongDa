@@ -57,9 +57,10 @@ fun BaoCaoScreen(
 ) {
     val context = LocalContext.current
     var teams by remember { mutableStateOf(listOf<BangXepHangNgay>()) }
+    var ngayBaoCao by remember { mutableStateOf(LocalDate.of(2025, 5, 11)) }
 
-    LaunchedEffect(Unit) {
-        teams = viewModel.selectBXHDoiNgay(LocalDate.of(2025, 5, 11))
+    LaunchedEffect(ngayBaoCao) {
+        teams = viewModel.selectBXHDoiNgay(ngayBaoCao)
     }
 
     // Lấy chiều cao của thanh trạng thái
@@ -80,6 +81,7 @@ fun BaoCaoScreen(
             StandingsBottomNavigationBar()
         }
     ) { innerPadding ->
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -104,6 +106,14 @@ fun BaoCaoScreen(
                 contentPadding = PaddingValues(top = 24.dp, bottom = 16.dp)
             ) {
                 item {
+                    InputDatePicker("Ngày báo cáo",
+                        value = convertLocalDateToMillis(ngayBaoCao),
+                        onDateSelected =  {
+                            if (it != null) {
+                                ngayBaoCao = convertMillisToLocalDate(it);
+                            }
+                        },
+                        onDismiss = {});
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()

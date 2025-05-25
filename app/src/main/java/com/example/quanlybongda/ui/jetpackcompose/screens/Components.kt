@@ -7,8 +7,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
@@ -31,7 +35,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import java.text.SimpleDateFormat
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.ZoneOffset
 import java.time.temporal.ChronoField
 import java.util.Date
@@ -75,6 +81,16 @@ data class OptionValue(
 ) {
     companion object {
         val DEFAULT = OptionValue(0, "");
+    }
+}
+
+@Composable
+fun AddFloatingButton(label: String, onClick : () -> Unit) {
+    FloatingActionButton(
+        onClick = { onClick() },
+        modifier = Modifier
+    ) {
+        Icon(Icons.Filled.Add, label)
     }
 }
 
@@ -139,6 +155,14 @@ fun convertLocalDateTimeToMillis(dateTime: LocalDateTime) : Long {
 
 fun convertMillisToLocalDateTime(millis : Long) : LocalDateTime {
     return LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), TimeZone.getDefault().toZoneId());
+}
+
+fun convertMillisToLocalDate(millis : Long) : LocalDate {
+    return convertMillisToLocalDateTime(millis).toLocalDate();
+}
+
+fun convertLocalDateToMillis(date: LocalDate) : Long {
+    return convertLocalDateTimeToMillis(LocalDateTime.of(date, LocalTime.now()));
 }
 
 @Composable

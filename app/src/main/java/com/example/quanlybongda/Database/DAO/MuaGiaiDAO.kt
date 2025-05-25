@@ -16,8 +16,5 @@ interface MuaGiaiDAO {
     suspend fun deleteDSMuaGiai(vararg dsMuaGiai: MuaGiai);
 
     @Query("SELECT * FROM MuaGiai")
-    suspend fun selectAllDSMuaGiai() : List<MuaGiai>;
-
-    @Query("SELECT * FROM MuaGiai")
-    fun selectAllDSMuaGiaiFlow() : Flow<List<MuaGiai>>;
+    suspend fun selectAllMuaGiai() : List<MuaGiai>;
 }

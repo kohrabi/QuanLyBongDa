@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.quanlybongda.Database.DatabaseViewModel
@@ -36,6 +37,7 @@ import com.example.quanlybongda.Database.Schema.CauThu
 import com.example.quanlybongda.Database.Schema.DoiBong
 import com.example.quanlybongda.R // << QUAN TRỌNG: Import lớp R của dự án bạn
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun KetQuaTranDauScreen(
@@ -48,10 +50,12 @@ fun KetQuaTranDauScreen(
     var doiBong by remember { mutableStateOf<DoiBong?>(null) }
 
     LaunchedEffect(Unit) {
-        val maDoi = 16;
-        cauThus = viewModel.cauThuDAO.selectCauThuDoiBongWithBanThang(maDoi);
-        doiBong = viewModel.doiBongDAO.selectDoiBongMaDoi(maDoi);
-        cauThus = cauThus.sortedByDescending { it.banThang }
+        viewModel.viewModelScope.launch {
+            val maDoi = 16;
+            cauThus = viewModel.cauThuDAO.selectCauThuDoiBongWithBanThang(maDoi);
+            doiBong = viewModel.doiBongDAO.selectDoiBongMaDoi(maDoi);
+            cauThus = cauThus.sortedByDescending { it.banThang }
+        }
     }
 
     Box(

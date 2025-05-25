@@ -20,5 +20,8 @@ interface SanNhaDAO {
 
     @Query("SELECT * FROM SanNha WHERE maSan=:maSan LIMIT 1")
     suspend fun selectSanNhaMaSan(maSan : Int) : SanNha?;
+
+    @Query("SELECT * FROM SanNha WHERE maMG=:maMG")
+    suspend fun selectSanNhaMaMG(maMG : Int) : List<SanNha>;
     
 }
