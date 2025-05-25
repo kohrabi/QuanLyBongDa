@@ -17,7 +17,7 @@ import androidx.core.view.WindowCompat
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
 import dagger.hilt.android.AndroidEntryPoint
-import com.example.quanlybongda.ui.theme.DarkColorScheme
+import com.example.quanlybongda.ui.theme.*
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -34,6 +34,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             QuanLyBongDaTheme {
                 AppNavigation();
+//                StatusBarProtection()
             }
         }
     }
@@ -41,7 +42,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun StatusBarProtection(
-    color: Color = DarkColorScheme.primary,
+    color: Color = darkPurple,
     heightProvider: () -> Float = calculateGradientHeight(),
 ) {
 

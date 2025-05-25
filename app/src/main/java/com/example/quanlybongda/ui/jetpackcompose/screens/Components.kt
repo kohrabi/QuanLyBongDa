@@ -33,6 +33,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.quanlybongda.ui.theme.Purple40
+import com.example.quanlybongda.ui.theme.Purple80
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
@@ -109,7 +111,7 @@ fun InputDropDownMenu(
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = !expanded },
-        modifier = Modifier.background(Color(0xFF222232), shape = RoundedCornerShape(6.dp)),
+        modifier = Modifier.background(Purple80, shape = RoundedCornerShape(6.dp)),
     ) {
         TextField(
             value = selectedOption.label,
@@ -131,7 +133,6 @@ fun InputDropDownMenu(
             modifier = Modifier.fillMaxWidth(),
             expanded = expanded,
             onDismissRequest = { expanded = false },
-
         ) {
             options.forEachIndexed { index, option ->
                 DropdownMenuItem(

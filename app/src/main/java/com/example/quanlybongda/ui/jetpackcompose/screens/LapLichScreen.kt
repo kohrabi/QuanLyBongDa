@@ -12,6 +12,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -24,9 +28,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,6 +44,9 @@ import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.DateConverter
 import com.example.quanlybongda.Database.Schema.DoiBong
 import com.example.quanlybongda.Database.Schema.LichThiDau
+import com.example.quanlybongda.ui.theme.DarkColorScheme
+import com.example.quanlybongda.ui.theme.darkCardBackground
+import com.example.quanlybongda.ui.theme.darkTextMuted
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.internal.synchronized
@@ -45,8 +54,6 @@ import kotlinx.coroutines.launch
 
 
 // Màu sắc từ thiết kế
-val screenBgColor = Color(0xFF181A20)
-val cardBgColor = Color(0xFF1F222A)
 // Gradient cho thẻ chính - bạn có thể cần điều chỉnh lại các màu này cho chính xác với ảnh thiết kế (image_d0de8e.png)
 // Thiết kế có vẻ chuyển từ xanh dương đậm ở góc trên trái sang tím đậm ở góc dưới phải.
 val featuredCardGradient = Brush.linearGradient(
@@ -54,17 +61,17 @@ val featuredCardGradient = Brush.linearGradient(
     // Hoặc thử 3 màu nếu bạn thấy có điểm chuyển ở giữa
     // colors = listOf(Color(0xFF2E3192), Color(0xFF4C2C80), Color(0xFF692971))
 )
-val textWhite = Color.White
-val textSecondary = Color(0xFFA0A3BD)
 val textGreenAccent = Color(0xFF4CFF89)
 val textScoreColor = Color(0xFFE0FF00) // Màu vàng chanh cho tỷ số, điều chỉnh lại cho khớp
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LapLichScreen(
     navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel()
 ) {
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val currentMuaGiai by viewModel.currentMuaGiai.collectAsState()
     var lichThiDaus by remember { mutableStateOf(listOf<LichThiDau>()) }
     var doiBongs by remember { mutableStateOf(listOf<DoiBong>()) }
@@ -101,13 +108,25 @@ fun LapLichScreen(
     }
 
     Scaffold(
-        backgroundColor = screenBgColor,
-        topBar = { AppTopBar() },
-        floatingActionButton = {
-            AddFloatingButton("Lập lịch", onClick = { navController.navigate("lichThiDauInput") })
+        backgroundColor = DarkColorScheme.background,
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    androidx.compose.material3.Text(
+                        "Lịch thi đấu",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = DarkColorScheme.background,
+                    scrolledContainerColor = DarkColorScheme.background
+                ),
+                scrollBehavior = scrollBehavior,
+            )
         },
-        modifier = modifier
-    ) { innerPadding ->
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+    )  { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
@@ -117,7 +136,7 @@ fun LapLichScreen(
         ) {
             item {
                 // Tăng khoảng cách giữa TopAppBar và FeaturedMatchCardUpdated
-                Spacer(modifier = Modifier.height(60.dp)) // << SỬA: Tăng khoảng cách
+                Spacer(modifier = Modifier.height(30.dp)) // << SỬA: Tăng khoảng cách
 
                 FeaturedMatchCardUpdated(
                     team1Name = "Chelse",
@@ -224,7 +243,7 @@ fun TeamDisplayUpdated( // Đổi tên và sửa đổi
     ) {
         Text(
             text = teamName,
-            color = textWhite,
+            color = Color.White,
             fontSize = 24.sp, // << SỬA: Tăng kích thước tên đội
             fontWeight = FontWeight.Bold,
             textAlign = textAlign,
@@ -234,7 +253,7 @@ fun TeamDisplayUpdated( // Đổi tên và sửa đổi
         Spacer(modifier = Modifier.height(8.dp)) // << SỬA: Thêm Spacer
         Text(
             text = scorers, // scorers giờ đây có thể chứa \n để xuống dòng
-            color = textWhite.copy(alpha = 0.85f),
+            color = Color.White.copy(alpha = 0.85f),
             fontSize = 11.sp, // << SỬA: Tăng nhẹ font chữ người ghi bàn
             textAlign = textAlign,
             lineHeight = 14.sp // Tăng lineHeight để các dòng không quá sát nhau
@@ -246,34 +265,14 @@ fun TeamDisplayUpdated( // Đổi tên và sửa đổi
 // --- và hàm Preview giữ nguyên như phiên bản trước. Bạn copy chúng vào đây. ---
 
 @Composable
-fun AppTopBar() {
-    TopAppBar(
-        title = { },
-        backgroundColor = screenBgColor,
-        elevation = 0.dp,
-//        navigationIcon = {
-//            IconButton(onClick = { /* TODO */ }) {
-//                Icon(Icons.Filled.Add, contentDescription = "Add", tint = textWhite)
-//            }
-//        },
-//        actions = {
-//            IconButton(onClick = { /* TODO */ }) {
-//                Icon(Icons.Filled.Search, contentDescription = "Search", tint = textWhite)
-//            }
-//        },
-        modifier = Modifier.padding(horizontal = 8.dp)
-    )
-}
-
-@Composable
 fun MatchScheduleHeader() {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text("Match Schedule", color = textWhite, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-//        Text("See All", color = textSecondary, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+        Text("Match Schedule", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+//        Text("See All", color = darkTextMuted, fontSize = 12.sp, fontWeight = FontWeight.Medium)
     }
 }
 
@@ -288,58 +287,14 @@ fun MatchInfoRowNoLogos(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(cardBgColor)
+            .background(darkCardBackground)
             .padding(horizontal = 16.dp, vertical = 20.dp)
             .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(team1Name, color = textWhite, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f), textAlign = TextAlign.Start)
-        Text(matchDateTime, color = textSecondary, fontSize = 10.sp, textAlign = TextAlign.Center, lineHeight = 12.sp, modifier = Modifier.weight(1f).padding(horizontal = 8.dp))
-        Text(team2Name, color = textWhite, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f), textAlign = TextAlign.End)
-    }
-}
-
-@Composable
-fun AppBottomNavigationBar(context: android.content.Context) {
-    BottomNavigation( // Sử dụng BottomNavigation của Material
-        backgroundColor = Color(0xFF1C1C2A), // Màu nền từ thiết kế
-        contentColor = Color(0xFF7F7F91) // Màu icon không được chọn
-    ) {
-        // selectedContentColor và unselectedContentColor cho icon và text (nếu có)
-        val selectedColor = Color.White
-        val unselectedColor = Color(0xFF7F7F91)
-
-        // Giả sử bạn có một biến trạng thái để theo dõi mục đang được chọn
-        var selectedItem by remember { mutableStateOf(0) } // 0 là Home
-
-        BottomNavigationItem(
-            icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
-            selected = selectedItem == 0,
-            onClick = { selectedItem = 0 /* TODO: Navigate to Home */ },
-            selectedContentColor = selectedColor,
-            unselectedContentColor = unselectedColor
-        )
-        BottomNavigationItem(
-            icon = { Icon(Icons.Filled.List, contentDescription = "Ranking") }, // Giả sử icon List cho Ranking
-            selected = selectedItem == 1,
-            onClick = { selectedItem = 1 /* TODO: Navigate to Ranking */ },
-            selectedContentColor = selectedColor,
-            unselectedContentColor = unselectedColor
-        )
-        BottomNavigationItem(
-            icon = { Icon(Icons.Filled.Schedule, contentDescription = "Schedule") }, // Giả sử Schedule
-            selected = selectedItem == 2,
-            onClick = { selectedItem = 2 /* TODO: Navigate to Schedule */ },
-            selectedContentColor = selectedColor,
-            unselectedContentColor = unselectedColor
-        )
-        BottomNavigationItem(
-            icon = { Icon(Icons.Filled.Person, contentDescription = "Profile") },
-            selected = selectedItem == 3,
-            onClick = { selectedItem = 3 /* TODO: Navigate to Profile */ },
-            selectedContentColor = selectedColor,
-            unselectedContentColor = unselectedColor
-        )
+        Text(team1Name, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f), textAlign = TextAlign.Start)
+        Text(matchDateTime, color = darkTextMuted, fontSize = 10.sp, textAlign = TextAlign.Center, lineHeight = 12.sp, modifier = Modifier.weight(1f).padding(horizontal = 8.dp))
+        Text(team2Name, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f), textAlign = TextAlign.End)
     }
 }
 

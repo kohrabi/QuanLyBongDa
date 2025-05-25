@@ -43,6 +43,7 @@ data class CauThu(
     @ColumnInfo(defaultValue = "false")
     val deleted : Boolean?,
 ) {
+    @Ignore var tenLCT : String = "";
     @Ignore var banThang : Int = 0;
 }
 

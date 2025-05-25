@@ -18,8 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,7 +35,9 @@ import com.example.quanlybongda.Database.Schema.MuaGiai
 import com.example.quanlybongda.homeRoute
 import com.example.quanlybongda.navigatePopUpTo
 import com.example.quanlybongda.ui.theme.DarkColorScheme
+import com.example.quanlybongda.ui.theme.Purple80
 import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
+import com.example.quanlybongda.ui.theme.darkCardBackground
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -53,6 +57,7 @@ fun MuaGiaiScreen(
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel(),
 ) {
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val context = LocalContext.current;
     val selectedMuaGiai by viewModel.currentMuaGiai.collectAsState()
     var muaGiais by remember { mutableStateOf(listOf<MuaGiai>()) }
@@ -70,42 +75,39 @@ fun MuaGiaiScreen(
         floatingActionButton = {
             AddFloatingButton("Tạo mùa giải", onClick = { navController.navigate("muaGiaiInput") })
         },
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        "Đội bóng",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = DarkColorScheme.background,
+                    scrolledContainerColor = DarkColorScheme.background
+                ),
+                scrollBehavior = scrollBehavior,
+            )
+        },
         containerColor = DarkColorScheme.background,
-        modifier = modifier
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(DarkColorScheme.background)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Header
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Chọn Mùa Giải",
-                    color = Color.White,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Tìm kiếm",
-                    tint = Color.Gray,
-                    modifier = Modifier.size(24.dp).clickable { /* Handle search click */ }
-                )
-            }
+//        Column(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .padding(paddingValues)
+//                .background(DarkColorScheme.background)
+//                .padding(16.dp),
+//            horizontalAlignment = Alignment.CenterHorizontally
+//        ) {
 
             // List of Season Cards
             LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .background(DarkColorScheme.background),
+                contentPadding = paddingValues,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(muaGiais) { muaGiai ->
@@ -123,7 +125,7 @@ fun MuaGiaiScreen(
                     )
                 }
             }
-        }
+//        }
     }
 }
 
@@ -137,14 +139,14 @@ fun SeasonCard(
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF1E1E1E)
+            containerColor = darkCardBackground
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onSeasonSelect() }
             .then(
-                if (isSelected) Modifier.border(2.dp, Color(0xFF9C27B0), RoundedCornerShape(16.dp))
+                if (isSelected) Modifier.border(2.dp, Purple80, RoundedCornerShape(16.dp))
                 else Modifier.border(2.dp, Color.Transparent, RoundedCornerShape(16.dp))
             )
             .padding(if (isSelected) 0.dp else 2.dp)

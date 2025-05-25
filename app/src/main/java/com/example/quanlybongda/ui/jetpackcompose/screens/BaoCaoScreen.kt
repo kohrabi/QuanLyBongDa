@@ -1,6 +1,5 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -35,26 +34,28 @@ import com.example.quanlybongda.Database.ReturnTypes.BangXepHangNgay
 import com.example.quanlybongda.R
 import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
 import java.time.LocalDate
+import com.example.quanlybongda.ui.theme.*
 
 // Thêm import cần thiết để lấy chiều cao thanh trạng thái
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.style.TextOverflow
 
-// Màu sắc
-val standingsScreenBackground = Color(0xFF0D0D12)
-val standingsContentBg = Color(0xFF181A20)
-val standingsCardBg = Color(0xFF222232)
-val standingsTextWhite = Color.White
-val standingsTextAccent = Color(0xFFD1B4FF)
-val standingsTextMuted = Color(0xFFA0A3BD)
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BaoCaoScreen(
     appController: NavController,
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel(),
 ) {
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val context = LocalContext.current
     var teams by remember { mutableStateOf(listOf<BangXepHangNgay>()) }
     var ngayBaoCao by remember { mutableStateOf(LocalDate.of(2025, 5, 11)) }
@@ -63,30 +64,31 @@ fun BaoCaoScreen(
         teams = viewModel.selectBXHDoiNgay(ngayBaoCao)
     }
 
-    // Lấy chiều cao của thanh trạng thái
-    val density = LocalDensity.current
-    val statusBarHeight = with(density) {
-        WindowInsets.statusBars.getTop(density).toDp()
-    }
-
-    // Khoảng cách bổ sung giữa thanh trạng thái và giao diện
-    val additionalSpacing = 8.dp
-
     Scaffold(
-        backgroundColor = standingsScreenBackground,
+        backgroundColor = DarkColorScheme.background,
         topBar = {
-            StandingsTopAppBar(statusBarHeight = statusBarHeight + additionalSpacing)
+            CenterAlignedTopAppBar(
+                title = {
+                    androidx.compose.material3.Text(
+                        "Báo cáo",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = DarkColorScheme.background,
+                    scrolledContainerColor = DarkColorScheme.background
+                ),
+                scrollBehavior = scrollBehavior,
+            )
         },
-        bottomBar = {
-            StandingsBottomNavigationBar()
-        }
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { innerPadding ->
-
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(top = statusBarHeight + additionalSpacing)
+//                .padding(top = statusBarHeight + additionalSpacing)
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(context)
@@ -118,7 +120,7 @@ fun BaoCaoScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
-                            .background(standingsContentBg.copy(alpha = 0.7f))
+                            .background(darkContentBackground.copy(alpha = 0.7f))
                             .padding(16.dp)
                     ) {
                         Row(
@@ -128,7 +130,7 @@ fun BaoCaoScreen(
                         ) {
                             Text(
                                 text = "Table Standings",
-                                color = standingsTextWhite,
+                                color = com.example.quanlybongda.ui.theme.darkTextWhite,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -150,7 +152,7 @@ fun BaoCaoScreen(
                     StandingsListRow(context = context, team = team)
                     if (index < teams.lastIndex) {
                         Divider(
-                            color = standingsTextMuted.copy(alpha = 0.2f),
+                            color = darkTextMuted.copy(alpha = 0.2f),
                             thickness = 0.5.dp,
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
@@ -177,7 +179,7 @@ fun StandingsTopAppBar(statusBarHeight: androidx.compose.ui.unit.Dp) {
     ) {
         Text(
             text = "Standings",
-            color = standingsTextWhite,
+            color = com.example.quanlybongda.ui.theme.darkTextWhite,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -195,11 +197,11 @@ fun StandingsListHeader(modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Spacer(modifier = Modifier.width(6.dp + 8.dp + 20.dp + 8.dp))
-        Text("Club", color = standingsTextMuted, fontSize = 11.sp, modifier = Modifier.weight(2.2f))
-        Text("W", color = standingsTextMuted, fontSize = 11.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("D", color = standingsTextMuted, fontSize = 11.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("L", color = standingsTextMuted, fontSize = 11.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("Point", color = standingsTextMuted, fontSize = 11.sp, modifier = Modifier.weight(0.7f), textAlign = TextAlign.End)
+        Text("Club", color = darkTextMuted, fontSize = 11.sp, modifier = Modifier.weight(2.2f))
+        Text("W", color = darkTextMuted, fontSize = 11.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("D", color = darkTextMuted, fontSize = 11.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("L", color = darkTextMuted, fontSize = 11.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("Point", color = darkTextMuted, fontSize = 11.sp, modifier = Modifier.weight(0.7f), textAlign = TextAlign.End)
     }
 }
 
@@ -223,15 +225,15 @@ fun StandingsListRow(context: android.content.Context, team: BangXepHangNgay, mo
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = team.tenDoi,
-            color = standingsTextWhite,
+            color = com.example.quanlybongda.ui.theme.darkTextWhite,
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.weight(2.2f)
         )
-        Text("${team.soTranThang}", color = standingsTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("${team.soTranHoa}", color = standingsTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("${team.soTranThua}", color = standingsTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("${team.hieuSo}", color = standingsTextWhite, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(0.7f), textAlign = TextAlign.End)
+        Text("${team.soTranThang}", color = com.example.quanlybongda.ui.theme.darkTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("${team.soTranHoa}", color = com.example.quanlybongda.ui.theme.darkTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("${team.soTranThua}", color = com.example.quanlybongda.ui.theme.darkTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("${team.hieuSo}", color = com.example.quanlybongda.ui.theme.darkTextWhite, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(0.7f), textAlign = TextAlign.End)
     }
 }
 
@@ -242,36 +244,10 @@ fun LeagueLegendStandings(modifier: Modifier = Modifier) {
         modifier = modifier.padding(top = 12.dp)
     ) {
         Box(modifier = Modifier.size(6.dp).background(Color(0xFF5C7CFA), shape = CircleShape))
-        Text(" UEFA Champions League", color = standingsTextMuted, fontSize = 10.sp)
+        Text(" UEFA Champions League", color = darkTextMuted, fontSize = 10.sp)
         Spacer(modifier = Modifier.width(12.dp))
         Box(modifier = Modifier.size(6.dp).background(Color(0xFFFF9F1C), shape = CircleShape))
-        Text(" Europa League", color = standingsTextMuted, fontSize = 10.sp)
-    }
-}
-
-@Composable
-fun StandingsBottomNavigationBar(modifier: Modifier = Modifier) {
-    var selectedItem by remember { mutableStateOf(0) }
-    val items = listOf(
-        "Home" to Icons.Filled.Home,
-        "Standings" to Icons.Filled.List,
-        "Schedule" to Icons.Filled.Schedule,
-        "Profile" to Icons.Filled.Person
-    )
-
-    BottomNavigation(
-        backgroundColor = standingsContentBg.copy(alpha = 0.9f),
-        contentColor = standingsTextMuted
-    ) {
-        items.forEachIndexed { index, item ->
-            BottomNavigationItem(
-                icon = { Icon(item.second, contentDescription = item.first) },
-                selected = selectedItem == index,
-                onClick = { selectedItem = index /* TODO: Handle navigation */ },
-                selectedContentColor = Color.White,
-                unselectedContentColor = standingsTextMuted
-            )
-        }
+        Text(" Europa League", color = darkTextMuted, fontSize = 10.sp)
     }
 }
 

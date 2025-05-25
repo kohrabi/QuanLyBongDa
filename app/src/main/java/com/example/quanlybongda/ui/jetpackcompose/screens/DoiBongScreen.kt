@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -20,7 +21,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,7 +33,9 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.Schema.DoiBong
+import com.example.quanlybongda.ui.theme.DarkColorScheme
 import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
+import com.example.quanlybongda.ui.theme.darkCardBackground
 import kotlinx.coroutines.launch
 
 // Main Composable for the Football Team Screen
@@ -42,6 +47,7 @@ fun DoiBongScreen(
     viewModel: DatabaseViewModel = hiltViewModel(),
 ) { // Đổi tên từ FootballTeamScreen thành DoiBong
     // List of football teams (sample data)
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val currentMuaGiai by viewModel.currentMuaGiai.collectAsState()
     var doiBongs by remember { mutableStateOf(listOf<DoiBong>()) }
 
@@ -66,74 +72,40 @@ fun DoiBongScreen(
     }
     // Main screen layout
     Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        "Đội bóng",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = DarkColorScheme.background,
+                    scrolledContainerColor = DarkColorScheme.background
+                ),
+                scrollBehavior = scrollBehavior,
+            )
+        },
         floatingActionButton = {
             AddFloatingButton("Tạo đội bóng", onClick = { navController.navigate("doiBongInput") })
         },
-        containerColor = Color(0xFF121212), // Đặt màu nền trực tiếp, đồng nhất với các màn hình khác
-        modifier = modifier
-    ) { it
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFF121212)) // Đặt màu nền trực tiếp
-                .padding(horizontal = 16.dp), // Padding ngang cho toàn bộ nội dung
-            horizontalAlignment = Alignment.CenterHorizontally
+        containerColor = DarkColorScheme.background,
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+    ) { innerPadding ->
+
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = innerPadding,
+            verticalArrangement = Arrangement.spacedBy(12.dp) // Khoảng cách giữa các card
         ) {
-            // Header with Add and Search icons
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp), // Khoảng cách từ trên xuống
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Thêm đội bóng",
-                    tint = Color.White,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clickable { /* Handle add team click */ }
-                )
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Tìm kiếm",
-                    tint = Color.Gray,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clickable { /* Handle search click */ }
-                )
-            }
-
-            // Spacer to push the title down (matching the image)
-            Spacer(modifier = Modifier.height(80.dp)) // Khoảng cách lớn để đẩy tiêu đề xuống
-
-            // Title "FOOTBALL TEAM"
-            Text(
-                text = "FOOTBALL TEAM",
-                color = Color.White, // Thay MaterialTheme.colorScheme.onBackground
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentWidth(Alignment.CenterHorizontally)
-            )
-
-            // Spacer between title and team list
-            Spacer(modifier = Modifier.height(24.dp)) // Khoảng cách giữa tiêu đề và danh sách
-
-            // List of Team Cards
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp) // Khoảng cách giữa các card
-            ) {
-                items(doiBongs) { doiBong ->
-                    TeamCard(
-                        team = doiBong,
-                        onClick = {
-                            navController.navigate("cauThu/${doiBong.maDoi}");
-                        })
-                }
+            items(doiBongs) { doiBong ->
+                TeamCard(
+                    team = doiBong,
+                    onClick = {
+                        navController.navigate("cauThu/${doiBong.maDoi}");
+                    })
             }
         }
     }
@@ -145,7 +117,7 @@ fun TeamCard(team: DoiBong, onClick : () -> Unit) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF1E1E1E) // Thay MaterialTheme.colorScheme.surface, đồng nhất với MuaGiai.kt
+            containerColor = darkCardBackground
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = Modifier

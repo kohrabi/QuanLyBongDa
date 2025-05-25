@@ -7,10 +7,8 @@ import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,11 +26,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.quanlybongda.Database.Schema.DoiBong
-import com.example.quanlybongda.Database.Schema.MuaGiai
 import com.example.quanlybongda.ui.jetpackcompose.screens.*
 import com.example.quanlybongda.ui.jetpackcompose.screens.Input.*
 import com.example.quanlybongda.ui.theme.DarkColorScheme
+import com.example.quanlybongda.ui.theme.darkContentBackground
+import com.example.quanlybongda.ui.theme.darkTextMuted
 
 data class BottomNavigationRoute(
     val name : String,
@@ -76,8 +74,8 @@ fun AppNavigation() {
     Scaffold(
         bottomBar = {
             BottomNavigation(
-                backgroundColor = standingsContentBg.copy(alpha = 0.9f),
-                contentColor = standingsTextMuted,
+                backgroundColor = darkContentBackground.copy(alpha = 0.9f),
+                contentColor =  darkTextMuted,
             ) {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
@@ -102,7 +100,7 @@ fun AppNavigation() {
                             }
                         },
                         selectedContentColor = Color.White,
-                        unselectedContentColor = standingsTextMuted,
+                        unselectedContentColor = darkTextMuted,
                         modifier = Modifier.padding(bottom = 24.dp)
                     )
                 }
@@ -114,7 +112,7 @@ fun AppNavigation() {
             startDestination = homeRoute,
             Modifier.fillMaxSize().background(DarkColorScheme.background)
         ) {
-            val modifier = Modifier.padding(innerPadding);
+            val modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding());
             composable("login") { LoginScreen(navController, modifier) }
             composable("signUp") { SignUpScreen(navController, modifier) }
             composable("baoCao") { BaoCaoScreen(navController, modifier) }

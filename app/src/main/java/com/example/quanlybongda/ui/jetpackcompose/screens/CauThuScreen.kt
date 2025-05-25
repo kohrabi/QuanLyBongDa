@@ -28,10 +28,13 @@ import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
 // Thêm import cần thiết để lấy chiều cao thanh trạng thái
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -39,6 +42,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.DateConverter
 import com.example.quanlybongda.Database.Schema.CauThu
+import com.example.quanlybongda.ui.theme.DarkColorScheme
+import com.example.quanlybongda.ui.theme.Purple40
+import com.example.quanlybongda.ui.theme.darkCardBackground
 import kotlinx.coroutines.launch
 
 // Main Composable for the Player List Screen
@@ -50,25 +56,54 @@ fun CauThuScreen(
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel(),
 ) {
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var cauThus by remember { mutableStateOf(listOf<CauThu>()) }
 
     LaunchedEffect(Unit) {
         viewModel.viewModelScope.launch {
             cauThus = viewModel.cauThuDAO.selectCauThuDoiBong(maDoi);
+            val loaiCTs = viewModel.cauThuDAO.selectAllLoaiCT();
+            for (cauThu in cauThus) {
+                cauThu.tenLCT = loaiCTs.find { it.maLCT == cauThu.maLCT }!!.tenLCT;
+            }
         }
     }
 
     Scaffold(
-        containerColor = Color(0xFF1C1D2B),
-        modifier = modifier,
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        "Cầu thủ",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = DarkColorScheme.background,
+                    scrolledContainerColor = DarkColorScheme.background
+                ),
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Go back"
+                        )
+                    }
+                },
+                scrollBehavior = scrollBehavior
+            )
+        },
         floatingActionButton = {
             AddFloatingButton("Cầu thủ", onClick = { navController.navigate("cauThuInput/${maDoi}")})
-        }
+        },
+        containerColor = DarkColorScheme.background,
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
     ) { it
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF1C1D2B))
+                .background(DarkColorScheme.background)
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -126,7 +161,7 @@ fun PlayerCard(player: CauThu) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF242539)
+            containerColor = darkCardBackground
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = Modifier
@@ -150,7 +185,7 @@ fun PlayerCard(player: CauThu) {
                 Box(
                     modifier = Modifier
                         .size(24.dp)
-                        .background(Color(0xFF9C27B0), shape = CircleShape),
+                        .background(Purple40, shape = CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -171,24 +206,24 @@ fun PlayerCard(player: CauThu) {
                         fontSize = 14.02.sp,
                         lineHeight = 24.53.sp,
                         fontWeight = FontWeight(500),
-                        color = Color(0xFFFFFFFF),
+                        color = Color.White,
                         textAlign = TextAlign.Start,
                         letterSpacing = 0.26.sp
                     ),
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
-                // Nhãn "Goal"
-                Text(
-                    text = "Goal",
-                    style = TextStyle(
-                        fontSize = 8.76.sp,
-                        lineHeight = 9.64.sp,
-                        fontWeight = FontWeight(500),
-                        color = Color(0xFF797979),
-                        textAlign = TextAlign.Start
-                    ),
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
+//                // Nhãn "Goal"
+//                Text(
+//                    text = "Goal",
+//                    style = TextStyle(
+//                        fontSize = 8.76.sp,
+//                        lineHeight = 9.64.sp,
+//                        fontWeight = FontWeight(500),
+//                        color = Color(0xFF797979),
+//                        textAlign = TextAlign.Start
+//                    ),
+//                    modifier = Modifier.padding(bottom = 4.dp)
+//                )
                 // Số bàn thắng (Goals)
 //                Text(
 //                    text = "${player.goals}",
@@ -210,18 +245,18 @@ fun PlayerCard(player: CauThu) {
                 horizontalAlignment = Alignment.Start
             ) {
                 // Vị trí (Player Type)
-//                Text(
-//                    text = player.position,
-//                    style = TextStyle(
-//                        fontSize = 14.02.sp,
-//                        lineHeight = 24.53.sp,
-//                        fontWeight = FontWeight(500),
-//                        color = Color(0xFFFFFFFF),
-//                        textAlign = TextAlign.Start,
-//                        letterSpacing = 0.26.sp
-//                    ),
-//                    modifier = Modifier.padding(bottom = 12.dp)
-//                )
+                Text(
+                    text = player.tenLCT,
+                    style = TextStyle(
+                        fontSize = 14.02.sp,
+                        lineHeight = 24.53.sp,
+                        fontWeight = FontWeight(500),
+                        color = Color(0xFFFFFFFF),
+                        textAlign = TextAlign.Start,
+                        letterSpacing = 0.26.sp
+                    ),
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
                 // Ngày sinh (Birth day)
                 Text(
                     text = DateConverter.LocalDateToString(player.ngaySinh),
