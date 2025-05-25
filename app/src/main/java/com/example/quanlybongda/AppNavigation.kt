@@ -40,7 +40,6 @@ data class BottomNavigationRoute(
     val icon : ImageVector
 )
 
-val homeRoute = "baoCao";
 
 fun navigatePopUpTo(navController: NavController, routeName : String) {
     navController.navigate(routeName) {
@@ -58,6 +57,7 @@ fun navigatePopUpTo(navController: NavController, routeName : String) {
     }
 }
 
+val homeRoute = "baoCao";
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController();
@@ -67,9 +67,10 @@ fun AppNavigation() {
 //        BottomNavigationType("login", "Home", Icons.Default.Home),
 //        BottomNavigationType("signUp", ,),
 //        BottomNavigationRoute("ghiNhan/1", "Home", Icons.Default.Home),
-        BottomNavigationRoute("baoCao", "Home", Icons.Default.Home),
-        BottomNavigationRoute("lapLich", "Schedule", Icons.Default.Schedule),
-        BottomNavigationRoute("hoSo", "Profile", Icons.Default.Person),
+        BottomNavigationRoute("baoCao", "Báo cáo", Icons.Default.Home),
+        BottomNavigationRoute("lapLich", "Lập lịch", Icons.Default.Schedule),
+        BottomNavigationRoute("muaGiai", "Mùa giải", Icons.Default.Star),
+        BottomNavigationRoute("doiBong", "Đội bóng", Icons.Default.Groups),
     )
 
     Scaffold(
@@ -110,7 +111,7 @@ fun AppNavigation() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "doiBong",
+            startDestination = homeRoute,
             Modifier.fillMaxSize().background(DarkColorScheme.background)
         ) {
             val modifier = Modifier.padding(innerPadding);
@@ -128,7 +129,9 @@ fun AppNavigation() {
                 CauThuScreen(backStackEntry.arguments?.getInt("maDoi") ?: 0, navController, modifier)
             }
 
-            composable("cauThuInput") { CauThuInputScreen(navController, modifier) }
+            composable("cauThuInput/{maDoi}", arguments = listOf(navArgument("maDoi") { type = NavType.IntType})) { backStackEntry ->
+                CauThuInputScreen(backStackEntry.arguments?.getInt("maDoi") ?: 0, navController, modifier)
+            }
             composable("doiBongInput") { DoiBongInputScreen(navController, modifier) }
             composable("banThangInput") { BanThangInputScreen(navController, modifier) }
             composable("lichThiDauInput") { LichThiDauInputScreen(navController, modifier) }

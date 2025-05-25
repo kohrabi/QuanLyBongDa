@@ -60,7 +60,10 @@ fun CauThuScreen(
 
     Scaffold(
         containerColor = Color(0xFF1C1D2B),
-        modifier = modifier
+        modifier = modifier,
+        floatingActionButton = {
+            AddFloatingButton("Cầu thủ", onClick = { navController.navigate("cauThuInput/${maDoi}")})
+        }
     ) { it
         Column(
             modifier = Modifier

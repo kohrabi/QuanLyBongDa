@@ -132,12 +132,12 @@ fun BaoCaoScreen(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
-                            Text(
-                                text = "See All",
-                                color = standingsTextAccent,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+//                            Text(
+//                                text = "See All",
+//                                color = standingsTextAccent,
+//                                fontSize = 12.sp,
+//                                fontWeight = FontWeight.Bold
+//                            )
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))

@@ -57,51 +57,6 @@ fun DoiBongInputScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(260.dp)
-//            ) {
-//                AsyncImage(
-//                    model = ImageRequest.Builder(context)
-//                        .data(R.drawable.sign_in_banner) // Đã đúng: sử dụng drawable. Comment "URL" ở đây có thể bỏ.
-//                        .crossfade(true)
-//                        .build(),
-//                    contentDescription = "Header Background Image",
-//                    contentScale = ContentScale.Crop,
-//                    modifier = Modifier.fillMaxSize()
-//                )
-//                Column(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .padding(16.dp),
-//                    verticalArrangement = Arrangement.SpaceBetween
-//                ) {
-//                    Row(
-//                        horizontalArrangement = Arrangement.SpaceBetween,
-//                        verticalAlignment = Alignment.CenterVertically,
-//                        modifier = Modifier.fillMaxWidth()
-//                    ) {
-//                        AsyncImage(
-//                            model = ImageRequest.Builder(context)
-//                                //.data("https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/937dcb20-0c08-4765-8b8b-adfbcf74189f") // THAY THẾ
-//                                .data(R.drawable.football_stadium) // << THAY BẰNG TÊN FILE DRAWABLE CỦA BẠN
-//                                .crossfade(true).build(),
-//                            contentDescription = "Overlay Logo 1",
-//                            modifier = Modifier.width(54.dp).height(21.dp).clip(RoundedCornerShape(32.dp))
-//                        )
-//                        AsyncImage(
-//                            model = ImageRequest.Builder(context)
-//                                //.data("https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/5207b008-4e8b-40e8-a4c0-932a5065e653") // THAY THẾ
-//                                .data(R.drawable.football_stadium) // << THAY BẰNG TÊN FILE DRAWABLE CỦA BẠN
-//                                .crossfade(true).build(),
-//                            contentDescription = "Overlay Logo 2",
-//                            modifier = Modifier.width(66.dp).height(11.dp)
-//                        )
-//                    }
-//                    // Phần "Team Name" (nếu có)
-//                }
-//            }
 
             Column(
                 modifier = Modifier

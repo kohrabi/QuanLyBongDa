@@ -1,6 +1,7 @@
 
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -51,6 +53,7 @@ fun MuaGiaiScreen(
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current;
     val selectedMuaGiai by viewModel.currentMuaGiai.collectAsState()
     var muaGiais by remember { mutableStateOf(listOf<MuaGiai>()) }
     val coroutineScope = rememberCoroutineScope()
@@ -112,6 +115,7 @@ fun MuaGiaiScreen(
                         onSeasonSelect = {
                             viewModel.selectMuaGiai(muaGiai)
                             coroutineScope.launch {
+                                Toast.makeText(context, "Chọn mùa giải ${muaGiai.tenMG} thành công", Toast.LENGTH_SHORT).show();
                                 delay(500)
                                 navigatePopUpTo(navController, homeRoute);
                             }

@@ -131,7 +131,6 @@ fun DoiBongScreen(
                     TeamCard(
                         team = doiBong,
                         onClick = {
-
                             navController.navigate("cauThu/${doiBong.maDoi}");
                         })
                 }
