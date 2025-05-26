@@ -127,10 +127,17 @@ fun BanThangInputScreen(
                     onOptionSelected = { cauThu = it })
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputTextField(thoiDiem, "Thời điểm", { thoiDiem = it })
+                InputTextField(
+                    value = thoiDiem,
+                    label = "Thời điểm",
+                    onValueChange = { thoiDiem = it })
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputDropDownMenu("Loại bàn thắng", loaiBTOptions, loaiBT, { loaiBT = it })
+                InputDropDownMenu(
+                    name = "Loại bàn thắng",
+                    options = loaiBTOptions,
+                    selectedOption = loaiBT,
+                    onOptionSelected = { loaiBT = it })
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(

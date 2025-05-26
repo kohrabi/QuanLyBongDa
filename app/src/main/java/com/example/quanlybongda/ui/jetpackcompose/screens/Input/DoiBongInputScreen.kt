@@ -89,10 +89,14 @@ fun DoiBongInputScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 24.dp)
             ) {
-                InputTextField(tenDoi, "Tên đội", { tenDoi = it })
+                InputTextField(value = tenDoi, label = "Tên đội", onValueChange = { tenDoi = it })
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputDropDownMenu("Sân nhà", sanNhaOptions, sanNha, { sanNha = it })
+                InputDropDownMenu(
+                    name = "Sân nhà",
+                    options = sanNhaOptions,
+                    selectedOption = sanNha,
+                    onOptionSelected = { sanNha = it })
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(

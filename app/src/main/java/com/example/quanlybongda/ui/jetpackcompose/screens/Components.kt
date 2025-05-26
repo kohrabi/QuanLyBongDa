@@ -6,13 +6,20 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
@@ -20,6 +27,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -32,7 +40,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.quanlybongda.ui.theme.Pink80
 import com.example.quanlybongda.ui.theme.Purple40
 import com.example.quanlybongda.ui.theme.Purple80
 import com.example.quanlybongda.ui.theme.darkCardBackground
@@ -51,29 +62,45 @@ import java.util.TimeZone
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InputTextField(
-    value : String,
     label : String,
+    value : String,
     onValueChange : (String) -> Unit,
+    isError : Boolean = false,
+    errorMessage : String = "",
+    visualTransformation : VisualTransformation = VisualTransformation.None,
+    trailingIcon : @Composable () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-
-    // Username
+    val supportingText : @Composable (() -> Unit) = {
+        Text(errorMessage);
+    }
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
+        isError = isError,
+        supportingText = if (isError) supportingText else null,
         modifier = modifier
             .fillMaxWidth()
             .background(darkCardBackground, shape = RoundedCornerShape(6.dp)),
+        visualTransformation = visualTransformation,
+        trailingIcon = {
+            trailingIcon()
+            if (isError)
+                Icon(imageVector = Icons.Default.Error, contentDescription = null, tint = Pink80)
+        },
 //        colors = TextFieldDefaults.colors()
-        colors = TextFieldDefaults.outlinedTextFieldColors(
+        colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = Color.Transparent,
             unfocusedBorderColor = Color.Transparent,
             focusedTextColor = Color.White,
 //            textColor = Color.White,
             cursorColor = Color.White,
             focusedLabelColor = Color.White,
-            unfocusedLabelColor = Color.LightGray
+            unfocusedLabelColor = Color.LightGray,
+            errorSupportingTextColor = Pink80,
+            errorBorderColor = Pink80,
+
         )
     )
 }
@@ -121,13 +148,13 @@ fun InputDropDownMenu(
             readOnly = true,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier.menuAnchor().fillMaxWidth(), // Required for dropdown to position correctly
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = Color.Transparent,
-                unfocusedBorderColor = Color.Transparent,
-                focusedTextColor = Color.White,
-                cursorColor = Color.White,
-                focusedLabelColor = Color.White,
-                unfocusedLabelColor = Color.LightGray
+            colors = TextFieldDefaults.colors(
+//                focusedBorderColor = Color.Transparent,
+//                unfocusedBorderColor = Color.Transparent,
+//                focusedTextColor = Color.White,
+//                cursorColor = Color.White,
+//                focusedLabelColor = Color.White,
+//                unfocusedLabelColor = Color.LightGray
             )
         )
         ExposedDropdownMenu(
@@ -187,7 +214,7 @@ fun InputDatePicker(
 //        onValueChange = {},
 //        label = { Text(label) },
 //        readOnly = true,
-//        colors = TextFieldDefaults.outlinedTextFieldColors(
+//        colors = OutlinedTextFieldDefaults.colors(
 //            focusedBorderColor = Color.Transparent,
 //            unfocusedBorderColor = Color.Transparent,
 //            focusedTextColor = Color.White,
@@ -211,15 +238,15 @@ fun InputDatePicker(
         onValueChange = {},
         readOnly = true,
         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = visible) },
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedBorderColor = Color.Transparent,
-            unfocusedBorderColor = Color.Transparent,
-            focusedTextColor = Color.White,
-            cursorColor = Color.White,
-            disabledTextColor = Color.LightGray,
-            disabledLabelColor = Color.LightGray,
-            focusedLabelColor = Color.White,
-            unfocusedLabelColor = Color.LightGray
+        colors = TextFieldDefaults.colors(
+//            focusedBorderColor = Color.Transparent,
+//            unfocusedBorderColor = Color.Transparent,
+//            focusedTextColor = Color.White,
+//            cursorColor = Color.White,
+//            disabledTextColor = Color.LightGray,
+//            disabledLabelColor = Color.LightGray,
+//            focusedLabelColor = Color.White,
+//            unfocusedLabelColor = Color.LightGray
         ),
         enabled = false,
         modifier = modifier

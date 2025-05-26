@@ -85,10 +85,14 @@ fun MuaGiaiInputScreen(
                     .padding(horizontal = 16.dp, vertical = 24.dp)
             ) {
                 // Username
-                InputTextField(tenMG, "Tên mùa giải", { tenMG = it });
+                InputTextField(
+                    value = tenMG,
+                    label = "Tên mùa giải",
+                    onValueChange = { tenMG = it });
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputDatePicker("Ngày bắt đầu",
+                InputDatePicker(
+                    label = "Ngày bắt đầu",
                     value = convertLocalDateToMillis(ngayDienRa),
                     onDateSelected = {
                         if (it != null) {
@@ -98,7 +102,8 @@ fun MuaGiaiInputScreen(
                     onDismiss = {});
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputDatePicker("Ngày kết thúc",
+                InputDatePicker(
+                    label = "Ngày kết thúc",
                     value = convertLocalDateToMillis(ngayKetThuc),
                     onDateSelected =  {
                         if (it != null) {

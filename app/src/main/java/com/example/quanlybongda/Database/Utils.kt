@@ -29,5 +29,5 @@ fun verifyUsernameInput(userName: String) : Boolean {
 }
 
 fun verifyEmailInput(email: String): Boolean {
-    return email.matches(Regex("/^.+@.+..+$/")) && email.length < 256;
+    return email.matches(Regex("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}\$")) && email.length < 256;
 }

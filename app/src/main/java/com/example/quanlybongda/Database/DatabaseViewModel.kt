@@ -18,6 +18,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
+import kotlin.math.exp
 
 @HiltViewModel
 class DatabaseViewModel @Inject constructor(application : Application) : ViewModel() {
@@ -160,10 +161,12 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
     }
 
     suspend fun createUser(email: String, username: String, password: String) : User? {
-        if (!verifyUsernameInput(username) ||
-            verifyEmailInput(username) ||
-            checkEmailAvailability(email))
-            return null;
+        if (!verifyUsernameInput(username))
+            throw java.lang.Exception("UsernameFormat");
+        if (!verifyEmailInput(email))
+            throw java.lang.Exception("EmailFormat")
+        if (checkEmailAvailability(email))
+            throw java.lang.Exception("EmailAvailability");
         val passwordHash = hashPassword(password);
         val user = User(
             email = email,

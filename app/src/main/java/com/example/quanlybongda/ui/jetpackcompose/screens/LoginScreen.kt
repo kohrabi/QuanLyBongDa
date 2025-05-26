@@ -88,30 +88,20 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Username
-                OutlinedTextField(
+                InputTextField(
                     value = username,
-                    onValueChange = { username = it },
-                    label = { Text("Username") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFF222232), shape = RoundedCornerShape(6.dp)),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
-                        textColor = Color.White,
-                        cursorColor = Color.White,
-                        focusedLabelColor = Color.White,
-                        unfocusedLabelColor = Color.LightGray
-                    )
-                )
+                    label = "Username",
+                    onValueChange = { username = it })
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 var passwordVisible by remember { mutableStateOf(false) }
-                OutlinedTextField(
+                InputTextField(
+                    label = "Password",
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Password") },
+                    isError = false,
+                    errorMessage = "",
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         val image = if (passwordVisible)
@@ -122,19 +112,7 @@ fun LoginScreen(
                             Icon(imageVector = image, contentDescription = null, tint = Color.LightGray)
                         }
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFF222232), shape = RoundedCornerShape(6.dp)),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
-                        textColor = Color.White,
-                        cursorColor = Color.White,
-                        focusedLabelColor = Color.White,
-                        unfocusedLabelColor = Color.LightGray
-                    )
                 )
-
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Row(

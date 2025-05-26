@@ -136,19 +136,36 @@ fun LichThiDauInputScreen(
                     .padding(horizontal = 16.dp, vertical = 24.dp)
             ) {
                 // Username
-                InputDropDownMenu("Đội một", doiBongOptions, doiMot, { doiMot = it });
+                InputDropDownMenu(
+                    name = "Đội một",
+                    options = doiBongOptions,
+                    selectedOption = doiMot,
+                    onOptionSelected = { doiMot = it });
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputDropDownMenu("Đội hai", doiBongOptions, doiHai, { doiHai = it });
+                InputDropDownMenu(
+                    name = "Đội hai",
+                    options = doiBongOptions,
+                    selectedOption = doiHai,
+                    onOptionSelected = { doiHai = it });
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputDropDownMenu("Vòng thi đấu", vongTDOptions, vongTD, { vongTD = it  } )
+                InputDropDownMenu(
+                    name = "Vòng thi đấu",
+                    options = vongTDOptions,
+                    selectedOption = vongTD,
+                    onOptionSelected = { vongTD = it  })
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputDropDownMenu("Đội Thắng", doiThangOptions, doiThang, { doiThang = it })
+                InputDropDownMenu(
+                    name = "Đội Thắng",
+                    options = doiThangOptions,
+                    selectedOption = doiThang,
+                    onOptionSelected = { doiThang = it })
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputDatePicker("Ngày dự kiến",
+                InputDatePicker(
+                    label = "Ngày dự kiến",
                     value = convertLocalDateTimeToMillis(ngayGioDuKien),
                     onDateSelected = {
                         if (it != null) {
@@ -158,7 +175,8 @@ fun LichThiDauInputScreen(
                     onDismiss = {});
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputDatePicker("Ngày thực tế",
+                InputDatePicker(
+                    label = "Ngày thực tế",
                     value = convertLocalDateTimeToMillis(ngayGioThucTe),
                     onDateSelected =  {
                         if (it != null) {
@@ -168,10 +186,17 @@ fun LichThiDauInputScreen(
                     onDismiss = {});
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputTextField(thoiGianDaThiDau, "Thời gian đã thi đấu", { thoiGianDaThiDau = it })
+                InputTextField(
+                    value = thoiGianDaThiDau,
+                    label = "Thời gian đã thi đấu",
+                    onValueChange = { thoiGianDaThiDau = it })
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputDropDownMenu("Trọng tài", trongTaiOptions, trongTai, { trongTai = it })
+                InputDropDownMenu(
+                    name = "Trọng tài",
+                    options = trongTaiOptions,
+                    selectedOption = trongTai,
+                    onOptionSelected = { trongTai = it })
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(

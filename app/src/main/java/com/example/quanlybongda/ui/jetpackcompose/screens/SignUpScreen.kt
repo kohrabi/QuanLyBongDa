@@ -40,6 +40,10 @@ fun SignUpScreen(
     viewModel: DatabaseViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current;
+    var usernameError by remember { mutableStateOf(false) }
+    var emailError by remember { mutableStateOf(false) }
+    var emailErrorString by remember { mutableStateOf("") }
+
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -47,10 +51,22 @@ fun SignUpScreen(
 
     val onSignUpClick : () -> Unit = {
         scope.launch {
-            if (viewModel.createUser(email, username, password) == null) {
-                Toast.makeText(context, "Không the tạo user", Toast.LENGTH_SHORT).show();
+            try {
+                viewModel.createUser(email, username, password)
+                navController.navigate("login");
             }
-            navController.navigate("login");
+            catch (e : Exception) {
+                if (e.message == "UsernameFormat")
+                    usernameError = true;
+                else if (e.message == "EmailFormat") {
+                    emailError = true;
+                    emailErrorString = "Email có format không đúng";
+                }
+                else if (e.message == "EmailAvailability") {
+                    emailError = true;
+                    emailErrorString = "Email đã tồn tại";
+                }
+            }
         }
     };
 
@@ -101,55 +117,32 @@ fun SignUpScreen(
 
 
                 // Email
-                OutlinedTextField(
+                InputTextField(
+                    label = "Email",
                     value = email,
-                    onValueChange = {
-                        email = it
-                        verifyEmailInput(email)
-                    },
-                    label = { Text("Email") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFF222232), shape = RoundedCornerShape(6.dp)),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
-                        textColor = Color.White,
-                        cursorColor = Color.White,
-                        focusedLabelColor = Color.White,
-                        unfocusedLabelColor = Color.LightGray
-                    )
+                    onValueChange = { email = it; emailError = false },
+                    isError = emailError,
+                    errorMessage = emailErrorString,
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Username
-                OutlinedTextField(
+                InputTextField(
+                    label = "Username",
                     value = username,
-                    onValueChange = {
-                        username = it
-                        verifyUsernameInput(username)
-                    },
-                    label = { Text("Username") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFF222232), shape = RoundedCornerShape(6.dp)),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
-                        textColor = Color.White,
-                        cursorColor = Color.White,
-                        focusedLabelColor = Color.White,
-                        unfocusedLabelColor = Color.LightGray
-                    )
+                    onValueChange = { username = it; usernameError = false },
+                    isError = usernameError,
+                    errorMessage = "Username phải có lớn hơn 8 kí tự và bé hơn 32 kí tự",
                 )
-
                 Spacer(modifier = Modifier.height(16.dp))
 
                 var passwordVisible by remember { mutableStateOf(false) }
-                OutlinedTextField(
+                InputTextField(
+                    label = "Password",
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Password") },
+                    isError = false,
+                    errorMessage = "",
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         val image = if (passwordVisible)
@@ -160,19 +153,7 @@ fun SignUpScreen(
                             Icon(imageVector = image, contentDescription = null, tint = Color.LightGray)
                         }
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFF222232), shape = RoundedCornerShape(6.dp)),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
-                        textColor = Color.White,
-                        cursorColor = Color.White,
-                        focusedLabelColor = Color.White,
-                        unfocusedLabelColor = Color.LightGray
-                    )
                 )
-
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
@@ -215,7 +196,9 @@ fun SignUpScreen(
             }
 
             Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 46.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 46.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(

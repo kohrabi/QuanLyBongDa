@@ -97,11 +97,12 @@ fun CauThuInputScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 24.dp)
             ) {
-                InputTextField(tenCT, "Tên cầu thủ", { tenCT = it })
+                InputTextField(value = tenCT, label = "Tên cầu thủ", onValueChange = { tenCT = it })
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputDatePicker("Ngày sinh",
-                    convertLocalDateTimeToMillis(ngaySinh),
+                InputDatePicker(
+                    label = "Ngày sinh",
+                    value = convertLocalDateTimeToMillis(ngaySinh),
                     onDateSelected = {
                         if (it != null)
                             ngaySinh = convertMillisToLocalDateTime(it)
@@ -110,13 +111,20 @@ fun CauThuInputScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputDropDownMenu("Loại cầu thủ", loaiCTOptions, loaiCT, { loaiCT = it });
+                InputDropDownMenu(
+                    name = "Loại cầu thủ",
+                    options = loaiCTOptions,
+                    selectedOption = loaiCT,
+                    onOptionSelected = { loaiCT = it });
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputTextField(ghiChu, "Ghi chú", { ghiChu = it }, modifier = Modifier.height(100.dp))
+                InputTextField(
+                    value = ghiChu,
+                    label = "Ghi chú",
+                    onValueChange = { ghiChu = it }, modifier = Modifier.height(100.dp))
                 Spacer(modifier = Modifier.height(32.dp))
 
-                InputTextField(soAo, "Số áo", { soAo = it })
+                InputTextField(value = soAo, label = "Số áo", onValueChange = { soAo = it })
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Row(
