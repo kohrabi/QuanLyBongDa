@@ -71,49 +71,48 @@ fun AppNavigation() {
         BottomNavigationRoute("muaGiai", "Mùa giải", Icons.Default.Star),
         BottomNavigationRoute("doiBong", "Đội bóng", Icons.Default.Groups),
     )
-    val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) {
-        "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner"
-    }
 
     Scaffold(
         bottomBar = {
-            BottomNavigation(
-                backgroundColor = darkContentBackground.copy(alpha = 0.9f),
-                contentColor =  darkTextMuted,
-            ) {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination
-                routes.forEach { route ->
-                    BottomNavigationItem(
-                        icon = { Icon(route.icon, contentDescription = route.description) },
-                        selected = selectedItem == route.name,
-                        onClick = {
-                            selectedItem = route.name
-                            navController.navigate(route.name) {
-                                // Pop up to the start destination of the graph to
-                                // avoid building up a large stack of destinations
-                                // on the back stack as users select items
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentDestination = navBackStackEntry?.destination
+            if (currentDestination?.route != "login" && currentDestination?.route != "signUp") {
+                BottomNavigation(
+                    backgroundColor = darkContentBackground.copy(alpha = 0.9f),
+                    contentColor =  darkTextMuted,
+                ) {
+                    routes.forEach { route ->
+                        BottomNavigationItem(
+                            icon = { Icon(route.icon, contentDescription = route.description) },
+                            selected = selectedItem == route.name,
+                            onClick = {
+                                selectedItem = route.name
+                                navController.navigate(route.name) {
+                                    // Pop up to the start destination of the graph to
+                                    // avoid building up a large stack of destinations
+                                    // on the back stack as users select items
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    // Avoid multiple copies of the same destination when
+                                    // reselecting the same item
+                                    launchSingleTop = true
+                                    // Restore state when reselecting a previously selected item
+                                    restoreState = true
                                 }
-                                // Avoid multiple copies of the same destination when
-                                // reselecting the same item
-                                launchSingleTop = true
-                                // Restore state when reselecting a previously selected item
-                                restoreState = true
-                            }
-                        },
-                        selectedContentColor = Color.White,
-                        unselectedContentColor = darkTextMuted,
-                        modifier = Modifier.padding(bottom = 24.dp)
-                    )
+                            },
+                            selectedContentColor = Color.White,
+                            unselectedContentColor = darkTextMuted,
+                            modifier = Modifier.padding(bottom = 24.dp)
+                        )
+                    }
                 }
             }
         }
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "muaGiai",
+            startDestination = "login",
             modifier = Modifier.fillMaxSize().background(DarkColorScheme.background)
         ) {
             val modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding());

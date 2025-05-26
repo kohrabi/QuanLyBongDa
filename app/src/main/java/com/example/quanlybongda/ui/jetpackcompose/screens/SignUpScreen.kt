@@ -1,5 +1,6 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,6 +13,7 @@ import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,6 +39,7 @@ fun SignUpScreen(
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current;
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -44,7 +47,9 @@ fun SignUpScreen(
 
     val onSignUpClick : () -> Unit = {
         scope.launch {
-            viewModel.createUser(email, username, password);
+            if (viewModel.createUser(email, username, password) == null) {
+                Toast.makeText(context, "Không the tạo user", Toast.LENGTH_SHORT).show();
+            }
             navController.navigate("login");
         }
     };

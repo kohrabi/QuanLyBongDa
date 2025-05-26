@@ -59,7 +59,7 @@ fun CauThuInputScreen(
     val onClick = {
         coroutineScope.launch {
             if (soAo.toIntOrNull() == null) {
-                Toast.makeText(context, "WARNING: soAo không hợp lệ", Toast.LENGTH_SHORT);
+                Toast.makeText(context, "WARNING: soAo không hợp lệ", Toast.LENGTH_SHORT).show();
                 return@launch;
             }
             viewModel.cauThuDAO.upsertCauThu(

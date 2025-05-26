@@ -22,6 +22,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.navigatePopUpTo
 import kotlinx.coroutines.launch
 
 @Composable
@@ -36,8 +37,8 @@ fun LoginScreen(
 
     val onSignInClick : () -> Unit = {
         scope.launch {
-            // TODO: Sign in
-            navController.navigate("hoSo");
+            if (viewModel.signIn(username, password))
+                navigatePopUpTo(navController, "muaGiai");
         }
     }
 

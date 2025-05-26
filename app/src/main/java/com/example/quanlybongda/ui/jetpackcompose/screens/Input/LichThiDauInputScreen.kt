@@ -74,12 +74,12 @@ fun LichThiDauInputScreen(
     val onClick = {
         coroutineScope.launch {
             if (currentMuaGiai == null) {
-                Toast.makeText(context, "WARNING: muaGiai không hợp lệ", Toast.LENGTH_SHORT);
+                Toast.makeText(context, "WARNING: muaGiai không hợp lệ", Toast.LENGTH_SHORT).show();
                 navigatePopUpTo(navController, "muaGiai");
                 return@launch;
             }
             if (thoiGianDaThiDau.toFloatOrNull() == null) {
-                Toast.makeText(context, "WARNING: thoiGianDaThiDau không hợp lệ", Toast.LENGTH_SHORT);
+                Toast.makeText(context, "WARNING: thoiGianDaThiDau không hợp lệ", Toast.LENGTH_SHORT).show();
                 navigatePopUpTo(navController, "muaGiai");
                 return@launch;
             }

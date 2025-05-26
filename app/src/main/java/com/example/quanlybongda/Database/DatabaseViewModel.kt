@@ -203,4 +203,12 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
     suspend fun deleteUser(userId : Int) {
         userDAO.deleteUser(userId);
     }
+
+    suspend fun signIn(username: String, password: String) : Boolean {
+        val passwordHash = hashPassword(password);
+        val user = userDAO.selectUserFromUsername(username) ?: return false;
+        if (user.passwordHash == passwordHash)
+            return true;
+        return false;
+    }
 }

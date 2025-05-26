@@ -57,7 +57,7 @@ fun BanThangInputScreen(
     val onClick = {
         coroutineScope.launch {
             if (thoiDiem.toFloatOrNull() == null) {
-                Toast.makeText(context, "WARNING: thoiDiem không hợp lệ", Toast.LENGTH_SHORT);
+                Toast.makeText(context, "WARNING: thoiDiem không hợp lệ", Toast.LENGTH_SHORT).show();
                 return@launch;
             }
             viewModel.banThangDAO.upsertBanThang(BanThang(
