@@ -1,5 +1,6 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens.Input
 
+import android.widget.Toast
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputTextField
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -17,26 +18,33 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.Database.Schema.BanThang
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputDropDownMenu
 import com.example.quanlybongda.ui.jetpackcompose.screens.OptionValue
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 // import androidx.compose.ui.geometry.Offset // Cần nếu dùng Offset trong Brush
 
 @Composable
 fun BanThangInputScreen(
-    appController: NavController,
+    maTD : Int,
+    navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current;
+    val coroutineScope = rememberCoroutineScope()
     var doiBongOptions by remember { mutableStateOf(listOf<OptionValue>()) }
     var cauThuDoiMotOptions by remember { mutableStateOf(listOf<OptionValue>()) }
     var cauThuDoiHaiOptions by remember { mutableStateOf(listOf<OptionValue>()) }
@@ -46,13 +54,28 @@ fun BanThangInputScreen(
     var cauThu by remember { mutableStateOf(OptionValue.DEFAULT) }
     var thoiDiem by remember { mutableStateOf("") }
     var loaiBT by remember { mutableStateOf(OptionValue.DEFAULT) }
+    val onClick = {
+        coroutineScope.launch {
+            if (thoiDiem.toFloatOrNull() == null) {
+                Toast.makeText(context, "WARNING: thoiDiem không hợp lệ", Toast.LENGTH_SHORT);
+                return@launch;
+            }
+            viewModel.banThangDAO.upsertBanThang(BanThang(
+                maTD = maTD,
+                thoiDiem = thoiDiem.toFloat(),
+                maCT = cauThu.value,
+                maLBT = loaiBT.value,
+                deleted = false,
+            ))
+            delay(500);
+            navController.popBackStack()
+        }
+    };
 
     LaunchedEffect(Unit) {
-
         launch {
             loaiBTOptions = viewModel.banThangDAO.selectAllLoaiBT().map { OptionValue(it.maLBT, it.tenLBT) };
         }
-        val maTD = 1;
         val lichThiDau = viewModel.lichThiDauDAO.selectLichThiDauMaTD(maTD);
         if (lichThiDau == null)
             return@LaunchedEffect;
@@ -60,21 +83,21 @@ fun BanThangInputScreen(
         launch {
             val doiMot = viewModel.doiBongDAO.selectDoiBongMaDoi(lichThiDau.doiMot)!!;
 //          if (doiMot != null)
-            doiBongs.add(OptionValue(doiMot.maDoi, doiMot.tenDoi));
-            cauThuDoiMotOptions = viewModel.cauThuDAO.selectCauThuDoiBong(doiMot.maDoi).map { OptionValue(it.maCT, it.tenCT) };
+            doiBongs.add(OptionValue(doiMot.maDoi!!, doiMot.tenDoi));
+            cauThuDoiMotOptions = viewModel.cauThuDAO.selectCauThuDoiBong(doiMot.maDoi).map { OptionValue(it.maCT!!, it.tenCT) };
         }
         launch {
             val doiHai = viewModel.doiBongDAO.selectDoiBongMaDoi(lichThiDau.doiHai)!!;
 //          if (doiHai != null)
-            doiBongs.add(OptionValue(doiHai.maDoi, doiHai.tenDoi));
+            doiBongs.add(OptionValue(doiHai.maDoi!!, doiHai.tenDoi));
             doiBongOptions = doiBongs;
-            cauThuDoiHaiOptions = viewModel.cauThuDAO.selectCauThuDoiBong(doiHai.maDoi).map { OptionValue(it.maCT, it.tenCT) };
+            cauThuDoiHaiOptions = viewModel.cauThuDAO.selectCauThuDoiBong(doiHai.maDoi).map { OptionValue(it.maCT!!, it.tenCT) };
         }
     }
 
     Scaffold(
         backgroundColor = Color(0xFF181928),
-        modifier = modifier
+        modifier = modifier.padding(top = 24.dp)
     ) { innerScaffoldPadding ->
         Column(
             modifier = Modifier
@@ -116,7 +139,7 @@ fun BanThangInputScreen(
                 ) {
                     val buttonModifier = Modifier.weight(1f).height(48.dp)
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = { navController.popBackStack() },
                         shape = RoundedCornerShape(7.dp),
                         contentPadding = PaddingValues(),
                         modifier = buttonModifier,
@@ -128,11 +151,11 @@ fun BanThangInputScreen(
                             ),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("New Player", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text("Cancel", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = { onClick() },
                         shape = RoundedCornerShape(7.dp),
                         contentPadding = PaddingValues(),
                         modifier = buttonModifier,
@@ -158,6 +181,6 @@ fun BanThangInputScreen(
 @Composable
 fun BanThangInputScreenPreview() {
     MaterialTheme {
-        BanThangInputScreen(rememberNavController())
+        BanThangInputScreen(1, rememberNavController())
     }
 }

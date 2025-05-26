@@ -8,10 +8,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,30 +26,52 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.Database.Schema.MuaGiai
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputDatePicker
-import com.example.quanlybongda.ui.jetpackcompose.screens.InputDropDownMenu
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputTextField
-import com.example.quanlybongda.ui.jetpackcompose.screens.OptionValue
 import com.example.quanlybongda.ui.jetpackcompose.screens.convertLocalDateTimeToMillis
+import com.example.quanlybongda.ui.jetpackcompose.screens.convertLocalDateToMillis
+import com.example.quanlybongda.ui.jetpackcompose.screens.convertMillisToLocalDate
 import com.example.quanlybongda.ui.jetpackcompose.screens.convertMillisToLocalDateTime
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MuaGiaiInputScreen(
-    appController: NavController,
+    navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
+    val context = LocalContext.current;
+    val coroutineScope = rememberCoroutineScope()
     var tenMG by remember { mutableStateOf("") }
-    var ngayBatDau by remember { mutableStateOf(LocalDateTime.now()) }
-    var ngayKeyThuc by remember { mutableStateOf(LocalDateTime.now()) }
+    var ngayDienRa by remember { mutableStateOf(LocalDate.now()) }
+    var ngayKetThuc by remember { mutableStateOf(LocalDate.now()) }
+    var submitted by remember { mutableStateOf(false) }
+    val onClick : () -> Unit = {
+        if (!submitted) {
+            coroutineScope.launch {
+                viewModel.muaGiaiDAO.upsertDSMuaGiai(
+                    MuaGiai(
+                        tenMG = tenMG,
+                        ngayDienRa = ngayDienRa,
+                        ngayKetThuc = ngayKetThuc,
+                    )
+                )
+                submitted = true;
+                delay(500);
+                navController.popBackStack()
+            }
+        }
+    };
 
     Scaffold(
         backgroundColor = Color(0xFF181928),
-        modifier = modifier
+        modifier = modifier.padding(top = 24.dp)
     ) { innerScaffoldPadding ->
         Column(
             modifier = Modifier
@@ -67,20 +89,20 @@ fun MuaGiaiInputScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 InputDatePicker("Ngày bắt đầu",
-                    value = convertLocalDateTimeToMillis(ngayBatDau),
+                    value = convertLocalDateToMillis(ngayDienRa),
                     onDateSelected = {
                         if (it != null) {
-                            ngayBatDau = convertMillisToLocalDateTime(it);
+                            ngayDienRa = convertMillisToLocalDate(it);
                         }
                     },
                     onDismiss = {});
                 Spacer(modifier = Modifier.height(16.dp))
 
                 InputDatePicker("Ngày kết thúc",
-                    value = convertLocalDateTimeToMillis(ngayKeyThuc),
+                    value = convertLocalDateToMillis(ngayKetThuc),
                     onDateSelected =  {
                         if (it != null) {
-                            ngayKeyThuc = convertMillisToLocalDateTime(it);
+                            ngayKetThuc = convertMillisToLocalDate(it);
                         }
                     },
                     onDismiss = {});
@@ -94,7 +116,7 @@ fun MuaGiaiInputScreen(
                         .weight(1f)
                         .height(48.dp)
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = { navController.popBackStack() },
                         shape = RoundedCornerShape(7.dp),
                         contentPadding = PaddingValues(),
                         modifier = buttonModifier,
@@ -118,7 +140,7 @@ fun MuaGiaiInputScreen(
                         }
                     }
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = { onClick() },
                         shape = RoundedCornerShape(7.dp),
                         contentPadding = PaddingValues(),
                         modifier = buttonModifier,

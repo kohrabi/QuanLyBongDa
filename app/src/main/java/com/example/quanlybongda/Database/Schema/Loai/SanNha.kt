@@ -22,7 +22,7 @@ import java.time.LocalDateTime
 data class SanNha(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(index = true)
-    val maSan : Int,
+    val maSan : Int = 0,
     val tenSan : String,
     val diaChi : String,
     val maMG : Int,

@@ -80,7 +80,7 @@ fun LapLichScreen(
     LaunchedEffect(Unit) {
         viewModel.viewModelScope.launch {
             if (currentMuaGiai != null) {
-                lichThiDaus = viewModel.lichThiDauDAO.selectLichThiDauMaMG(currentMuaGiai!!.maMG);
+                lichThiDaus = viewModel.lichThiDauDAO.selectLichThiDauMaMG(currentMuaGiai!!.maMG!!);
                 doiBongs = viewModel.doiBongDAO.selectAllDoiBong();
                 for (lichThiDau in lichThiDaus) {
                     lichThiDau.tenDoiMot = doiBongs.find { it.maDoi == lichThiDau.doiMot }!!.tenDoi;
@@ -112,6 +112,9 @@ fun LapLichScreen(
                 ),
                 scrollBehavior = scrollBehavior,
             )
+        },
+        floatingActionButton = {
+            AddFloatingButton("Tạo lịch thi đấu", onClick = { navController.navigate("lichThiDauInput") })
         },
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     )  { innerPadding ->
@@ -146,7 +149,7 @@ fun LapLichScreen(
                     DateConverter.LocalDateTimeToString(lichThiDau.ngayGioThucTe),
                     lichThiDau.tenDoiHai ?: "",
                     onClick = {
-                        navController.navigate("ghiNhan/${lichThiDau.maTD}");
+                        navController.navigate("banThang/${lichThiDau.maTD}");
                     })
                 Spacer(modifier = Modifier.height(12.dp))
             };

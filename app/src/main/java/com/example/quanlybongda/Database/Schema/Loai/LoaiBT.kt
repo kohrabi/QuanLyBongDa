@@ -13,7 +13,7 @@ import java.time.LocalDateTime
 data class LoaiBT(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(index = true)
-    val maLBT : Int,
+    val maLBT : Int = 0,
     val tenLBT : String,
     @ColumnInfo(defaultValue = "1")
     val diemBT : Int,

@@ -54,7 +54,7 @@ fun DoiBongScreen(
     LaunchedEffect(Unit) {
         viewModel.viewModelScope.launch {
             if (currentMuaGiai != null) {
-                doiBongs = viewModel.doiBongDAO.selectDoiBongMuaGiai(currentMuaGiai!!.maMG);
+                doiBongs = viewModel.doiBongDAO.selectDoiBongMuaGiai(currentMuaGiai!!.maMG!!);
                 val sanNha = viewModel.sanNhaDAO.selectAllSanNha();
                 for (doiBong in doiBongs) {
                     doiBong.tenSan = sanNha.find { doiBong.maSan == it.maSan }!!.tenSan;

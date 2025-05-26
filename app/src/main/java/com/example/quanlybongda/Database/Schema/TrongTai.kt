@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity(
@@ -23,12 +24,12 @@ import java.time.LocalDateTime
 )
 data class TrongTai(
     @PrimaryKey(autoGenerate = true)
-    val maTT : Int,
+    val maTT : Int = 0,
     val tenTT : String,
-    val ngaySinh : LocalDateTime = LocalDateTime.now(),
+    val ngaySinh : LocalDate = LocalDate.now(),
     val maMG : Int,
     @ColumnInfo(defaultValue = "false")
-    val deleted : Boolean?,
+    val deleted : Boolean? = false,
 )
 
 

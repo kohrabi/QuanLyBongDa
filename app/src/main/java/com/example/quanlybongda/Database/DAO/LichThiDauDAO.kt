@@ -6,6 +6,7 @@ import androidx.room.Query
 import androidx.room.Upsert
 import com.example.quanlybongda.Database.Schema.LichThiDau
 import com.example.quanlybongda.Database.Schema.Loai.VongTD
+import com.example.quanlybongda.Database.Schema.TrongTai
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -27,6 +28,9 @@ interface LichThiDauDAO {
 
     @Query("SELECT * FROM LichThiDau WHERE maMG=:maMG")
     suspend fun selectLichThiDauMaMG(maMG: Int) : List<LichThiDau>;
+
+    @Query("SELECT * FROM TrongTai")
+    suspend fun selectAllTrongTai() : List<TrongTai>;
 
     @Query("SELECT * FROM VongTD")
     suspend fun selectAllVongTD() : List<VongTD>;

@@ -1,5 +1,6 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens.Input
 
+import android.widget.Toast
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputTextField
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -14,9 +15,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
@@ -26,22 +29,45 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.Database.Schema.DoiBong
+import com.example.quanlybongda.navigatePopUpTo
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputDropDownMenu
 import com.example.quanlybongda.ui.jetpackcompose.screens.OptionValue
-import java.lang.StackWalker.Option
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 // import androidx.compose.ui.geometry.Offset // Cần nếu dùng Offset trong Brush
 
 @Composable
 fun DoiBongInputScreen(
-    appController: NavController,
+    navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
+    val context = LocalContext.current;
+    val coroutineScope = rememberCoroutineScope()
+    val currentMuaGiai by DatabaseViewModel.currentMuaGiai.collectAsState()
     var tenDoi by remember { mutableStateOf("") }
     var sanNhaOptions by remember { mutableStateOf(listOf<OptionValue>()) }
     var sanNha by remember { mutableStateOf(OptionValue.DEFAULT) }
+    val onClick = {
+        coroutineScope.launch {
+            if (currentMuaGiai == null) {
+                Toast.makeText(context, "WARNING: muaGiai không hợp lệ", Toast.LENGTH_SHORT);
+                navigatePopUpTo(navController, "muaGiai");
+                return@launch;
+            }
+            viewModel.doiBongDAO.upsertDoiBong(
+                DoiBong(
+                    tenDoi = tenDoi,
+                    maSan = sanNha.value,
+                    maMG = currentMuaGiai!!.maMG,
+                )
+            )
+            delay(500);
+            navController.popBackStack()
+        }
+    };
 
     LaunchedEffect(Unit) {
         sanNhaOptions = viewModel.sanNhaDAO.selectAllSanNha().map { OptionValue(it.maSan, it.tenSan) };
@@ -49,7 +75,7 @@ fun DoiBongInputScreen(
 
     Scaffold(
         backgroundColor = Color(0xFF181928),
-        modifier = modifier
+        modifier = modifier.padding(top = 24.dp)
     ) { innerScaffoldPadding ->
         Column(
             modifier = Modifier
@@ -75,7 +101,7 @@ fun DoiBongInputScreen(
                 ) {
                     val buttonModifier = Modifier.weight(1f).height(48.dp)
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = { navController.popBackStack() },
                         shape = RoundedCornerShape(7.dp),
                         contentPadding = PaddingValues(),
                         modifier = buttonModifier,
@@ -91,7 +117,7 @@ fun DoiBongInputScreen(
                         }
                     }
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = { onClick() },
                         shape = RoundedCornerShape(7.dp),
                         contentPadding = PaddingValues(),
                         modifier = buttonModifier,

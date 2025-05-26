@@ -3,7 +3,6 @@ package com.example.quanlybongda.ui.jetpackcompose.screens // Giữ nguyên pack
 // import androidx.compose.foundation.Image // Đã có ở trên, không cần import lại
 // import androidx.compose.foundation.layout.size // Đã có trong layout.*
 
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -41,7 +39,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.Schema.BanThang
 import com.example.quanlybongda.Database.Schema.LichThiDau
-import com.example.quanlybongda.MainActivity
 import com.example.quanlybongda.R
 import com.example.quanlybongda.ui.theme.DarkColorScheme
 import kotlinx.coroutines.launch
@@ -53,15 +50,9 @@ val fullTimeColor = Color(0xFF4CFF89)
 val textWhiteColor = Color.White
 val textMutedColor = Color(0xFFA0A3BD)
 
-// BỎ URL PLACEHOLDER KHÔNG CẦN THIẾT
-// const val BACKGROUND_IMAGE_URL = "https://i.imgur.com/your_background_image.png"
-// const val FCB_LOGO_URL = "https://i.imgur.com/nWgD6YI.png" // Không dùng trong GhiNhan()
-// const val MANCITY_LOGO_URL1 = "https://i.imgur.com/yiLJgk9.png" // Không dùng trong GhiNhan()
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GhiNhanScreen(
+fun BanThangScreen(
     maTD: Int,
     navController: NavController,
     modifier: Modifier = Modifier,
@@ -114,6 +105,9 @@ fun GhiNhanScreen(
                 ),
                 scrollBehavior = scrollBehavior,
             )
+        },
+        floatingActionButton = {
+            AddFloatingButton("Tạo bàn thắng", onClick = { navController.navigate("banThangInput/${maTD}") })
         },
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { innerPadding ->
@@ -248,6 +242,6 @@ fun StatisticRowUpdated(side: String, player: String, action: String, time: Stri
 @Composable
 fun FinalScoreScreenPreview() {
     MaterialTheme {
-        GhiNhanScreen(1, rememberNavController())
+        BanThangScreen(1, rememberNavController())
     }
 }

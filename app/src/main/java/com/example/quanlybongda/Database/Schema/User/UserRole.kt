@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 @Entity
 data class UserRole(
     @PrimaryKey(autoGenerate = true)
-    val roleId : Int,
+    val roleId : Int = 0,
     val roleName : String,
     val viewablePage : String,
     val canEdit : Boolean,

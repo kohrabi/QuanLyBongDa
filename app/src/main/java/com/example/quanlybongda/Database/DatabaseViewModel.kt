@@ -63,8 +63,8 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
         val doiHai = doiBongDAO.selectDoiBongMaDoi(lichThiDau.doiHai);
         if (doiMot == null || doiHai == null)
             return null;
-        val tySoDoiMot = banThangDAO.selectSoBanThangDoi(doiMot.maDoi);
-        val tySoDoiHai = banThangDAO.selectSoBanThangDoi(doiHai.maDoi);
+        val tySoDoiMot = banThangDAO.selectSoBanThangDoi(doiMot.maDoi!!);
+        val tySoDoiHai = banThangDAO.selectSoBanThangDoi(doiHai.maDoi!!);
 
         val sanNha = sanNhaDAO.selectSanNhaMaSan(lichThiDau.maSan);
         return KetQuaTranDau(
@@ -100,7 +100,7 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
             val soTranThua = lichThiDauDAO.countLichThiDauThuaMaDoi(doiCoTran, ngay);
             val soTranHoa = soTran - soTranThang - soTranThua;
             val doiBXH  = BangXepHangNgay(
-                maDoi = doi.maDoi,
+                maDoi = doi.maDoi!!,
                 tenDoi = doi.tenDoi,
                 soTran = soTran,
                 soTranThang = soTranThang,

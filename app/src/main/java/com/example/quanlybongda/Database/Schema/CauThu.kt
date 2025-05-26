@@ -33,7 +33,7 @@ import java.time.LocalDateTime
 )
 data class CauThu(
     @PrimaryKey(autoGenerate = true)
-    val maCT: Int,
+    val maCT: Int = 0,
     val tenCT: String,
     val ngaySinh: LocalDate = LocalDate.now(),
     val ghiChu: String,
@@ -41,7 +41,7 @@ data class CauThu(
     val maDoi: Int,
     val soAo: Int,
     @ColumnInfo(defaultValue = "false")
-    val deleted : Boolean?,
+    val deleted : Boolean? = false,
 ) {
     @Ignore var tenLCT : String = "";
     @Ignore var banThang : Int = 0;

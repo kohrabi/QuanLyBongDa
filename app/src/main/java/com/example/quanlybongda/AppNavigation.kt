@@ -1,6 +1,5 @@
 package com.example.quanlybongda
 
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,9 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -30,7 +27,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.ui.jetpackcompose.screens.*
 import com.example.quanlybongda.ui.jetpackcompose.screens.Input.*
 import com.example.quanlybongda.ui.theme.DarkColorScheme
@@ -69,7 +65,7 @@ fun AppNavigation() {
     val routes = listOf(
 //        BottomNavigationType("login", "Home", Icons.Default.Home),
 //        BottomNavigationType("signUp", ,),
-//        BottomNavigationRoute("ghiNhan/1", "Home", Icons.Default.Home),
+//        BottomNavigationRoute("banThang/1", "Home", Icons.Default.Home),
         BottomNavigationRoute("baoCao", "Báo cáo", Icons.Default.Home),
         BottomNavigationRoute("lapLich", "Lập lịch", Icons.Default.Schedule),
         BottomNavigationRoute("muaGiai", "Mùa giải", Icons.Default.Star),
@@ -117,15 +113,15 @@ fun AppNavigation() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = homeRoute,
+            startDestination = "muaGiai",
             modifier = Modifier.fillMaxSize().background(DarkColorScheme.background)
         ) {
             val modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding());
             composable("login") { LoginScreen(navController, modifier) }
             composable("signUp") { SignUpScreen(navController, modifier) }
             composable("baoCao") { BaoCaoScreen(navController, modifier) }
-            composable("ghiNhan/{maTD}", arguments = listOf(navArgument("maTD") { type = NavType.IntType})) { backStackEntry ->
-                GhiNhanScreen(backStackEntry.arguments?.getInt("maTD") ?: 1, navController, modifier)
+            composable("banThang/{maTD}", arguments = listOf(navArgument("maTD") { type = NavType.IntType})) { backStackEntry ->
+                BanThangScreen(backStackEntry.arguments?.getInt("maTD") ?: 1, navController, modifier)
             }
             composable("hoSo") { KetQuaTranDauScreen(navController, modifier) }
             composable("lapLich") { LapLichScreen(navController, modifier) }
@@ -139,7 +135,13 @@ fun AppNavigation() {
                 CauThuInputScreen(backStackEntry.arguments?.getInt("maDoi") ?: 0, navController, modifier)
             }
             composable("doiBongInput") { DoiBongInputScreen(navController, modifier) }
-            composable("banThangInput") { BanThangInputScreen(navController, modifier) }
+            composable("banThangInput/{maTD}", arguments = listOf(navArgument("maTD") { type = NavType.IntType})) { backStackEntry ->
+                if (backStackEntry.arguments == null) {
+                    navController.popBackStack();
+                    return@composable;
+                }
+                BanThangInputScreen(backStackEntry.arguments!!.getInt("maTD"), navController, modifier)
+            }
             composable("lichThiDauInput") { LichThiDauInputScreen(navController, modifier) }
             composable("muaGiaiInput") { MuaGiaiInputScreen(navController, modifier) }
         }

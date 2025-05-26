@@ -99,57 +99,17 @@ fun CauThuScreen(
         },
         containerColor = DarkColorScheme.background,
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-    ) { it
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
+    ) { innerPadding ->
+        // Danh sách cầu thủ
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth()
                 .background(DarkColorScheme.background)
                 .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            contentPadding = innerPadding,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Header với icon Back và Search
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp, bottom = 24.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.White,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clickable { /* Handle back click */ }
-                )
-                Text(
-                    text = "Cầu Thủ",
-                    style = TextStyle(
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        textAlign = TextAlign.Center
-                    )
-                )
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search",
-                    tint = Color.Gray,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clickable { /* Handle search click */ }
-                )
-            }
-
-            // Danh sách cầu thủ
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(cauThus) { cauThu ->
-                    PlayerCard(player = cauThu)
-                }
+            items(cauThus) { cauThu ->
+                PlayerCard(player = cauThu)
             }
         }
     }

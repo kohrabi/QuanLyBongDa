@@ -13,7 +13,7 @@ import java.time.LocalDateTime
 data class LoaiCT(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(index = true)
-    val maLCT : Int,
+    val maLCT : Int = 0,
     val tenLCT : String,
     val soCauThuToiDa : Int,
 )

@@ -38,7 +38,7 @@ data class BanThang(
     val maCT: Int,
     val maLBT: Int,
     @ColumnInfo(defaultValue = "false")
-    val deleted : Boolean?,
+    val deleted : Boolean? = false,
 ) {
     @Ignore var side : String = "";
     @Ignore var tenCT : String = "";

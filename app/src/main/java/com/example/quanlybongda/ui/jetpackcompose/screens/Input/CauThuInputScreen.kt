@@ -1,5 +1,6 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens.Input
 
+import android.widget.Toast
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputTextField
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -17,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
@@ -26,11 +28,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.Database.Schema.CauThu
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputDatePicker
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputDropDownMenu
 import com.example.quanlybongda.ui.jetpackcompose.screens.OptionValue
 import com.example.quanlybongda.ui.jetpackcompose.screens.convertLocalDateTimeToMillis
 import com.example.quanlybongda.ui.jetpackcompose.screens.convertMillisToLocalDateTime
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
 // import androidx.compose.ui.geometry.Offset // Cần nếu dùng Offset trong Brush
@@ -38,17 +43,39 @@ import java.time.LocalDateTime
 @Composable
 fun CauThuInputScreen(
     maDoi: Int,
-    appController: NavController,
+    navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
+    val context = LocalContext.current;
+    val coroutineScope = rememberCoroutineScope()
     var loaiCTOptions by remember { mutableStateOf(listOf<OptionValue>()) }
 
     var tenCT by remember { mutableStateOf("") }
     var ngaySinh by remember { mutableStateOf(LocalDateTime.now()) }
     var loaiCT by remember { mutableStateOf(OptionValue(0, "")) }
     var ghiChu by remember { mutableStateOf("") }
+    var soAo by remember { mutableStateOf("") }
+    val onClick = {
+        coroutineScope.launch {
+            if (soAo.toIntOrNull() == null) {
+                Toast.makeText(context, "WARNING: soAo không hợp lệ", Toast.LENGTH_SHORT);
+                return@launch;
+            }
+            viewModel.cauThuDAO.upsertCauThu(
+                CauThu(
+                    tenCT = tenCT,
+                    ngaySinh = ngaySinh.toLocalDate(),
+                    maLCT = loaiCT.value,
+                    maDoi = maDoi,
+                    ghiChu = ghiChu,
+                    soAo = soAo.toInt(),
+                )
+            )
+            delay(500);
+            navController.popBackStack()
+        }
+    };
 
     LaunchedEffect(Unit) {
         val loaiCTs = viewModel.cauThuDAO.selectAllLoaiCT();
@@ -57,6 +84,7 @@ fun CauThuInputScreen(
 
     Scaffold(
         backgroundColor = Color(0xFF181928),
+        modifier = modifier.padding(top = 24.dp)
     ) { innerScaffoldPadding ->
         Column(
             modifier = Modifier
@@ -88,13 +116,16 @@ fun CauThuInputScreen(
                 InputTextField(ghiChu, "Ghi chú", { ghiChu = it }, modifier = Modifier.height(100.dp))
                 Spacer(modifier = Modifier.height(32.dp))
 
+                InputTextField(soAo, "Số áo", { soAo = it })
+                Spacer(modifier = Modifier.height(32.dp))
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     val buttonModifier = Modifier.weight(1f).height(48.dp)
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = { navController.popBackStack() },
                         shape = RoundedCornerShape(7.dp),
                         contentPadding = PaddingValues(),
                         modifier = buttonModifier,
@@ -106,11 +137,11 @@ fun CauThuInputScreen(
                             ),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("New Player", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text("Cancel", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = { onClick() },
                         shape = RoundedCornerShape(7.dp),
                         contentPadding = PaddingValues(),
                         modifier = buttonModifier,

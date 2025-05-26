@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 data class VongTD(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(index = true)
-    val maVTD : Int,
+    val maVTD : Int = 0,
     val tenVTD : String,
 )
 

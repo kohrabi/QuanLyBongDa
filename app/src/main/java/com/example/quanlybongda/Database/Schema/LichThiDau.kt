@@ -53,27 +53,24 @@ import java.time.LocalDateTime
             childColumns = ["doiThang"],
             onDelete = ForeignKey.CASCADE
         ),
-
         ForeignKey(
             entity = TrongTai::class,
             parentColumns = ["maTT"],
             childColumns = ["maTT"],
             onDelete = ForeignKey.CASCADE
         ),
-
-
     )
 )
 data class LichThiDau(
     @PrimaryKey(autoGenerate = true)
-    val maTD : Int,
+    val maTD : Int = 0,
     val maMG: Int,
     val maVTD : Int,
     val maSan : Int,
 
     val doiMot : Int,
     val doiHai : Int,
-    val doiThang : Int?,
+    val doiThang : Int? = null,
 
     val ngayGioDuKien : LocalDateTime = LocalDateTime.now(),
     val ngayGioThucTe : LocalDateTime = LocalDateTime.now(),
@@ -81,7 +78,7 @@ data class LichThiDau(
     val thoiGianDaThiDau : Float,
     val maTT : Int,
     @ColumnInfo(defaultValue = "false")
-    val deleted : Boolean?,
+    val deleted : Boolean? = false,
 ) {
     @Ignore var tenDoiMot: String? = null;
     @Ignore var tenDoiHai: String? = null;

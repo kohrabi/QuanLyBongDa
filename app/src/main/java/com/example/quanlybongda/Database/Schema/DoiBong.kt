@@ -30,12 +30,12 @@ import java.time.LocalDateTime
 )
 data class DoiBong(
     @PrimaryKey(autoGenerate = true)
-    val maDoi : Int,
+    val maDoi : Int = 0,
     val tenDoi : String,
     val maSan : Int,
     val maMG : Int,
     @ColumnInfo(defaultValue = "false")
-    val deleted : Boolean?,
+    val deleted : Boolean? = false,
 ) {
     @Ignore var tenSan : String = ""
 }

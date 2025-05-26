@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 data class ViTri(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(index = true)
-    val maVT : Int,
+    val maVT : Int = 0,
     val tenVT : String,
 )
 

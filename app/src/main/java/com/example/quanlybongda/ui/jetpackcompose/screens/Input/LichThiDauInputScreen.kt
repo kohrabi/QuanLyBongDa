@@ -1,6 +1,7 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens.Input
 
 // import androidx.compose.ui.geometry.Offset // Cần nếu dùng Offset trong Brush
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -9,9 +10,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,35 +29,83 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.Database.Schema.DoiBong
+import com.example.quanlybongda.Database.Schema.LichThiDau
+import com.example.quanlybongda.Database.Schema.Loai.SanNha
+import com.example.quanlybongda.navigatePopUpTo
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputDatePicker
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputDropDownMenu
+import com.example.quanlybongda.ui.jetpackcompose.screens.InputTextField
 import com.example.quanlybongda.ui.jetpackcompose.screens.OptionValue
 import com.example.quanlybongda.ui.jetpackcompose.screens.convertLocalDateTimeToMillis
 import com.example.quanlybongda.ui.jetpackcompose.screens.convertMillisToLocalDateTime
+import com.example.quanlybongda.ui.theme.darkContentBackground
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.lang.StackWalker.Option
 import java.time.LocalDateTime
 
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun LichThiDauInputScreen(
-    appController: NavController,
+    navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
+    val context = LocalContext.current;
+    val coroutineScope = rememberCoroutineScope()
+    val currentMuaGiai by DatabaseViewModel.currentMuaGiai.collectAsState()
+    var doiBongs by remember { mutableStateOf(listOf<DoiBong>()) }
     var doiBongOptions by remember { mutableStateOf(listOf<OptionValue>()) }
     var vongTDOptions by remember { mutableStateOf(listOf<OptionValue>()) }
     var doiThangOptions by remember { mutableStateOf(listOf<OptionValue>()) }
+    var trongTaiOptions by remember { mutableStateOf(listOf<OptionValue>()) }
 
+    var vongTD by remember { mutableStateOf(OptionValue.DEFAULT) }
     var doiMot by remember { mutableStateOf(OptionValue.DEFAULT) }
     var doiHai by remember { mutableStateOf(OptionValue.DEFAULT) }
-    var vongTD by remember { mutableStateOf(OptionValue.DEFAULT) }
     var doiThang by remember { mutableStateOf(OptionValue.DEFAULT) }
+
     var ngayGioDuKien by remember { mutableStateOf(LocalDateTime.now()) }
     var ngayGioThucTe by remember { mutableStateOf(LocalDateTime.now()) }
+    var trongTai by remember { mutableStateOf(OptionValue.DEFAULT) }
+    var thoiGianDaThiDau by remember { mutableStateOf("") }
+    val onClick = {
+        coroutineScope.launch {
+            if (currentMuaGiai == null) {
+                Toast.makeText(context, "WARNING: muaGiai không hợp lệ", Toast.LENGTH_SHORT);
+                navigatePopUpTo(navController, "muaGiai");
+                return@launch;
+            }
+            if (thoiGianDaThiDau.toFloatOrNull() == null) {
+                Toast.makeText(context, "WARNING: thoiGianDaThiDau không hợp lệ", Toast.LENGTH_SHORT);
+                navigatePopUpTo(navController, "muaGiai");
+                return@launch;
+            }
+            viewModel.lichThiDauDAO.upsertLichThiDau(
+                LichThiDau(
+                    maMG = currentMuaGiai!!.maMG,
+                    maVTD = vongTD.value,
+                    maSan = doiBongs.find { it.maDoi == doiMot.value }!!.maSan,
+                    doiMot = doiMot.value,
+                    doiHai = doiHai.value,
+                    doiThang = (if (doiThang.value == 0) null else doiThang.value),
+                    ngayGioDuKien = ngayGioDuKien,
+                    ngayGioThucTe = ngayGioThucTe,
+                    thoiGianDaThiDau = thoiGianDaThiDau.toFloat(),
+                    maTT = trongTai.value,
+                )
+            )
+            delay(500);
+            navController.popBackStack()
+        }
+    };
 
     LaunchedEffect(Unit) {
-        doiBongOptions = viewModel.doiBongDAO.selectAllDoiBong().map { OptionValue(value = it.maDoi, label = it.tenDoi) };
+        doiBongs = viewModel.doiBongDAO.selectAllDoiBong();
+        trongTaiOptions = viewModel.lichThiDauDAO.selectAllTrongTai().map { OptionValue(value = it.maMG, label = it.tenTT) };
+        doiBongOptions = doiBongs.map { OptionValue(value = it.maDoi!!, label = it.tenDoi) };
         vongTDOptions = viewModel.lichThiDauDAO.selectAllVongTD().map { OptionValue(it.maVTD, it.tenVTD) };
     }
 
@@ -69,8 +120,8 @@ fun LichThiDauInputScreen(
     }
 
     Scaffold(
-        backgroundColor = Color(0xFF181928),
-        modifier = modifier
+        backgroundColor = darkContentBackground,
+        modifier = modifier.padding(top = 24.dp)
     ) { innerScaffoldPadding ->
         Column(
             modifier = Modifier
@@ -78,42 +129,6 @@ fun LichThiDauInputScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(260.dp)
-//            ) {
-//                Column(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .padding(16.dp),
-//                    verticalArrangement = Arrangement.SpaceBetween
-//                ) {
-//                    Row(
-//                        horizontalArrangement = Arrangement.SpaceBetween,
-//                        verticalAlignment = Alignment.CenterVertically,
-//                        modifier = Modifier.fillMaxWidth()
-//                    ) {
-//                        AsyncImage(
-//                            model = ImageRequest.Builder(context)
-//                                //.data("https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/937dcb20-0c08-4765-8b8b-adfbcf74189f") // THAY THẾ
-//                                .data(R.drawable.football_stadium) // << THAY BẰNG TÊN FILE DRAWABLE CỦA BẠN
-//                                .crossfade(true).build(),
-//                            contentDescription = "Overlay Logo 1",
-//                            modifier = Modifier.width(54.dp).height(21.dp).clip(RoundedCornerShape(32.dp))
-//                        )
-//                        AsyncImage(
-//                            model = ImageRequest.Builder(context)
-//                                //.data("https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/5207b008-4e8b-40e8-a4c0-932a5065e653") // THAY THẾ
-//                                .data(R.drawable.football_stadium) // << THAY BẰNG TÊN FILE DRAWABLE CỦA BẠN
-//                                .crossfade(true).build(),
-//                            contentDescription = "Overlay Logo 2",
-//                            modifier = Modifier.width(66.dp).height(11.dp)
-//                        )
-//                    }
-//                    // Phần "Team Name" (nếu có)
-//                }
-//            }
 
             Column(
                 modifier = Modifier
@@ -153,6 +168,12 @@ fun LichThiDauInputScreen(
                     onDismiss = {});
                 Spacer(modifier = Modifier.height(16.dp))
 
+                InputTextField(thoiGianDaThiDau, "Thời gian đã thi đấu", { thoiGianDaThiDau = it })
+                Spacer(modifier = Modifier.height(16.dp))
+
+                InputDropDownMenu("Trọng tài", trongTaiOptions, trongTai, { trongTai = it })
+                Spacer(modifier = Modifier.height(16.dp))
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -161,7 +182,7 @@ fun LichThiDauInputScreen(
                         .weight(1f)
                         .height(48.dp)
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = { navController.popBackStack() },
                         shape = RoundedCornerShape(7.dp),
                         contentPadding = PaddingValues(),
                         modifier = buttonModifier,
@@ -181,11 +202,11 @@ fun LichThiDauInputScreen(
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("New Player", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text("Cancel", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = { onClick() },
                         shape = RoundedCornerShape(7.dp),
                         contentPadding = PaddingValues(),
                         modifier = buttonModifier,

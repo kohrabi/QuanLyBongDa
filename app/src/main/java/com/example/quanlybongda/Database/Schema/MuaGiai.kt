@@ -16,12 +16,12 @@ import java.time.LocalDateTime
 data class MuaGiai (
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(index = true)
-    val maMG : Int,
+    val maMG : Int = 0,
     val tenMG : String,
     val ngayDienRa : LocalDate = LocalDate.now(),
     val ngayKetThuc : LocalDate = LocalDate.now(),
     @ColumnInfo(defaultValue = "false")
-    val deleted : Boolean?,
+    val deleted : Boolean? = false,
 )
 
 @Entity(

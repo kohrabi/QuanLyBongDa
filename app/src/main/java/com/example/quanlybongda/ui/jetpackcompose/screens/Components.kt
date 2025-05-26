@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.quanlybongda.ui.theme.Purple40
 import com.example.quanlybongda.ui.theme.Purple80
+import com.example.quanlybongda.ui.theme.darkCardBackground
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
@@ -63,7 +64,7 @@ fun InputTextField(
         label = { Text(label) },
         modifier = modifier
             .fillMaxWidth()
-            .background(Color(0xFF222232), shape = RoundedCornerShape(6.dp)),
+            .background(darkCardBackground, shape = RoundedCornerShape(6.dp)),
 //        colors = TextFieldDefaults.colors()
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = Color.Transparent,
@@ -111,7 +112,7 @@ fun InputDropDownMenu(
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = !expanded },
-        modifier = Modifier.background(Purple80, shape = RoundedCornerShape(6.dp)),
+        modifier = Modifier.background(darkCardBackground, shape = RoundedCornerShape(6.dp)),
     ) {
         TextField(
             value = selectedOption.label,
@@ -223,7 +224,7 @@ fun InputDatePicker(
         enabled = false,
         modifier = modifier
             .fillMaxWidth()
-            .background(Color(0xFF222232), shape = RoundedCornerShape(6.dp))
+            .background(darkCardBackground, shape = RoundedCornerShape(6.dp))
             .clickable { visible = true },
 
     )
