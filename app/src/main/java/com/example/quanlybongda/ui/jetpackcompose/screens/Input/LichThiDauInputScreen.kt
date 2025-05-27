@@ -35,6 +35,7 @@ import com.example.quanlybongda.Database.Schema.Loai.SanNha
 import com.example.quanlybongda.navigatePopUpTo
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputDatePicker
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputDropDownMenu
+import com.example.quanlybongda.ui.jetpackcompose.screens.InputFloatField
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputTextField
 import com.example.quanlybongda.ui.jetpackcompose.screens.OptionValue
 import com.example.quanlybongda.ui.jetpackcompose.screens.convertLocalDateTimeToMillis
@@ -70,16 +71,11 @@ fun LichThiDauInputScreen(
     var ngayGioDuKien by remember { mutableStateOf(LocalDateTime.now()) }
     var ngayGioThucTe by remember { mutableStateOf(LocalDateTime.now()) }
     var trongTai by remember { mutableStateOf(OptionValue.DEFAULT) }
-    var thoiGianDaThiDau by remember { mutableStateOf("") }
+    var thoiGianDaThiDau by remember { mutableStateOf(0.0f) }
     val onClick = {
         coroutineScope.launch {
             if (currentMuaGiai == null) {
                 Toast.makeText(context, "WARNING: muaGiai không hợp lệ", Toast.LENGTH_SHORT).show();
-                navigatePopUpTo(navController, "muaGiai");
-                return@launch;
-            }
-            if (thoiGianDaThiDau.toFloatOrNull() == null) {
-                Toast.makeText(context, "WARNING: thoiGianDaThiDau không hợp lệ", Toast.LENGTH_SHORT).show();
                 navigatePopUpTo(navController, "muaGiai");
                 return@launch;
             }
@@ -186,7 +182,7 @@ fun LichThiDauInputScreen(
                     onDismiss = {});
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputTextField(
+                InputFloatField(
                     value = thoiGianDaThiDau,
                     label = "Thời gian đã thi đấu",
                     onValueChange = { thoiGianDaThiDau = it })

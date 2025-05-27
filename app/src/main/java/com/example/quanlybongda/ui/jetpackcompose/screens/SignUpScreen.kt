@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -40,9 +41,9 @@ fun SignUpScreen(
     viewModel: DatabaseViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current;
-    var usernameError by remember { mutableStateOf(false) }
-    var emailError by remember { mutableStateOf(false) }
-    var emailErrorString by remember { mutableStateOf("") }
+    var usernameError by remember { mutableStateOf(InputError()) }
+    var emailError by remember { mutableStateOf(InputError()) }
+    var passwordError by remember { mutableStateOf(InputError()) }
 
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -50,21 +51,33 @@ fun SignUpScreen(
     val scope = rememberCoroutineScope()
 
     val onSignUpClick : () -> Unit = {
-        scope.launch {
-            try {
-                viewModel.createUser(email, username, password)
-                navController.navigate("login");
-            }
-            catch (e : Exception) {
-                if (e.message == "UsernameFormat")
-                    usernameError = true;
-                else if (e.message == "EmailFormat") {
-                    emailError = true;
-                    emailErrorString = "Email có format không đúng";
+        var isError = false;
+        if (username.isEmpty()) {
+            usernameError = InputError(true, "Username không thể trống");
+            isError = true;
+        }
+        if (email.isEmpty()) {
+            emailError = InputError(true, "Email không thể trống");
+            isError = true;
+        }
+        if (password.isEmpty()) {
+            passwordError = InputError(true, "Password không thể trống");
+            isError = true;
+        }
+
+        if (!isError) {
+            scope.launch {
+                try {
+                    viewModel.createUser(email, username, password)
+                    navController.navigate("login");
                 }
-                else if (e.message == "EmailAvailability") {
-                    emailError = true;
-                    emailErrorString = "Email đã tồn tại";
+                catch (e : Exception) {
+                    if (e.message == "UsernameFormat")
+                        usernameError = InputError(true, "Username phải có lớn hơn 8 kí tự và bé hơn 32 kí tự");
+                    else if (e.message == "EmailFormat")
+                        emailError = InputError(true, "Email có format không đúng");
+                    else if (e.message == "EmailAvailability")
+                        emailError = InputError(true, "Email đã tồn tại");
                 }
             }
         }
@@ -120,9 +133,10 @@ fun SignUpScreen(
                 InputTextField(
                     label = "Email",
                     value = email,
-                    onValueChange = { email = it; emailError = false },
-                    isError = emailError,
-                    errorMessage = emailErrorString,
+                    onValueChange = { email = it; emailError.isError = false; },
+                    isError = emailError.isError,
+                    errorMessage = emailError.errorMessage,
+                    keyboardOption = KeyboardOptions(keyboardType = KeyboardType.Email)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -130,9 +144,9 @@ fun SignUpScreen(
                 InputTextField(
                     label = "Username",
                     value = username,
-                    onValueChange = { username = it; usernameError = false },
-                    isError = usernameError,
-                    errorMessage = "Username phải có lớn hơn 8 kí tự và bé hơn 32 kí tự",
+                    onValueChange = { username = it; usernameError.isError = false; },
+                    isError = usernameError.isError,
+                    errorMessage = usernameError.errorMessage,
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -140,9 +154,9 @@ fun SignUpScreen(
                 InputTextField(
                     label = "Password",
                     value = password,
-                    onValueChange = { password = it },
-                    isError = false,
-                    errorMessage = "",
+                    onValueChange = { password = it; passwordError.isError = false; },
+                    isError = passwordError.isError,
+                    errorMessage = passwordError.errorMessage,
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         val image = if (passwordVisible)
@@ -153,6 +167,7 @@ fun SignUpScreen(
                             Icon(imageVector = image, contentDescription = null, tint = Color.LightGray)
                         }
                     },
+                    keyboardOption = KeyboardOptions(keyboardType = KeyboardType.Password)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 

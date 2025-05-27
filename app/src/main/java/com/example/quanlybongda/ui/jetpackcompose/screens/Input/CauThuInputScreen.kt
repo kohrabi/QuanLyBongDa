@@ -31,6 +31,7 @@ import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.Schema.CauThu
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputDatePicker
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputDropDownMenu
+import com.example.quanlybongda.ui.jetpackcompose.screens.InputIntField
 import com.example.quanlybongda.ui.jetpackcompose.screens.OptionValue
 import com.example.quanlybongda.ui.jetpackcompose.screens.convertLocalDateTimeToMillis
 import com.example.quanlybongda.ui.jetpackcompose.screens.convertMillisToLocalDateTime
@@ -55,13 +56,9 @@ fun CauThuInputScreen(
     var ngaySinh by remember { mutableStateOf(LocalDateTime.now()) }
     var loaiCT by remember { mutableStateOf(OptionValue(0, "")) }
     var ghiChu by remember { mutableStateOf("") }
-    var soAo by remember { mutableStateOf("") }
+    var soAo by remember { mutableStateOf(0) }
     val onClick = {
         coroutineScope.launch {
-            if (soAo.toIntOrNull() == null) {
-                Toast.makeText(context, "WARNING: soAo không hợp lệ", Toast.LENGTH_SHORT).show();
-                return@launch;
-            }
             viewModel.cauThuDAO.upsertCauThu(
                 CauThu(
                     tenCT = tenCT,
@@ -124,7 +121,7 @@ fun CauThuInputScreen(
                     onValueChange = { ghiChu = it }, modifier = Modifier.height(100.dp))
                 Spacer(modifier = Modifier.height(32.dp))
 
-                InputTextField(value = soAo, label = "Số áo", onValueChange = { soAo = it })
+                InputIntField(value = soAo, label = "Số áo", onValueChange = { soAo = it })
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Row(

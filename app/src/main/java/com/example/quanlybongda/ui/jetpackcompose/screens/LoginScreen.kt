@@ -3,6 +3,7 @@ package com.example.quanlybongda.ui.jetpackcompose.screens
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -31,15 +32,41 @@ fun LoginScreen(
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel()
 ) {
+    var userError by remember { mutableStateOf(InputError()) }
+    var passwordError by remember { mutableStateOf(InputError()) }
+
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope();
 
     val onSignInClick : () -> Unit = {
-        scope.launch {
-            if (viewModel.signIn(username, password))
-                navigatePopUpTo(navController, "muaGiai");
+        var isError = false;
+        if (username.isEmpty()) {
+            userError = InputError(true, "Username trống");
+            isError = true;
         }
+        if (password.isEmpty()) {
+            passwordError = InputError(true, "Password trống");
+            isError = true;
+        }
+        if (!isError) {
+            scope.launch {
+                try {
+                    if (viewModel.signIn(username, password))
+                        navigatePopUpTo(navController, "muaGiai");
+                } catch (e: Exception) {
+                    if (e.message == "IncorrectUsername")
+                        userError = InputError(true, "Không tồn tại user");
+                    else if (e.message == "IncorrectPassword")
+                        passwordError = InputError(true, "Không tồn tại password");
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(username, password) {
+        userError = InputError();
+        passwordError = InputError();
     }
 
     Box(
@@ -89,9 +116,12 @@ fun LoginScreen(
 
                 // Username
                 InputTextField(
-                    value = username,
                     label = "Username",
-                    onValueChange = { username = it })
+                    value = username,
+                    onValueChange = { username = it },
+                    isError = userError.isError,
+                    errorMessage = userError.errorMessage,
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -100,8 +130,8 @@ fun LoginScreen(
                     label = "Password",
                     value = password,
                     onValueChange = { password = it },
-                    isError = false,
-                    errorMessage = "",
+                    isError = passwordError.isError,
+                    errorMessage = passwordError.errorMessage,
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         val image = if (passwordVisible)
@@ -112,6 +142,7 @@ fun LoginScreen(
                             Icon(imageVector = image, contentDescription = null, tint = Color.LightGray)
                         }
                     },
+                    keyboardOption = KeyboardOptions(keyboardType = KeyboardType.Password)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 

@@ -30,6 +30,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.Schema.BanThang
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputDropDownMenu
+import com.example.quanlybongda.ui.jetpackcompose.screens.InputFloatField
+import com.example.quanlybongda.ui.jetpackcompose.screens.InputIntField
 import com.example.quanlybongda.ui.jetpackcompose.screens.OptionValue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -52,17 +54,13 @@ fun BanThangInputScreen(
 
     var doiBong by remember { mutableStateOf(OptionValue.DEFAULT) }
     var cauThu by remember { mutableStateOf(OptionValue.DEFAULT) }
-    var thoiDiem by remember { mutableStateOf("") }
+    var thoiDiem by remember { mutableStateOf(0.0f) }
     var loaiBT by remember { mutableStateOf(OptionValue.DEFAULT) }
     val onClick = {
         coroutineScope.launch {
-            if (thoiDiem.toFloatOrNull() == null) {
-                Toast.makeText(context, "WARNING: thoiDiem không hợp lệ", Toast.LENGTH_SHORT).show();
-                return@launch;
-            }
             viewModel.banThangDAO.upsertBanThang(BanThang(
                 maTD = maTD,
-                thoiDiem = thoiDiem.toFloat(),
+                thoiDiem = thoiDiem,
                 maCT = cauThu.value,
                 maLBT = loaiBT.value,
                 deleted = false,
@@ -127,7 +125,7 @@ fun BanThangInputScreen(
                     onOptionSelected = { cauThu = it })
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputTextField(
+                InputFloatField(
                     value = thoiDiem,
                     label = "Thời điểm",
                     onValueChange = { thoiDiem = it })

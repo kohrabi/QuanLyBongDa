@@ -1,10 +1,8 @@
 package com.example.quanlybongda.Database
 
 import android.app.Application
-import android.provider.ContactsContract.CommonDataKinds.Email
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.quanlybongda.Database.DAO.*
 import com.example.quanlybongda.Database.DAO.User.*
 import com.example.quanlybongda.Database.ReturnTypes.*
@@ -13,12 +11,9 @@ import com.example.quanlybongda.Database.Schema.User.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
-import kotlin.math.exp
 
 @HiltViewModel
 class DatabaseViewModel @Inject constructor(application : Application) : ViewModel() {
@@ -155,9 +150,9 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
         }
     }
 
-    suspend fun checkEmailAvailability(email: String) : Boolean {
+    suspend fun isEmailAvailable(email: String) : Boolean {
         val row = userDAO.selectUserFromEmail(email);
-        return row == null;
+        return row != null;
     }
 
     suspend fun createUser(email: String, username: String, password: String) : User? {
@@ -165,7 +160,7 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
             throw java.lang.Exception("UsernameFormat");
         if (!verifyEmailInput(email))
             throw java.lang.Exception("EmailFormat")
-        if (checkEmailAvailability(email))
+        if (isEmailAvailable(email))
             throw java.lang.Exception("EmailAvailability");
         val passwordHash = hashPassword(password);
         val user = User(
@@ -209,9 +204,9 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
 
     suspend fun signIn(username: String, password: String) : Boolean {
         val passwordHash = hashPassword(password);
-        val user = userDAO.selectUserFromUsername(username) ?: return false;
-        if (user.passwordHash == passwordHash)
-            return true;
-        return false;
+        val user = userDAO.selectUserFromUsername(username) ?: throw Exception("IncorrectUsername");
+        if (user.passwordHash != passwordHash)
+            throw Exception("IncorrectPassword");
+        return true;
     }
 }

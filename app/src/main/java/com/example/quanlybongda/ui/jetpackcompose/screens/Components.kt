@@ -6,20 +6,15 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
@@ -40,12 +35,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.quanlybongda.ui.theme.Pink80
-import com.example.quanlybongda.ui.theme.Purple40
-import com.example.quanlybongda.ui.theme.Purple80
 import com.example.quanlybongda.ui.theme.darkCardBackground
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -58,6 +51,10 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
+data class InputError(
+    var isError: Boolean = false,
+    var errorMessage: String = "",
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,6 +66,7 @@ fun InputTextField(
     errorMessage : String = "",
     visualTransformation : VisualTransformation = VisualTransformation.None,
     trailingIcon : @Composable () -> Unit = {},
+    keyboardOption: KeyboardOptions = KeyboardOptions.Default,
     modifier: Modifier = Modifier
 ) {
     val supportingText : @Composable (() -> Unit) = {
@@ -89,19 +87,76 @@ fun InputTextField(
             if (isError)
                 Icon(imageVector = Icons.Default.Error, contentDescription = null, tint = Pink80)
         },
-//        colors = TextFieldDefaults.colors()
+        keyboardOptions = keyboardOption,
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = Color.Transparent,
             unfocusedBorderColor = Color.Transparent,
             focusedTextColor = Color.White,
-//            textColor = Color.White,
+            unfocusedTextColor = Color.White,
             cursorColor = Color.White,
             focusedLabelColor = Color.White,
             unfocusedLabelColor = Color.LightGray,
+            errorTextColor = Pink80,
+            errorLabelColor = Pink80,
             errorSupportingTextColor = Pink80,
             errorBorderColor = Pink80,
-
         )
+    )
+}
+
+@Composable
+fun InputIntField(
+    label : String, // this must be unique
+    value : Int,
+    onValueChange : (Int) -> Unit,
+    error: Boolean = false,
+    errorMessage : String = "",
+    modifier: Modifier = Modifier
+) {
+    var isError by remember(label) { mutableStateOf(false) }
+    InputTextField(
+        label = label,
+        value = value.toString(),
+        onValueChange = {
+            if (it.toIntOrNull() == null) {
+                isError = true;
+            }
+            else {
+                onValueChange(it.toInt());
+            }
+        },
+        isError = isError && error,
+        errorMessage = if (error) errorMessage else "Vui lòng nhập vào dữ liệu số nguyên",
+        keyboardOption = KeyboardOptions(keyboardType = KeyboardType.Number),
+        modifier = modifier
+    )
+}
+
+@Composable
+fun InputFloatField(
+    label : String, // this must be unique
+    value : Float,
+    onValueChange : (Float) -> Unit,
+    error: Boolean = false,
+    errorMessage : String = "",
+    modifier: Modifier = Modifier
+) {
+    var isError by remember(label) { mutableStateOf(false) }
+    InputTextField(
+        label = label,
+        value = value.toString(),
+        onValueChange = {
+            if (it.toFloatOrNull() == null) {
+                isError = true;
+            }
+            else {
+                onValueChange(it.toFloat());
+            }
+        },
+        isError = isError && error,
+        errorMessage = if (error) errorMessage else "Vui lòng nhập vào dữ liệu số thập phân",
+        keyboardOption = KeyboardOptions(keyboardType = KeyboardType.Number),
+        modifier = modifier
     )
 }
 
