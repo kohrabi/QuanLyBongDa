@@ -1,5 +1,6 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
+import android.service.autofill.UserData
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,10 +10,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,6 +27,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.Exceptions.*
+import com.example.quanlybongda.Database.UserDataStore
 import com.example.quanlybongda.navigatePopUpTo
 import kotlinx.coroutines.launch
 
@@ -33,12 +37,14 @@ fun LoginScreen(
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current;
     var userError by remember { mutableStateOf(InputError()) }
     var passwordError by remember { mutableStateOf(InputError()) }
 
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope();
+    val dataStore by remember { mutableStateOf(UserDataStore(context)) };
 
     val onLogInClick : () -> Unit = {
         var isError = false;
@@ -53,8 +59,10 @@ fun LoginScreen(
         if (!isError) {
             scope.launch {
                 try {
-                    if (viewModel.loginIn(username, password))
+                    if (viewModel.loginIn(username, password)) {
+                        dataStore.saveLoggedIn(true, context);
                         navigatePopUpTo(navController, "muaGiai");
+                    }
                 } catch (e: RuntimeException) {
                     if (e is IncorrectUsername)
                         userError = InputError(true, "Không tồn tại user");
@@ -62,6 +70,13 @@ fun LoginScreen(
                         passwordError = InputError(true, "Không tồn tại password");
                 }
             }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        dataStore.loggedInFlow.collect { loggedIn ->
+            if (loggedIn)
+                navController.navigate("muaGiai");
         }
     }
 

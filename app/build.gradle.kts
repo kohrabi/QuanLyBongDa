@@ -71,6 +71,10 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.3.1")
+
+
 
     // Jetpack Compose
     implementation(platform("androidx.compose:compose-bom:2024.05.00")) // Sử dụng BOM để quản lý phiên bản Compose
