@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
+import com.example.quanlybongda.Database.Exceptions.*
 
 @HiltViewModel
 class DatabaseViewModel @Inject constructor(application : Application) : ViewModel() {
@@ -157,11 +158,11 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
 
     suspend fun createUser(email: String, username: String, password: String) : User? {
         if (!verifyUsernameInput(username))
-            throw java.lang.Exception("UsernameFormat");
+            throw UsernameFormat();
         if (!verifyEmailInput(email))
-            throw java.lang.Exception("EmailFormat")
+            throw EmailFormat()
         if (isEmailAvailable(email))
-            throw java.lang.Exception("EmailAvailability");
+            throw EmailAvailability();
         val passwordHash = hashPassword(password);
         val user = User(
             email = email,
@@ -204,9 +205,9 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
 
     suspend fun signIn(username: String, password: String) : Boolean {
         val passwordHash = hashPassword(password);
-        val user = userDAO.selectUserFromUsername(username) ?: throw Exception("IncorrectUsername");
+        val user = userDAO.selectUserFromUsername(username) ?: throw IncorrectUsername();
         if (user.passwordHash != passwordHash)
-            throw Exception("IncorrectPassword");
+            throw IncorrectPassword();
         return true;
     }
 }

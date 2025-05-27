@@ -26,11 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.quanlybongda.Database.AppDatabase
 import com.example.quanlybongda.Database.DatabaseViewModel
-import com.example.quanlybongda.Database.verifyEmailInput
-import com.example.quanlybongda.Database.verifyUsernameInput
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import com.example.quanlybongda.Database.Exceptions.*
 import kotlinx.coroutines.launch
 import okhttp3.Dispatcher
 
@@ -71,12 +67,12 @@ fun SignUpScreen(
                     viewModel.createUser(email, username, password)
                     navController.navigate("login");
                 }
-                catch (e : Exception) {
-                    if (e.message == "UsernameFormat")
+                catch (e : RuntimeException) {
+                    if (e is UsernameFormat)
                         usernameError = InputError(true, "Username phải có lớn hơn 8 kí tự và bé hơn 32 kí tự");
-                    else if (e.message == "EmailFormat")
+                    else if (e is EmailFormat)
                         emailError = InputError(true, "Email có format không đúng");
-                    else if (e.message == "EmailAvailability")
+                    else if (e is EmailAvailability)
                         emailError = InputError(true, "Email đã tồn tại");
                 }
             }

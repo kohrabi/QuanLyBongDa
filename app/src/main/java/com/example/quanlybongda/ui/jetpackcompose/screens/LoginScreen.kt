@@ -23,6 +23,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.Database.Exceptions.*
 import com.example.quanlybongda.navigatePopUpTo
 import kotlinx.coroutines.launch
 
@@ -54,10 +55,10 @@ fun LoginScreen(
                 try {
                     if (viewModel.signIn(username, password))
                         navigatePopUpTo(navController, "muaGiai");
-                } catch (e: Exception) {
-                    if (e.message == "IncorrectUsername")
+                } catch (e: RuntimeException) {
+                    if (e is IncorrectUsername)
                         userError = InputError(true, "Không tồn tại user");
-                    else if (e.message == "IncorrectPassword")
+                    else if (e is IncorrectPassword)
                         passwordError = InputError(true, "Không tồn tại password");
                 }
             }
