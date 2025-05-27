@@ -33,6 +33,7 @@ import com.example.quanlybongda.Database.Schema.DoiBong
 import com.example.quanlybongda.navigatePopUpTo
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputDropDownMenu
 import com.example.quanlybongda.ui.jetpackcompose.screens.OptionValue
+import com.example.quanlybongda.ui.theme.darkColorBackground
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -74,7 +75,7 @@ fun DoiBongInputScreen(
     }
 
     Scaffold(
-        backgroundColor = Color(0xFF181928),
+        backgroundColor = darkColorBackground,
         modifier = modifier.padding(top = 24.dp)
     ) { innerScaffoldPadding ->
         Column(
@@ -117,7 +118,7 @@ fun DoiBongInputScreen(
                             ),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("New Player", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text("Cancel", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                     Button(

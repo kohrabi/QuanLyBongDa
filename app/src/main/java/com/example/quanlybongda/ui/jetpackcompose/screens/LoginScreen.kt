@@ -40,7 +40,7 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope();
 
-    val onSignInClick : () -> Unit = {
+    val onLogInClick : () -> Unit = {
         var isError = false;
         if (username.isEmpty()) {
             userError = InputError(true, "Username trống");
@@ -53,7 +53,7 @@ fun LoginScreen(
         if (!isError) {
             scope.launch {
                 try {
-                    if (viewModel.signIn(username, password))
+                    if (viewModel.loginIn(username, password))
                         navigatePopUpTo(navController, "muaGiai");
                 } catch (e: RuntimeException) {
                     if (e is IncorrectUsername)
@@ -167,7 +167,7 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
-                    onClick = onSignInClick,
+                    onClick = onLogInClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),

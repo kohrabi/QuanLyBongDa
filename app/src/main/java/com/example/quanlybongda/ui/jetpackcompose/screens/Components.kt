@@ -39,6 +39,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.quanlybongda.ui.theme.Pink80
+import com.example.quanlybongda.ui.theme.Purple80
+import com.example.quanlybongda.ui.theme.PurpleGrey80
 import com.example.quanlybongda.ui.theme.darkCardBackground
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -204,12 +206,18 @@ fun InputDropDownMenu(
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier.menuAnchor().fillMaxWidth(), // Required for dropdown to position correctly
             colors = TextFieldDefaults.colors(
-//                focusedBorderColor = Color.Transparent,
-//                unfocusedBorderColor = Color.Transparent,
-//                focusedTextColor = Color.White,
-//                cursorColor = Color.White,
-//                focusedLabelColor = Color.White,
-//                unfocusedLabelColor = Color.LightGray
+                focusedContainerColor = darkCardBackground,
+                unfocusedContainerColor = darkCardBackground,
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                focusedLabelColor = Color.White,
+                unfocusedLabelColor = Color.LightGray,
+                cursorColor = Color.White,
+                disabledTrailingIconColor = Purple80,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedTrailingIconColor = Purple80,
+                unfocusedTrailingIconColor = Purple80
             )
         )
         ExposedDropdownMenu(
@@ -287,28 +295,29 @@ fun InputDatePicker(
             prevDatePicker.selectedDateMillis = datePickerState.selectedDateMillis;
         }
     }
+
     TextField(
         value = selectedDate,
         label = { Text(label) },
         onValueChange = {},
         readOnly = true,
-        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = visible) },
-        colors = TextFieldDefaults.colors(
-//            focusedBorderColor = Color.Transparent,
-//            unfocusedBorderColor = Color.Transparent,
-//            focusedTextColor = Color.White,
-//            cursorColor = Color.White,
-//            disabledTextColor = Color.LightGray,
-//            disabledLabelColor = Color.LightGray,
-//            focusedLabelColor = Color.White,
-//            unfocusedLabelColor = Color.LightGray
-        ),
         enabled = false,
+        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = visible) },
         modifier = modifier
             .fillMaxWidth()
             .background(darkCardBackground, shape = RoundedCornerShape(6.dp))
             .clickable { visible = true },
+        colors = TextFieldDefaults.colors(
 
+            disabledPlaceholderColor = darkCardBackground,
+            disabledContainerColor = darkCardBackground,
+            disabledTextColor = Color.White,
+            disabledLabelColor = Color.White,
+            cursorColor = Color.White,
+            disabledTrailingIconColor = Purple80,
+            disabledIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
+        ),
     )
     if (visible) {
         DatePickerDialog(

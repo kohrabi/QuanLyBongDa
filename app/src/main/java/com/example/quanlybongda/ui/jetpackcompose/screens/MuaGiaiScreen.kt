@@ -92,7 +92,7 @@ fun MuaGiaiScreen(
             )
         },
         containerColor = DarkColorScheme.background,
-        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection).padding(horizontal = 16.dp)
     ) { paddingValues ->
 //        Column(
 //            modifier = Modifier

@@ -141,7 +141,7 @@ fun MuaGiaiInputScreen(
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("New Player", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text("Cancel", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                     Button(

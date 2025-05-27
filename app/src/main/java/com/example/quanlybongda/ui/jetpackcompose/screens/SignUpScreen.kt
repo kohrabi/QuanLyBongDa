@@ -65,7 +65,7 @@ fun SignUpScreen(
             scope.launch {
                 try {
                     viewModel.createUser(email, username, password)
-                    navController.navigate("login");
+                    navController.navigate("muaGiai");
                 }
                 catch (e : RuntimeException) {
                     if (e is UsernameFormat)
