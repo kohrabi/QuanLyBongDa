@@ -75,6 +75,7 @@ fun AppNavigation() {
         BottomNavigationRoute("lapLich", "Lập lịch", Icons.Default.Schedule),
         BottomNavigationRoute("muaGiai", "Mùa giải", Icons.Default.Star),
         BottomNavigationRoute("doiBong", "Đội bóng", Icons.Default.Groups),
+        BottomNavigationRoute("traCuu", "Tra cứu", Icons.Default.Search),
     )
 
     Scaffold(
@@ -127,6 +128,7 @@ fun AppNavigation() {
                 BanThangScreen(backStackEntry.arguments?.getInt("maTD") ?: 1, navController, modifier)
             }
             composable("hoSo") { KetQuaTranDauScreen(navController, modifier) }
+            composable("traCuu") { TraCuuScreen(navController, modifier) }
             composable("lapLich") { LapLichScreen(navController, modifier) }
             composable("muaGiai") { MuaGiaiScreen(navController, modifier) }
             composable("doiBong") { DoiBongScreen(navController, modifier) }

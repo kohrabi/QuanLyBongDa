@@ -98,6 +98,7 @@ fun InputTextField(
     errorMessage : String = "",
     visualTransformation : VisualTransformation = VisualTransformation.None,
     trailingIcon : @Composable () -> Unit = {},
+    leadingIcon : (@Composable () -> Unit)? = null,
     keyboardOption: KeyboardOptions = KeyboardOptions.Default,
     modifier: Modifier = Modifier
 ) {
@@ -114,6 +115,7 @@ fun InputTextField(
             .fillMaxWidth()
             .background(darkCardBackground, shape = RoundedCornerShape(6.dp)),
         visualTransformation = visualTransformation,
+        leadingIcon = leadingIcon,
         trailingIcon = {
             trailingIcon()
             if (isError)
@@ -132,6 +134,8 @@ fun InputTextField(
             errorLabelColor = Pink80,
             errorSupportingTextColor = Pink80,
             errorBorderColor = Pink80,
+            focusedLeadingIconColor = Color.White,
+            unfocusedLeadingIconColor = Color.LightGray,
         )
     )
 }

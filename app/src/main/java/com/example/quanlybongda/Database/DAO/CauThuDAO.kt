@@ -21,8 +21,17 @@ interface CauThuDAO {
     @Query("SELECT * FROM CauThu")
     suspend fun selectAlLCauThu() : List<CauThu>;
 
+    @Query("SELECT * FROM CauThu LIMIT :limit")
+    suspend fun selectCauThuLimit(limit : Int) : List<CauThu>;
+
     @Query("SELECT * FROM LoaiCT")
     suspend fun selectAllLoaiCT() : List<LoaiCT>;
+
+    @Query("""SELECT * FROM CauThu AS CT 
+        WHERE CT.tenCT LIKE :searchArgument OR 
+                CAST(CT.soAo AS TEXT) LIKE :searchArgument OR 
+                CT.ghiChu LIKE :searchArgument""")
+    suspend fun searchCauThu(searchArgument : String) : List<CauThu>;
 
     @Query("""SELECT CT.*, SUM(CASE WHEN LBT.diemBT > 0 THEN LBT.diemBT END ) as banThang FROM CauThu AS CT
         LEFT JOIN BanThang AS BT ON BT.maCT=CT.maCT

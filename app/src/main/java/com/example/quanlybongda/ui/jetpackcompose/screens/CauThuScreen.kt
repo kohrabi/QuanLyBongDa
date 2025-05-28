@@ -149,7 +149,7 @@ fun PlayerCard(player: CauThu) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "${player.maCT}",
+                        text = "${player.soAo}",
                         style = TextStyle(
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
