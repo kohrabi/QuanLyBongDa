@@ -8,13 +8,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.TextButton
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
@@ -26,6 +27,8 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,11 +40,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.quanlybongda.ui.theme.Pink80
 import com.example.quanlybongda.ui.theme.Purple80
-import com.example.quanlybongda.ui.theme.PurpleGrey80
 import com.example.quanlybongda.ui.theme.darkCardBackground
+import com.example.quanlybongda.ui.theme.darkPurple
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
@@ -52,6 +56,32 @@ import java.time.temporal.ChronoField
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+
+@Composable
+fun AppTopBar(
+    title: String,
+    scrollBehavior : TopAppBarScrollBehavior,
+    navigationIcon: @Composable () -> Unit = {},
+) {
+    CenterAlignedTopAppBar(
+        title = {
+            Text(
+                title,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = darkPurple,
+            titleContentColor = Color.White,
+            scrolledContainerColor = darkPurple,
+            navigationIconContentColor = Purple80,
+            actionIconContentColor = Purple80,
+        ),
+        navigationIcon = navigationIcon,
+        scrollBehavior = scrollBehavior
+    )
+}
 
 data class InputError(
     var isError: Boolean = false,
@@ -175,7 +205,8 @@ data class OptionValue(
 fun AddFloatingButton(label: String, onClick : () -> Unit) {
     FloatingActionButton(
         onClick = { onClick() },
-        modifier = Modifier
+        modifier = Modifier,
+        containerColor = Purple80
     ) {
         Icon(Icons.Filled.Add, label)
     }
@@ -228,7 +259,7 @@ fun InputDropDownMenu(
             options.forEachIndexed { index, option ->
                 DropdownMenuItem(
                     onClick = { onOptionSelected(option); expanded = false },
-                    text = {  Text(option.label, style = MaterialTheme.typography.body1) },
+                    text = {  Text(option.label, style = MaterialTheme.typography.bodyLarge) },
                     contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                 )
             }

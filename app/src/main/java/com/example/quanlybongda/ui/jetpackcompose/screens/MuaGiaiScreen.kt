@@ -9,19 +9,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -76,36 +71,19 @@ fun MuaGiaiScreen(
             AddFloatingButton("Tạo mùa giải", onClick = { navController.navigate("muaGiaiInput") })
         },
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        "Đội bóng",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = DarkColorScheme.background,
-                    scrolledContainerColor = DarkColorScheme.background
-                ),
-                scrollBehavior = scrollBehavior,
+            AppTopBar(
+                title = "Mùa giải",
+                scrollBehavior = scrollBehavior
             )
         },
         containerColor = DarkColorScheme.background,
-        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection).padding(horizontal = 16.dp)
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { paddingValues ->
-//        Column(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(paddingValues)
-//                .background(DarkColorScheme.background)
-//                .padding(16.dp),
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
-
             // List of Season Cards
             LazyColumn(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
                     .background(DarkColorScheme.background),
                 contentPadding = paddingValues,
                 verticalArrangement = Arrangement.spacedBy(12.dp)

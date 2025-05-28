@@ -3,12 +3,14 @@ package com.example.quanlybongda
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.BottomNavigation
-import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material.Icon
+import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +32,8 @@ import androidx.navigation.navArgument
 import com.example.quanlybongda.ui.jetpackcompose.screens.*
 import com.example.quanlybongda.ui.jetpackcompose.screens.Input.*
 import com.example.quanlybongda.ui.theme.DarkColorScheme
+import com.example.quanlybongda.ui.theme.Purple80
+import com.example.quanlybongda.ui.theme.PurpleGrey80
 import com.example.quanlybongda.ui.theme.darkContentBackground
 import com.example.quanlybongda.ui.theme.darkTextMuted
 
@@ -60,7 +64,8 @@ val homeRoute = "baoCao";
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController();
-    var selectedItem by remember { mutableStateOf("") }
+    val rootRoute = "login"
+    var selectedItem by remember { mutableStateOf(rootRoute) }
 
     val routes = listOf(
 //        BottomNavigationType("login", "Home", Icons.Default.Home),
@@ -77,33 +82,32 @@ fun AppNavigation() {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentDestination = navBackStackEntry?.destination
             if (currentDestination?.route != "login" && currentDestination?.route != "signUp") {
-                BottomNavigation(
-                    backgroundColor = darkContentBackground.copy(alpha = 0.9f),
-                    contentColor =  darkTextMuted,
+                NavigationBar(
+                    containerColor = darkContentBackground//.copy(alpha = 0.9f),
+//                    contentColor =  darkTextMuted,
                 ) {
                     routes.forEach { route ->
-                        BottomNavigationItem(
-                            icon = { Icon(route.icon, contentDescription = route.description) },
+                        NavigationBarItem(
+                            icon = {
+                                Icon(imageVector = route.icon, contentDescription = route.description)
+                            },
+                            label = {
+                                Text(route.description, color = Color.White)
+                            },
                             selected = selectedItem == route.name,
                             onClick = {
                                 selectedItem = route.name
-                                navController.navigate(route.name) {
-                                    // Pop up to the start destination of the graph to
-                                    // avoid building up a large stack of destinations
-                                    // on the back stack as users select items
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    // Avoid multiple copies of the same destination when
-                                    // reselecting the same item
-                                    launchSingleTop = true
-                                    // Restore state when reselecting a previously selected item
-                                    restoreState = true
-                                }
+                                navigatePopUpTo(navController, route.name);
                             },
-                            selectedContentColor = Color.White,
-                            unselectedContentColor = darkTextMuted,
-                            modifier = Modifier.padding(bottom = 24.dp)
+                            colors = NavigationBarItemColors(
+                                selectedIconColor = Color.Black,
+                                selectedTextColor = Purple80,
+                                selectedIndicatorColor = Purple80,
+                                unselectedIconColor = Color.White,
+                                unselectedTextColor = Color.Transparent,
+                                disabledIconColor = PurpleGrey80,
+                                disabledTextColor = Color.Transparent,
+                            )
                         )
                     }
                 }
@@ -112,7 +116,7 @@ fun AppNavigation() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "login",
+            startDestination = rootRoute,
             modifier = Modifier.fillMaxSize().background(DarkColorScheme.background)
         ) {
             val modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding());

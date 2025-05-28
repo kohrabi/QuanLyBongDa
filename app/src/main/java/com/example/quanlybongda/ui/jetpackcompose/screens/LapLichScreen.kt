@@ -2,17 +2,23 @@ package com.example.quanlybongda.ui.jetpackcompose.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
@@ -29,10 +35,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,9 +51,6 @@ import com.example.quanlybongda.Database.Schema.LichThiDau
 import com.example.quanlybongda.ui.theme.DarkColorScheme
 import com.example.quanlybongda.ui.theme.darkCardBackground
 import com.example.quanlybongda.ui.theme.darkTextMuted
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.internal.synchronized
 import kotlinx.coroutines.launch
 
 
@@ -96,21 +97,11 @@ fun LapLichScreen(
     }
 
     Scaffold(
-        backgroundColor = DarkColorScheme.background,
+        containerColor = DarkColorScheme.background,
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    androidx.compose.material3.Text(
-                        "Lịch thi đấu",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = DarkColorScheme.background,
-                    scrolledContainerColor = DarkColorScheme.background
-                ),
-                scrollBehavior = scrollBehavior,
+            AppTopBar(
+                title = "Lịch thi đấu",
+                scrollBehavior = scrollBehavior
             )
         },
         floatingActionButton = {
@@ -120,10 +111,11 @@ fun LapLichScreen(
     )  { innerPadding ->
         LazyColumn(
             modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-//                .verticalScroll(rememberScrollState())
+                .fillMaxWidth()
                 .padding(horizontal = 16.dp)
+                .background(DarkColorScheme.background),
+            contentPadding = innerPadding,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
                 // Tăng khoảng cách giữa TopAppBar và FeaturedMatchCardUpdated
