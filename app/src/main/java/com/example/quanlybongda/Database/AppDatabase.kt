@@ -15,6 +15,7 @@ import com.example.quanlybongda.Database.Schema.User.*
     entities = [
         // User
         User::class,
+        Session::class,
         HasRole::class,
         UserGroup::class,
         UserRole::class,

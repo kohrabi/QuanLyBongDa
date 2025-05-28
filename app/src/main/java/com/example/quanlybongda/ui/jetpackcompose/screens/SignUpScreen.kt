@@ -25,6 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.Exceptions.*
+import com.example.quanlybongda.Database.UserDataStore
 import kotlinx.coroutines.launch
 
 @Composable
@@ -37,6 +38,7 @@ fun SignUpScreen(
     var usernameError by remember { mutableStateOf(InputError()) }
     var emailError by remember { mutableStateOf(InputError()) }
     var passwordError by remember { mutableStateOf(InputError()) }
+    val dataStore by remember { mutableStateOf(UserDataStore(context)) };
 
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -61,7 +63,9 @@ fun SignUpScreen(
         if (!isError) {
             scope.launch {
                 try {
-                    viewModel.createUser(email, username, password)
+                    val sessionToken = viewModel.createUser(email, username, password);
+                    dataStore.saveSessionToken(sessionToken, context);
+
                     navController.navigate("muaGiai");
                 }
                 catch (e : RuntimeException) {

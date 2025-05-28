@@ -57,10 +57,10 @@ fun LoginScreen(
         if (!isError) {
             scope.launch {
                 try {
-                    if (viewModel.loginIn(username, password)) {
-                        dataStore.saveLoggedIn(true, context);
-                        navigatePopUpTo(navController, "muaGiai");
-                    }
+                    val sessionToken = viewModel.loginIn(username, password);
+                    dataStore.saveSessionToken(sessionToken, context);
+
+                    navigatePopUpTo(navController, "muaGiai");
                 } catch (e: RuntimeException) {
                     if (e is IncorrectUsername)
                         userError = InputError(true, "Không tồn tại user");
@@ -72,8 +72,9 @@ fun LoginScreen(
     }
 
     LaunchedEffect(Unit) {
-        dataStore.loggedInFlow.collect { loggedIn ->
-            if (loggedIn)
+        dataStore.loggedInFlow.collect { sessionToken ->
+            val result = viewModel.validateSessionToken(sessionToken);
+            if (result.session != null)
                 navController.navigate("muaGiai");
         }
     }

@@ -1,6 +1,7 @@
 package com.example.quanlybongda.Database
 
 import android.app.Application
+import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.quanlybongda.Database.DAO.*
@@ -15,6 +16,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import com.example.quanlybongda.Database.Exceptions.*
+import java.security.SecureRandom
+import java.time.LocalDateTime
 
 @HiltViewModel
 class DatabaseViewModel @Inject constructor(application : Application) : ViewModel() {
@@ -128,6 +131,73 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
 //        return false;
 //    }
 
+
+    fun generateSecureRandomBytes(size: Int): ByteArray {
+        val secureRandom = SecureRandom()
+        val bytes = ByteArray(size)
+        secureRandom.nextBytes(bytes)
+        return bytes
+    }
+
+    fun generateSessionToken() : String {
+        val bytes = generateSecureRandomBytes(20);
+        val token = Base64.encode(bytes, Base64.NO_PADDING);
+        return token.toString().lowercase();
+    }
+
+    suspend fun createSession(token: String, userId: Int) : Session {
+        val sessionId = sha256EncodeLowercase(token);
+        val session = Session(
+            sessionId = sessionId,
+            userId = userId,
+            expiresAt = LocalDateTime.now().plusDays(30)
+        );
+        userDAO.upsertSession(session);
+        return session;
+    }
+
+    /*
+    Sessions are validated in 2 steps:
+
+    Does the session exist in your database?
+    Is it still within expiration?
+    */
+
+    suspend fun validateSessionToken(token: String) : SessionValidationResult {
+        val expiredTime : Long = 2592000L; // 30 days;
+        val sessionId = sha256EncodeLowercase(token);
+        val result = userDAO.selectUserSession(sessionId);
+
+        if (result.size == 0) {
+            return SessionValidationResult();
+        }
+
+        val (user, session) = result[0];
+
+        if (session == null || user == null)
+            return SessionValidationResult();
+
+        if (LocalDateTime.now() >= session.expiresAt) {
+            userDAO.deleteSession(session.sessionId);
+            return SessionValidationResult();
+        }
+
+        // If expiresAt is less than 15days update to 30days
+        if (LocalDateTime.now() >= session.expiresAt.minusSeconds(expiredTime / 2)) {
+            session.expiresAt = LocalDateTime.now().plusSeconds(expiredTime);
+            userDAO.updateSessionExpiration(session.sessionId, session.expiresAt);
+        }
+        return SessionValidationResult(user, session);
+    }
+
+    suspend fun invalidateSession(sessionId: String) {
+        userDAO.deleteSession(sessionId);
+    }
+
+    suspend fun invalidateAllSessions(userId: Int) {
+        userDAO.deleteAllUserSession(userId);
+    }
+
     suspend fun selectAllUserGroupWithRole() : List<UserGroupRoles> {
         val groups = userGroupDAO.selectAllUserGroup();
         var groupRoles = mutableListOf<UserGroupRoles>();
@@ -156,7 +226,7 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
         return row != null;
     }
 
-    suspend fun createUser(email: String, username: String, password: String) : User? {
+    suspend fun createUser(email: String, username: String, password: String) : String {
         if (!verifyUsernameInput(username))
             throw UsernameFormat();
         if (!verifyEmailInput(email))
@@ -170,7 +240,10 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
             passwordHash = passwordHash,
         )
         userDAO.upsertUser(user);
-        return user;
+        val sessionToken = generateSessionToken();
+        createSession(sessionToken, user.id);
+
+        return sessionToken;
     }
 
     suspend fun updateUserPassword(userId: Int, password: String) {
@@ -203,11 +276,14 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
         userDAO.deleteUser(userId);
     }
 
-    suspend fun loginIn(username: String, password: String) : Boolean {
+    suspend fun loginIn(username: String, password: String) : String {
         val passwordHash = hashPassword(password);
         val user = userDAO.selectUserFromUsername(username) ?: throw IncorrectUsername();
         if (user.passwordHash != passwordHash)
             throw IncorrectPassword();
-        return true;
+        val sessionToken = generateSessionToken();
+        createSession(sessionToken, user.id);
+
+        return sessionToken;
     }
 }

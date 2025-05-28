@@ -33,10 +33,19 @@ data class User(
     val groupId : Int = 1,
 )
 
-@Entity
+@Entity(
+    foreignKeys = arrayOf(
+        ForeignKey(
+            entity = User::class,
+            parentColumns = ["id"],
+            childColumns = ["userId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    )
+)
 data class Session(
-    @PrimaryKey(autoGenerate = true)
-    val id: String,
+    @PrimaryKey
+    val sessionId: String,
     val userId: Int,
-    val expiresAt: LocalDateTime = LocalDateTime.now(),
+    var expiresAt: LocalDateTime = LocalDateTime.now(),
 )

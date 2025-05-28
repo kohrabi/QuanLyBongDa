@@ -3,11 +3,10 @@ package com.example.quanlybongda.Database
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.example.quanlybongda.Database.Schema.User.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -19,9 +18,9 @@ private val Context.dataStore : DataStore<Preferences> by preferencesDataStore(
 )
 
 class UserDataStore(context : Context) {
-    private val IS_LOGGED_IN = booleanPreferencesKey("logged_in");
+    private val SESSION_TOKEN = stringPreferencesKey("session_token");
 
-    val loggedInFlow: Flow<Boolean> = context.dataStore.data
+    val loggedInFlow: Flow<String> = context.dataStore.data
         .catch {
             if (it is IOException) {
                 it.printStackTrace()
@@ -31,12 +30,12 @@ class UserDataStore(context : Context) {
             }
         }
         .map { preferences ->
-            preferences[IS_LOGGED_IN] ?: false
+            preferences[SESSION_TOKEN] ?: ""
         }
 
-    suspend fun saveLoggedIn(loggedIn : Boolean, context: Context) {
+    suspend fun saveSessionToken(sessionToken: String, context: Context) {
         context.dataStore.edit { preferences ->
-            preferences[IS_LOGGED_IN] = loggedIn;
+            preferences[SESSION_TOKEN] = sessionToken;
         }
     }
 }
