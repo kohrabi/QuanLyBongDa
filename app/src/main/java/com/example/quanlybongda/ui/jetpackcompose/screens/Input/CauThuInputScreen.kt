@@ -75,25 +75,36 @@ fun CauThuInputScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val context = LocalContext.current;
     val coroutineScope = rememberCoroutineScope()
+
+    var submitted by remember { mutableStateOf(false) }
+    var clicked by remember { mutableStateOf(false) }
+
     var loaiCTOptions by remember { mutableStateOf(listOf<OptionValue>()) }
 
     var tenCT by remember { mutableStateOf("") }
     var ngaySinh by remember { mutableStateOf(LocalDateTime.now()) }
-    var loaiCT by remember { mutableStateOf(OptionValue(0, "")) }
+    var loaiCT by remember { mutableStateOf(OptionValue.DEFAULT) }
     var ghiChu by remember { mutableStateOf("") }
-    var soAo by remember { mutableStateOf(0) }
+    var soAo by remember { mutableStateOf<Int?>(0) }
     val onClick = {
+        clicked = true;
         coroutineScope.launch {
+            if (submitted)
+                return@launch;
+            if (loaiCT.value == null ||
+                soAo == null)
+                return@launch;
             viewModel.cauThuDAO.upsertCauThu(
                 CauThu(
                     tenCT = tenCT,
                     ngaySinh = ngaySinh.toLocalDate(),
-                    maLCT = loaiCT.value,
+                    maLCT = loaiCT.value!!,
                     maDoi = maDoi,
                     ghiChu = ghiChu,
-                    soAo = soAo.toInt(),
+                    soAo = soAo!!,
                 )
             )
+            submitted = true;
             delay(500);
             navController.popBackStack()
         }
@@ -134,7 +145,13 @@ fun CauThuInputScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 24.dp)
             ) {
-                InputTextField(value = tenCT, label = "Tên cầu thủ", onValueChange = { tenCT = it })
+                InputTextField(
+                    value = tenCT,
+                    label = "Tên cầu thủ",
+                    onValueChange = { tenCT = it },
+                    isError = tenCT.isEmpty() && clicked,
+                    errorMessage = "Tên cầu thủ trống"
+                )
                 Spacer(modifier = Modifier.height(16.dp))
 
                 InputDatePicker(
@@ -149,19 +166,28 @@ fun CauThuInputScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 InputDropDownMenu(
-                    name = "Loại cầu thủ",
+                    label = "Loại cầu thủ",
                     options = loaiCTOptions,
                     selectedOption = loaiCT,
-                    onOptionSelected = { loaiCT = it });
+                    onOptionSelected = { loaiCT = it },
+                    showEmptyError = clicked);
                 Spacer(modifier = Modifier.height(16.dp))
 
                 InputTextField(
                     value = ghiChu,
                     label = "Ghi chú",
-                    onValueChange = { ghiChu = it }, modifier = Modifier.height(100.dp))
+                    onValueChange = { ghiChu = it },
+                    isError = ghiChu.isEmpty() && clicked,
+                    errorMessage = "Ghi chú trống",
+                    modifier = Modifier.height(100.dp))
                 Spacer(modifier = Modifier.height(32.dp))
 
-                InputIntField(value = soAo, label = "Số áo", onValueChange = { soAo = it })
+                InputIntField(
+                    value = soAo,
+                    label = "Số áo",
+                    onValueChange = { soAo = it },
+
+                )
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Row(

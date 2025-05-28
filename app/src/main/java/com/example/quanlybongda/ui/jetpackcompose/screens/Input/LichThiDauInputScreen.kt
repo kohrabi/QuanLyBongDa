@@ -56,6 +56,7 @@ import com.example.quanlybongda.navigatePopUpTo
 import com.example.quanlybongda.ui.jetpackcompose.screens.AppTopBar
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputDatePicker
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputDropDownMenu
+import com.example.quanlybongda.ui.jetpackcompose.screens.InputError
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputFloatField
 import com.example.quanlybongda.ui.jetpackcompose.screens.OptionValue
 import com.example.quanlybongda.ui.jetpackcompose.screens.convertLocalDateTimeToMillis
@@ -77,12 +78,18 @@ fun LichThiDauInputScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val context = LocalContext.current;
     val coroutineScope = rememberCoroutineScope()
+
     val currentMuaGiai by DatabaseViewModel.currentMuaGiai.collectAsState()
     var doiBongs by remember { mutableStateOf(listOf<DoiBong>()) }
     var doiBongOptions by remember { mutableStateOf(listOf<OptionValue>()) }
     var vongTDOptions by remember { mutableStateOf(listOf<OptionValue>()) }
     var doiThangOptions by remember { mutableStateOf(listOf<OptionValue>()) }
     var trongTaiOptions by remember { mutableStateOf(listOf<OptionValue>()) }
+
+    var submitted by remember { mutableStateOf(false) }
+    var clicked by remember { mutableStateOf(false) }
+
+    var thoiGianError by remember { mutableStateOf(InputError()) }
 
     var vongTD by remember { mutableStateOf(OptionValue.DEFAULT) }
     var doiMot by remember { mutableStateOf(OptionValue.DEFAULT) }
@@ -92,28 +99,38 @@ fun LichThiDauInputScreen(
     var ngayGioDuKien by remember { mutableStateOf(LocalDateTime.now()) }
     var ngayGioThucTe by remember { mutableStateOf(LocalDateTime.now()) }
     var trongTai by remember { mutableStateOf(OptionValue.DEFAULT) }
-    var thoiGianDaThiDau by remember { mutableStateOf(0.0f) }
+    var thoiGianDaThiDau by remember { mutableStateOf<Float?>(0.0f) }
     val onClick = {
+        clicked = true;
         coroutineScope.launch {
+            if (submitted)
+                return@launch;
             if (currentMuaGiai == null) {
                 Toast.makeText(context, "WARNING: muaGiai không hợp lệ", Toast.LENGTH_SHORT).show();
                 navigatePopUpTo(navController, "muaGiai");
                 return@launch;
             }
+            if (vongTD.value == null ||
+                doiMot.value == null ||
+                doiHai.value == null ||
+                trongTai.value == null ||
+                thoiGianDaThiDau == null)
+                return@launch;
             viewModel.lichThiDauDAO.upsertLichThiDau(
                 LichThiDau(
                     maMG = currentMuaGiai!!.maMG,
-                    maVTD = vongTD.value,
+                    maVTD = vongTD.value!!,
                     maSan = doiBongs.find { it.maDoi == doiMot.value }!!.maSan,
-                    doiMot = doiMot.value,
-                    doiHai = doiHai.value,
-                    doiThang = (if (doiThang.value == 0) null else doiThang.value),
+                    doiMot = doiMot.value!!,
+                    doiHai = doiHai.value!!,
+                    doiThang = doiThang.value,
                     ngayGioDuKien = ngayGioDuKien,
                     ngayGioThucTe = ngayGioThucTe,
-                    thoiGianDaThiDau = thoiGianDaThiDau.toFloat(),
-                    maTT = trongTai.value,
+                    thoiGianDaThiDau = thoiGianDaThiDau!!,
+                    maTT = trongTai.value!!,
                 )
             )
+            submitted = true;
             delay(500);
             navController.popBackStack()
         }
@@ -128,10 +145,10 @@ fun LichThiDauInputScreen(
 
     LaunchedEffect(doiMot, doiHai) {
         val options = mutableListOf<OptionValue>();
-        options.add(OptionValue(0, "Hòa"));
-        if (doiMot.value > 0)
+        options.add(OptionValue(null, "Hòa"));
+        if (doiMot.value != null)
             options.add(doiMot);
-        if (doiHai.value > 0)
+        if (doiHai.value != null)
             options.add(doiHai);
         doiThangOptions = options;
     }
@@ -169,31 +186,35 @@ fun LichThiDauInputScreen(
             ) {
                 // Username
                 InputDropDownMenu(
-                    name = "Đội một",
+                    label = "Đội một",
                     options = doiBongOptions,
                     selectedOption = doiMot,
-                    onOptionSelected = { doiMot = it });
+                    onOptionSelected = { doiMot = it },
+                    showEmptyError = clicked);
                 Spacer(modifier = Modifier.height(16.dp))
 
                 InputDropDownMenu(
-                    name = "Đội hai",
+                    label = "Đội hai",
                     options = doiBongOptions,
                     selectedOption = doiHai,
-                    onOptionSelected = { doiHai = it });
+                    onOptionSelected = { doiHai = it },
+                    showEmptyError = clicked);
                 Spacer(modifier = Modifier.height(16.dp))
 
                 InputDropDownMenu(
-                    name = "Vòng thi đấu",
+                    label = "Vòng thi đấu",
                     options = vongTDOptions,
                     selectedOption = vongTD,
-                    onOptionSelected = { vongTD = it  })
+                    onOptionSelected = { vongTD = it  },
+                    showEmptyError = clicked)
                 Spacer(modifier = Modifier.height(16.dp))
 
                 InputDropDownMenu(
-                    name = "Đội Thắng",
+                    label = "Đội Thắng",
                     options = doiThangOptions,
                     selectedOption = doiThang,
-                    onOptionSelected = { doiThang = it })
+                    onOptionSelected = { doiThang = it },
+                    showEmptyError = clicked)
                 Spacer(modifier = Modifier.height(16.dp))
 
                 InputDatePicker(
@@ -221,14 +242,17 @@ fun LichThiDauInputScreen(
                 InputFloatField(
                     value = thoiGianDaThiDau,
                     label = "Thời gian đã thi đấu",
-                    onValueChange = { thoiGianDaThiDau = it })
+                    onValueChange = { thoiGianDaThiDau = it },
+                    isError = thoiGianError.isError,
+                    errorMessage = thoiGianError.errorMessage)
                 Spacer(modifier = Modifier.height(16.dp))
 
                 InputDropDownMenu(
-                    name = "Trọng tài",
+                    label = "Trọng tài",
                     options = trongTaiOptions,
                     selectedOption = trongTai,
-                    onOptionSelected = { trongTai = it })
+                    onOptionSelected = { trongTai = it },
+                    showEmptyError = clicked)
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(

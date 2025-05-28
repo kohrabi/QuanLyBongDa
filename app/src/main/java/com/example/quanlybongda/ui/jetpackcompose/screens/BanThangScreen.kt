@@ -110,6 +110,7 @@ fun BanThangScreen(
         Box(
             modifier = Modifier
                 .padding(innerPadding)
+                .padding(top = 12.dp)
                 .fillMaxSize()
         ) {
             Image(

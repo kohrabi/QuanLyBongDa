@@ -2,7 +2,6 @@
 
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DatePicker
@@ -22,6 +22,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -108,7 +109,7 @@ fun InputTextField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label) },
+        label = { Text(text = label) },
         isError = isError,
         supportingText = if (isError) supportingText else null,
         modifier = modifier
@@ -143,26 +144,26 @@ fun InputTextField(
 @Composable
 fun InputIntField(
     label : String, // this must be unique
-    value : Int,
-    onValueChange : (Int) -> Unit,
-    error: Boolean = false,
+    value : Int?,
+    onValueChange : (Int?) -> Unit,
+    isError: Boolean = false,
     errorMessage : String = "",
     modifier: Modifier = Modifier
 ) {
-    var isError by remember(label) { mutableStateOf(false) }
+    var valueString by remember(label) { mutableStateOf(value?.toString() ?: "") }
+    var formatError by remember(label) { mutableStateOf(false) }
     InputTextField(
         label = label,
-        value = value.toString(),
+        value = valueString,
         onValueChange = {
-            if (it.toIntOrNull() == null) {
-                isError = true;
-            }
-            else {
-                onValueChange(it.toInt());
-            }
+            valueString = it;
+            formatError = false;
+            if (valueString.toIntOrNull() == null)
+                formatError = true;
+            onValueChange(valueString.toIntOrNull());
         },
-        isError = isError && error,
-        errorMessage = if (error) errorMessage else "Vui lòng nhập vào dữ liệu số nguyên",
+        isError = isError || formatError,
+        errorMessage = if (isError) errorMessage else "Vui lòng nhập vào dữ liệu số nguyên",
         keyboardOption = KeyboardOptions(keyboardType = KeyboardType.Number),
         modifier = modifier
     )
@@ -171,37 +172,37 @@ fun InputIntField(
 @Composable
 fun InputFloatField(
     label : String, // this must be unique
-    value : Float,
-    onValueChange : (Float) -> Unit,
-    error: Boolean = false,
+    value : Float?,
+    onValueChange : (Float?) -> Unit,
+    isError: Boolean = false,
     errorMessage : String = "",
     modifier: Modifier = Modifier
 ) {
-    var isError by remember(label) { mutableStateOf(false) }
+    var valueString by remember(label) { mutableStateOf(value.toString()) }
+    var formatError by remember(label) { mutableStateOf(false) }
     InputTextField(
         label = label,
-        value = value.toString(),
+        value = valueString,
         onValueChange = {
-            if (it.toFloatOrNull() == null) {
-                isError = true;
-            }
-            else {
-                onValueChange(it.toFloat());
-            }
+            valueString = it;
+            formatError = false;
+            if (valueString.toFloatOrNull() == null)
+                formatError = true;
+            onValueChange(it.toFloatOrNull());
         },
-        isError = isError && error,
-        errorMessage = if (error) errorMessage else "Vui lòng nhập vào dữ liệu số thập phân",
+        isError = isError || formatError,
+        errorMessage = if (isError) errorMessage else "Vui lòng nhập vào dữ liệu số thập phân",
         keyboardOption = KeyboardOptions(keyboardType = KeyboardType.Number),
         modifier = modifier
     )
 }
 
 data class OptionValue(
-    val value : Int,
+    val value : Int?,
     val label : String,
 ) {
     companion object {
-        val DEFAULT = OptionValue(0, "");
+        val DEFAULT = OptionValue(null, "");
     }
 }
 
@@ -210,21 +211,21 @@ fun AddFloatingButton(label: String, onClick : () -> Unit) {
     FloatingActionButton(
         onClick = { onClick() },
         modifier = Modifier,
-        containerColor = Purple80
+        containerColor = Purple80,
+        contentColor = Color.Black
     ) {
         Icon(Icons.Filled.Add, label)
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class,
-    ExperimentalFoundationApi::class
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InputDropDownMenu(
-    name : String,
+    label : String,
     options : List<OptionValue>,
     selectedOption: OptionValue,
-    onOptionSelected: (OptionValue) -> Unit
+    onOptionSelected: (OptionValue) -> Unit,
+    showEmptyError: Boolean = false,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -234,12 +235,13 @@ fun InputDropDownMenu(
         modifier = Modifier.background(darkCardBackground, shape = RoundedCornerShape(6.dp)),
     ) {
         TextField(
-            value = selectedOption.label,
-            label = { Text(name) },
+            value = if (selectedOption.value == null) "Vui lòng chọn một $label" else selectedOption.label,
+            label = { Text(label) },
             onValueChange = {},
             readOnly = true,
+            isError = selectedOption.value == null && showEmptyError,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.menuAnchor().fillMaxWidth(), // Required for dropdown to position correctly
+            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryEditable, true).fillMaxWidth(), // Required for dropdown to position correctly
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = darkCardBackground,
                 unfocusedContainerColor = darkCardBackground,
@@ -252,7 +254,12 @@ fun InputDropDownMenu(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 focusedTrailingIconColor = Purple80,
-                unfocusedTrailingIconColor = Purple80
+                unfocusedTrailingIconColor = Purple80,
+
+                errorTextColor = Pink80,
+                errorLabelColor = Pink80,
+                errorIndicatorColor = Pink80,
+                errorContainerColor = darkCardBackground
             )
         )
         ExposedDropdownMenu(
@@ -307,24 +314,6 @@ fun InputDatePicker(
         convertMillisToDate(it)
     } ?: ""
 
-//    OutlinedTextField(
-//        value = selectedDate,
-//        onValueChange = {},
-//        label = { Text(label) },
-//        readOnly = true,
-//        colors = OutlinedTextFieldDefaults.colors(
-//            focusedBorderColor = Color.Transparent,
-//            unfocusedBorderColor = Color.Transparent,
-//            focusedTextColor = Color.White,
-//            cursorColor = Color.White,
-//            focusedLabelColor = Color.White,
-//            unfocusedLabelColor = Color.LightGray
-//        ),
-//        modifier = modifier
-//            .fillMaxWidth()
-//            .background(Color(0xFF222232), shape = RoundedCornerShape(6.dp))
-//            .clickable { visible = true },
-//    )
     LaunchedEffect(visible) {
         if (visible) {
             prevDatePicker.selectedDateMillis = datePickerState.selectedDateMillis;
@@ -337,7 +326,12 @@ fun InputDatePicker(
         onValueChange = {},
         readOnly = true,
         enabled = false,
-        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = visible) },
+        trailingIcon = { Icon(
+                imageVector = Icons.Default.EditCalendar,
+                tint = Purple80,
+                contentDescription = "Calendar",
+            )
+        },
         modifier = modifier
             .fillMaxWidth()
             .background(darkCardBackground, shape = RoundedCornerShape(6.dp))
@@ -380,3 +374,4 @@ fun InputDatePicker(
         }
     }
 }
+

@@ -91,7 +91,7 @@ fun LapLichScreen(
                     else
                         lichThiDau.tenDoiThang = doiBongs.find { it.maDoi == lichThiDau.doiThang }!!.tenDoi;
                 }
-
+                lichThiDaus = lichThiDaus.sortedByDescending { it.ngayGioThucTe };
             }
         }
     }
@@ -112,6 +112,7 @@ fun LapLichScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(top = 12.dp)
                 .padding(horizontal = 16.dp)
                 .background(DarkColorScheme.background),
             contentPadding = innerPadding,

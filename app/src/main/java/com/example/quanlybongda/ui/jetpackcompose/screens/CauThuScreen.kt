@@ -104,6 +104,7 @@ fun CauThuScreen(
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
                 .background(DarkColorScheme.background)
+                .padding(top = 12.dp)
                 .padding(horizontal = 16.dp),
             contentPadding = innerPadding,
             verticalArrangement = Arrangement.spacedBy(12.dp)

@@ -1,5 +1,6 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens.Input
 
+import android.renderscript.ScriptGroup.Input
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -53,6 +54,7 @@ import com.example.quanlybongda.Database.Schema.DoiBong
 import com.example.quanlybongda.navigatePopUpTo
 import com.example.quanlybongda.ui.jetpackcompose.screens.AppTopBar
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputDropDownMenu
+import com.example.quanlybongda.ui.jetpackcompose.screens.InputError
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputTextField
 import com.example.quanlybongda.ui.jetpackcompose.screens.OptionValue
 import com.example.quanlybongda.ui.theme.DarkColorScheme
@@ -72,24 +74,38 @@ fun DoiBongInputScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val context = LocalContext.current;
     val coroutineScope = rememberCoroutineScope()
+
+    var submitted by remember { mutableStateOf(false) }
+    var clicked by remember { mutableStateOf(false) }
+
     val currentMuaGiai by DatabaseViewModel.currentMuaGiai.collectAsState()
     var tenDoi by remember { mutableStateOf("") }
     var sanNhaOptions by remember { mutableStateOf(listOf<OptionValue>()) }
     var sanNha by remember { mutableStateOf(OptionValue.DEFAULT) }
+
     val onClick = {
+        clicked = true;
         coroutineScope.launch {
+            if (submitted)
+                return@launch;
             if (currentMuaGiai == null) {
                 Toast.makeText(context, "WARNING: muaGiai không hợp lệ", Toast.LENGTH_SHORT).show();
                 navigatePopUpTo(navController, "muaGiai");
                 return@launch;
             }
+            if (sanNha.value == null)
+                return@launch;
+            if (tenDoi.isEmpty()) {
+                return@launch;
+            }
             viewModel.doiBongDAO.upsertDoiBong(
                 DoiBong(
                     tenDoi = tenDoi,
-                    maSan = sanNha.value,
+                    maSan = sanNha.value!!,
                     maMG = currentMuaGiai!!.maMG,
                 )
             )
+            submitted = true;
             delay(500);
             navController.popBackStack()
         }
@@ -130,14 +146,21 @@ fun DoiBongInputScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 24.dp)
             ) {
-                InputTextField(value = tenDoi, label = "Tên đội", onValueChange = { tenDoi = it })
+                InputTextField(
+                    value = tenDoi,
+                    label = "Tên đội",
+                    onValueChange = { tenDoi = it },
+                    isError = tenDoi.isEmpty() && clicked,
+                    errorMessage = "Tên đội trống"
+                )
                 Spacer(modifier = Modifier.height(16.dp))
 
                 InputDropDownMenu(
-                    name = "Sân nhà",
+                    label = "Sân nhà",
                     options = sanNhaOptions,
                     selectedOption = sanNha,
-                    onOptionSelected = { sanNha = it })
+                    onOptionSelected = { sanNha = it },
+                    showEmptyError = clicked)
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(

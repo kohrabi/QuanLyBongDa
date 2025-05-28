@@ -56,6 +56,7 @@ fun KetQuaTranDauScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
+            .padding(top = 12.dp)
             .background(Color(0xFF0A0F24)) // Nền chính của màn hình là màu đặc
     ) {
         Column(

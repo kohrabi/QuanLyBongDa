@@ -50,7 +50,9 @@ import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.Schema.MuaGiai
 import com.example.quanlybongda.ui.jetpackcompose.screens.AppTopBar
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputDatePicker
+import com.example.quanlybongda.ui.jetpackcompose.screens.InputError
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputTextField
+import com.example.quanlybongda.ui.jetpackcompose.screens.OptionValue
 import com.example.quanlybongda.ui.jetpackcompose.screens.convertLocalDateToMillis
 import com.example.quanlybongda.ui.jetpackcompose.screens.convertMillisToLocalDate
 import com.example.quanlybongda.ui.theme.DarkColorScheme
@@ -70,13 +72,19 @@ fun MuaGiaiInputScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val context = LocalContext.current;
     val coroutineScope = rememberCoroutineScope()
+
+    var submitted by remember { mutableStateOf(false) }
+    var clicked by remember { mutableStateOf(false) }
+
     var tenMG by remember { mutableStateOf("") }
     var ngayDienRa by remember { mutableStateOf(LocalDate.now()) }
     var ngayKetThuc by remember { mutableStateOf(LocalDate.now()) }
-    var submitted by remember { mutableStateOf(false) }
     val onClick : () -> Unit = {
+        clicked = true;
         if (!submitted) {
             coroutineScope.launch {
+                if (tenMG.isEmpty())
+                    return@launch;
                 viewModel.muaGiaiDAO.upsertDSMuaGiai(
                     MuaGiai(
                         tenMG = tenMG,
@@ -125,7 +133,9 @@ fun MuaGiaiInputScreen(
                 InputTextField(
                     value = tenMG,
                     label = "Tên mùa giải",
-                    onValueChange = { tenMG = it });
+                    onValueChange = { tenMG = it },
+                    isError = tenMG.isEmpty() && clicked,
+                    errorMessage = "Tên mùa giải trống");
                 Spacer(modifier = Modifier.height(16.dp))
 
                 InputDatePicker(

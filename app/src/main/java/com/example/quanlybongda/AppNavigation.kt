@@ -1,5 +1,6 @@
 package com.example.quanlybongda
 
+import android.provider.ContactsContract.Data
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -12,6 +13,7 @@ import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,7 +21,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ComponentActivity
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -29,6 +34,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.ui.jetpackcompose.screens.*
 import com.example.quanlybongda.ui.jetpackcompose.screens.Input.*
 import com.example.quanlybongda.ui.theme.DarkColorScheme
@@ -65,24 +71,22 @@ val homeRoute = "baoCao";
 fun AppNavigation() {
     val navController = rememberNavController();
     val rootRoute = "login"
-    var selectedItem by remember { mutableStateOf(rootRoute) }
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute by remember { derivedStateOf { currentBackStackEntry?.destination?.route ?: homeRoute } }
+    val viewModel : DatabaseViewModel = hiltViewModel();
 
     val routes = listOf(
-//        BottomNavigationType("login", "Home", Icons.Default.Home),
-//        BottomNavigationType("signUp", ,),
-//        BottomNavigationRoute("banThang/1", "Home", Icons.Default.Home),
         BottomNavigationRoute("baoCao", "Báo cáo", Icons.Default.Home),
         BottomNavigationRoute("lapLich", "Lập lịch", Icons.Default.Schedule),
         BottomNavigationRoute("muaGiai", "Mùa giải", Icons.Default.Star),
         BottomNavigationRoute("doiBong", "Đội bóng", Icons.Default.Groups),
         BottomNavigationRoute("traCuu", "Tra cứu", Icons.Default.Search),
+        BottomNavigationRoute("settings", "Cài đặt", Icons.Default.Settings),
     )
 
     Scaffold(
         bottomBar = {
-            val navBackStackEntry by navController.currentBackStackEntryAsState()
-            val currentDestination = navBackStackEntry?.destination
-            if (currentDestination?.route != "login" && currentDestination?.route != "signUp") {
+            if (currentRoute != "login" && currentRoute != "signUp") {
                 NavigationBar(
                     containerColor = darkContentBackground//.copy(alpha = 0.9f),
 //                    contentColor =  darkTextMuted,
@@ -95,11 +99,8 @@ fun AppNavigation() {
                             label = {
                                 Text(route.description, color = Color.White)
                             },
-                            selected = selectedItem == route.name,
-                            onClick = {
-                                selectedItem = route.name
-                                navigatePopUpTo(navController, route.name);
-                            },
+                            selected = currentRoute == route.name,
+                            onClick = { navigatePopUpTo(navController, route.name) },
                             colors = NavigationBarItemColors(
                                 selectedIconColor = Color.Black,
                                 selectedTextColor = Purple80,
@@ -121,34 +122,36 @@ fun AppNavigation() {
             modifier = Modifier.fillMaxSize().background(DarkColorScheme.background)
         ) {
             val modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding());
-            composable("login") { LoginScreen(navController, modifier) }
-            composable("signUp") { SignUpScreen(navController, modifier) }
-            composable("baoCao") { BaoCaoScreen(navController, modifier) }
+            composable("login") { LoginScreen(navController, modifier, viewModel) }
+            composable("signUp") { SignUpScreen(navController, modifier, viewModel) }
+            composable("settings") { SettingsScreen(navController, modifier, viewModel) }
+
+            composable("baoCao") { BaoCaoScreen(navController, modifier, viewModel) }
             composable("banThang/{maTD}", arguments = listOf(navArgument("maTD") { type = NavType.IntType})) { backStackEntry ->
-                BanThangScreen(backStackEntry.arguments?.getInt("maTD") ?: 1, navController, modifier)
+                BanThangScreen(backStackEntry.arguments?.getInt("maTD") ?: 1, navController, modifier, viewModel)
             }
-            composable("hoSo") { KetQuaTranDauScreen(navController, modifier) }
-            composable("traCuu") { TraCuuScreen(navController, modifier) }
-            composable("lapLich") { LapLichScreen(navController, modifier) }
-            composable("muaGiai") { MuaGiaiScreen(navController, modifier) }
-            composable("doiBong") { DoiBongScreen(navController, modifier) }
+            composable("hoSo") { KetQuaTranDauScreen(navController, modifier, viewModel) }
+            composable("traCuu") { TraCuuScreen(navController, modifier, viewModel) }
+            composable("lapLich") { LapLichScreen(navController, modifier, viewModel) }
+            composable("muaGiai") { MuaGiaiScreen(navController, modifier, viewModel) }
+            composable("doiBong") { DoiBongScreen(navController, modifier, viewModel) }
             composable("cauThu/{maDoi}", arguments = listOf(navArgument("maDoi") { type = NavType.IntType})) { backStackEntry ->
-                CauThuScreen(backStackEntry.arguments?.getInt("maDoi") ?: 0, navController, modifier)
+                CauThuScreen(backStackEntry.arguments?.getInt("maDoi") ?: 0, navController, modifier, viewModel)
             }
 
             composable("cauThuInput/{maDoi}", arguments = listOf(navArgument("maDoi") { type = NavType.IntType})) { backStackEntry ->
-                CauThuInputScreen(backStackEntry.arguments?.getInt("maDoi") ?: 0, navController, modifier)
+                CauThuInputScreen(backStackEntry.arguments?.getInt("maDoi") ?: 0, navController, modifier, viewModel)
             }
-            composable("doiBongInput") { DoiBongInputScreen(navController, modifier) }
+            composable("doiBongInput") { DoiBongInputScreen(navController, modifier, viewModel) }
             composable("banThangInput/{maTD}", arguments = listOf(navArgument("maTD") { type = NavType.IntType})) { backStackEntry ->
                 if (backStackEntry.arguments == null) {
                     navController.popBackStack();
                     return@composable;
                 }
-                BanThangInputScreen(backStackEntry.arguments!!.getInt("maTD"), navController, modifier)
+                BanThangInputScreen(backStackEntry.arguments!!.getInt("maTD"), navController, modifier, viewModel)
             }
-            composable("lichThiDauInput") { LichThiDauInputScreen(navController, modifier) }
-            composable("muaGiaiInput") { MuaGiaiInputScreen(navController, modifier) }
+            composable("lichThiDauInput") { LichThiDauInputScreen(navController, modifier, viewModel) }
+            composable("muaGiaiInput") { MuaGiaiInputScreen(navController, modifier, viewModel) }
         }
     }
 }

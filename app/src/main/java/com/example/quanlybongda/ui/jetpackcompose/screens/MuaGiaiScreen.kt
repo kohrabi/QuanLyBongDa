@@ -83,6 +83,7 @@ fun MuaGiaiScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(top = 12.dp)
                     .padding(horizontal = 16.dp)
                     .background(DarkColorScheme.background),
                 contentPadding = paddingValues,

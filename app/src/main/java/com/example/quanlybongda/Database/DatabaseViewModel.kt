@@ -27,6 +27,12 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
         val currentMuaGiai : StateFlow<MuaGiai?> = _currentMuaGiai;
     }
 
+    private var _user = MutableStateFlow<User?>(null);
+    val user : StateFlow<User?> = _user;
+
+    private var _session = MutableStateFlow<Session?>(null);
+    val session : StateFlow<Session?> = _session;
+
     public val cauThuDAO : CauThuDAO;
     public val doiBongDAO : DoiBongDAO;
     public val lichThiDauDAO : LichThiDauDAO;
@@ -168,14 +174,18 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
         val sessionId = sha256EncodeLowercase(token);
         val result = userDAO.selectUserSession(sessionId);
 
+        _user.value = null;
+        _session.value = null;
+
         if (result.size == 0) {
             return SessionValidationResult();
         }
 
         val (user, session) = result[0];
 
-        if (session == null || user == null)
+        if (session == null || user == null) {
             return SessionValidationResult();
+        }
 
         if (LocalDateTime.now() >= session.expiresAt) {
             userDAO.deleteSession(session.sessionId);
@@ -187,6 +197,9 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
             session.expiresAt = LocalDateTime.now().plusSeconds(expiredTime);
             userDAO.updateSessionExpiration(session.sessionId, session.expiresAt);
         }
+
+        _user.value = user;
+        _session.value = session;
         return SessionValidationResult(user, session);
     }
 
@@ -240,10 +253,8 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
             passwordHash = passwordHash,
         )
         userDAO.upsertUser(user);
-        val sessionToken = generateSessionToken();
-        createSession(sessionToken, user.id);
 
-        return sessionToken;
+        return loginIn(username, passwordHash); // Return SessionToken
     }
 
     suspend fun updateUserPassword(userId: Int, password: String) {
@@ -281,8 +292,10 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
         val user = userDAO.selectUserFromUsername(username) ?: throw IncorrectUsername();
         if (user.passwordHash != passwordHash)
             throw IncorrectPassword();
+
         val sessionToken = generateSessionToken();
         createSession(sessionToken, user.id);
+        validateSessionToken(sessionToken);
 
         return sessionToken;
     }

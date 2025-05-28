@@ -86,6 +86,7 @@ fun DoiBongScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
+                .padding(top = 12.dp)
                 .background(DarkColorScheme.background),
             contentPadding = innerPadding,
             verticalArrangement = Arrangement.spacedBy(12.dp) // Khoảng cách giữa các card

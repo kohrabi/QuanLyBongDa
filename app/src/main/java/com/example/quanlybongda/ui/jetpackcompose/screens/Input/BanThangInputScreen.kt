@@ -71,6 +71,10 @@ fun BanThangInputScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val context = LocalContext.current;
     val coroutineScope = rememberCoroutineScope()
+
+    var submitted by remember { mutableStateOf(false) }
+    var clicked by remember { mutableStateOf(false) }
+
     var doiBongOptions by remember { mutableStateOf(listOf<OptionValue>()) }
     var cauThuDoiMotOptions by remember { mutableStateOf(listOf<OptionValue>()) }
     var cauThuDoiHaiOptions by remember { mutableStateOf(listOf<OptionValue>()) }
@@ -78,17 +82,25 @@ fun BanThangInputScreen(
 
     var doiBong by remember { mutableStateOf(OptionValue.DEFAULT) }
     var cauThu by remember { mutableStateOf(OptionValue.DEFAULT) }
-    var thoiDiem by remember { mutableStateOf(0.0f) }
+    var thoiDiem by remember { mutableStateOf<Float?>(0.0f) }
     var loaiBT by remember { mutableStateOf(OptionValue.DEFAULT) }
     val onClick = {
+        clicked = true;
         coroutineScope.launch {
+            if (submitted)
+                return@launch;
+            if (cauThu.value == null ||
+                loaiBT.value == null ||
+                thoiDiem == null)
+                return@launch;
             viewModel.banThangDAO.upsertBanThang(BanThang(
                 maTD = maTD,
-                thoiDiem = thoiDiem,
-                maCT = cauThu.value,
-                maLBT = loaiBT.value,
+                thoiDiem = thoiDiem!!,
+                maCT = cauThu.value!!,
+                maLBT = loaiBT.value!!,
                 deleted = false,
             ))
+            submitted = true;
             delay(500);
             navController.popBackStack()
         }
@@ -148,20 +160,25 @@ fun BanThangInputScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 24.dp)
             ) {
-                InputDropDownMenu("Đội bóng", doiBongOptions, doiBong, { doiBong = it })
+                InputDropDownMenu(
+                    label = "Đội bóng",
+                    options = doiBongOptions,
+                    selectedOption = doiBong,
+                    onOptionSelected = { doiBong = it },
+                    showEmptyError = clicked)
                 Spacer(modifier = Modifier.height(16.dp))
 
                 InputDropDownMenu(
-                    name ="Cầu thủ",
+                    label ="Cầu thủ",
                     options = (
                         if (doiBongOptions.size == 0)
                             listOf();
-                        else if (doiBong.value == doiBongOptions[0].value)
-                            cauThuDoiMotOptions
+                        else if (doiBong.value == doiBongOptions[0].value)  cauThuDoiMotOptions
                         else cauThuDoiHaiOptions
                     ),
                     selectedOption =  cauThu,
-                    onOptionSelected = { cauThu = it })
+                    onOptionSelected = { cauThu = it },
+                    showEmptyError = clicked)
                 Spacer(modifier = Modifier.height(16.dp))
 
                 InputFloatField(
@@ -171,10 +188,11 @@ fun BanThangInputScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 InputDropDownMenu(
-                    name = "Loại bàn thắng",
+                    label = "Loại bàn thắng",
                     options = loaiBTOptions,
                     selectedOption = loaiBT,
-                    onOptionSelected = { loaiBT = it })
+                    onOptionSelected = { loaiBT = it },
+                    showEmptyError = clicked)
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
