@@ -152,6 +152,10 @@ fun InputIntField(
 ) {
     var valueString by remember(label) { mutableStateOf(value?.toString() ?: "") }
     var formatError by remember(label) { mutableStateOf(false) }
+    LaunchedEffect(value) {
+        if (valueString.toIntOrNull() != null && value != valueString.toInt())
+            valueString = value.toString();
+    }
     InputTextField(
         label = label,
         value = valueString,
@@ -180,6 +184,10 @@ fun InputFloatField(
 ) {
     var valueString by remember(label) { mutableStateOf(value.toString()) }
     var formatError by remember(label) { mutableStateOf(false) }
+    LaunchedEffect(value) {
+        if (valueString.toFloatOrNull() != null && value != valueString.toFloat())
+            valueString = value.toString();
+    }
     InputTextField(
         label = label,
         value = valueString,

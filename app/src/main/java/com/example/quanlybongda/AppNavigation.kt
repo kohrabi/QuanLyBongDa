@@ -56,7 +56,8 @@ fun navigatePopUpTo(navController: NavController, routeName : String) {
         // avoid building up a large stack of destinations
         // on the back stack as users select items
         popUpTo(navController.graph.findStartDestination().id) {
-            saveState = true
+            saveState = false
+            inclusive = false
         }
         // Avoid multiple copies of the same destination when
         // reselecting the same item

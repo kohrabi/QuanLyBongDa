@@ -125,9 +125,6 @@ fun PlayerCard(player: CauThu) {
             containerColor = darkCardBackground
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 2.dp)
     ) {
         Row(
             modifier = Modifier
@@ -173,29 +170,29 @@ fun PlayerCard(player: CauThu) {
                     ),
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
-//                // Nhãn "Goal"
-//                Text(
-//                    text = "Goal",
-//                    style = TextStyle(
-//                        fontSize = 8.76.sp,
-//                        lineHeight = 9.64.sp,
-//                        fontWeight = FontWeight(500),
-//                        color = Color(0xFF797979),
-//                        textAlign = TextAlign.Start
-//                    ),
-//                    modifier = Modifier.padding(bottom = 4.dp)
-//                )
+                //                // Nhãn "Goal"
+                //                Text(
+                //                    text = "Goal",
+                //                    style = TextStyle(
+                //                        fontSize = 8.76.sp,
+                //                        lineHeight = 9.64.sp,
+                //                        fontWeight = FontWeight(500),
+                //                        color = Color(0xFF797979),
+                //                        textAlign = TextAlign.Start
+                //                    ),
+                //                    modifier = Modifier.padding(bottom = 4.dp)
+                //                )
                 // Số bàn thắng (Goals)
-//                Text(
-//                    text = "${player.goals}",
-//                    style = TextStyle(
-//                        fontSize = 21.03.sp,
-//                        lineHeight = 14.71.sp,
-//                        fontWeight = FontWeight(600),
-//                        color = Color(0xFFD2B5FF),
-//                        textAlign = TextAlign.Start
-//                    )
-//                )
+                //                Text(
+                //                    text = "${player.goals}",
+                //                    style = TextStyle(
+                //                        fontSize = 21.03.sp,
+                //                        lineHeight = 14.71.sp,
+                //                        fontWeight = FontWeight(600),
+                //                        color = Color(0xFFD2B5FF),
+                //                        textAlign = TextAlign.Start
+                //                    )
+                //                )
             }
 
             // Phần bên phải: Position, Birth day, Note

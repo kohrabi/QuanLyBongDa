@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -90,17 +91,25 @@ fun MuaGiaiScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(muaGiais) { muaGiai ->
-                    SeasonCard(
-                        season = muaGiai,
-                        isSelected = selectedMuaGiai?.maMG == muaGiai.maMG,
-                        onSeasonSelect = {
-                            viewModel.selectMuaGiai(muaGiai)
-                            coroutineScope.launch {
-                                Toast.makeText(context, "Chọn mùa giải ${muaGiai.tenMG} thành công", Toast.LENGTH_SHORT).show();
-                                delay(500)
-                                navigatePopUpTo(navController, homeRoute);
-                            }
-                        }
+                    SwipeToDeleteContainer(
+                        item = muaGiai,
+                        onDelete = {  },
+                        content = {
+                            SeasonCard(
+                                season = muaGiai,
+                                isSelected = selectedMuaGiai?.maMG == muaGiai.maMG,
+                                onSeasonSelect = {
+                                    viewModel.selectMuaGiai(muaGiai)
+                                    coroutineScope.launch {
+                                        Toast.makeText(context, "Chọn mùa giải ${muaGiai.tenMG} thành công", Toast.LENGTH_SHORT).show();
+                                        delay(500)
+                                        navigatePopUpTo(navController, homeRoute);
+                                    }
+                                }
+                            )
+                        },
+                        modifier = Modifier
+                            .fillMaxSize()
                     )
                 }
             }

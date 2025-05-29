@@ -106,6 +106,7 @@ fun DoiBongInputScreen(
                 )
             )
             submitted = true;
+            Toast.makeText(context, "Tạo đội bóng thành công", Toast.LENGTH_SHORT).show();
             delay(500);
             navController.popBackStack()
         }

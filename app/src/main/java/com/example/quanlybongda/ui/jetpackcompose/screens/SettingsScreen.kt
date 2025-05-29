@@ -1,5 +1,6 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,6 +22,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +48,7 @@ import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.ui.theme.DarkColorScheme
 import com.example.quanlybongda.ui.theme.Purple80
 import com.example.quanlybongda.ui.theme.PurpleBlue
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 // import androidx.compose.ui.geometry.Offset // Cần nếu dùng Offset trong Brush
@@ -122,19 +125,59 @@ fun SettingsScreen(
     val user by viewModel.user.collectAsState()
     val session by viewModel.session.collectAsState()
 
+    var submitted by remember { mutableStateOf(false) }
+    var clicked by remember { mutableStateOf(false) }
+
     var tuoiMin by remember { mutableStateOf<Int?>(16) }
     var tuoiMax by remember { mutableStateOf<Int?>(40) }
     var soCauThuMin by remember { mutableStateOf<Int?>(15) }
     var soCauThuMax by remember { mutableStateOf<Int?>(25) }
+    val doiDaOptions = listOf(OptionValue(1, "Nhà"), OptionValue(2, "Khách"));
 
     var doiDaTrenSanNha by remember { mutableStateOf(OptionValue(1, "Nhà")) }
 
-    var thoiDiemGhiBanToiThieu by remember { mutableStateOf<Float?>(0f) }
-    var thoiDiemGhiBanToiDa by remember { mutableStateOf<Float?>(90f) }
+    var thoiDiemGhiBanToiThieu by remember { mutableStateOf<Int?>(0) }
+    var thoiDiemGhiBanToiDa by remember { mutableStateOf<Int?>(90) }
 
-    val onClick = {
+    val onClick : () -> Unit = {
+        clicked = true;
+        viewModel.viewModelScope.launch {
+            if (submitted)
+                return@launch;
+            if (tuoiMin == null ||
+                tuoiMax == null ||
+                soCauThuMax == null ||
+                soCauThuMin == null ||
+                doiDaTrenSanNha.value == null ||
+                thoiDiemGhiBanToiThieu == null ||
+                thoiDiemGhiBanToiDa == null)
+                return@launch;
 
+            viewModel.thamSoDAO.updateThamSo("tuoiMin", tuoiMin!!);
+            viewModel.thamSoDAO.updateThamSo("tuoiMax", tuoiMax!!);
+            viewModel.thamSoDAO.updateThamSo("soCauThuMin", soCauThuMin!!);
+            viewModel.thamSoDAO.updateThamSo("soCauThuMax", soCauThuMax!!);
+            viewModel.thamSoDAO.updateThamSo("doiDaTrenSanNha", doiDaTrenSanNha.value!!);
+            viewModel.thamSoDAO.updateThamSo("thoiDiemGhiBanToiThieu", thoiDiemGhiBanToiThieu!!);
+            viewModel.thamSoDAO.updateThamSo("thoiDiemGhiBanToiDa", thoiDiemGhiBanToiDa!!);
+            Toast.makeText(context, "Cập nhật thành công", Toast.LENGTH_SHORT).show();
+            delay(500);
+        }
     };
+
+    LaunchedEffect(Unit) {
+        tuoiMin = viewModel.thamSoDAO.selectThamSo("tuoiMin")!!.giaTri;
+        tuoiMax = viewModel.thamSoDAO.selectThamSo("tuoiMax")!!.giaTri;
+        soCauThuMin = viewModel.thamSoDAO.selectThamSo("soCauThuMin")!!.giaTri;
+        soCauThuMax = viewModel.thamSoDAO.selectThamSo("soCauThuMax")!!.giaTri;
+        val doiDa = viewModel.thamSoDAO.selectThamSo("doiDaTrenSanNha")!!.giaTri;
+        if (doiDa == 1)
+            doiDaTrenSanNha = doiDaOptions[0];
+        else
+            doiDaTrenSanNha = doiDaOptions[1];
+        thoiDiemGhiBanToiThieu = viewModel.thamSoDAO.selectThamSo("thoiDiemGhiBanToiThieu")!!.giaTri;
+        thoiDiemGhiBanToiDa = viewModel.thamSoDAO.selectThamSo("thoiDiemGhiBanToiDa")!!.giaTri;
+    }
 
     Scaffold(
         containerColor = DarkColorScheme.background,
@@ -207,20 +250,20 @@ fun SettingsScreen(
 
                 InputDropDownMenu(
                     label = "Đội đá trên sân nhà",
-                    options = listOf(OptionValue(1, "Nhà"), OptionValue(2, "Khách")),
+                    options = doiDaOptions,
                     selectedOption = doiDaTrenSanNha,
                     onOptionSelected = { doiDaTrenSanNha = it },
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputFloatField(
+                InputIntField(
                     label = "Thời điểm ghi bàn tổi thiểu",
                     value = thoiDiemGhiBanToiThieu,
                     onValueChange = { thoiDiemGhiBanToiThieu = it },
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputFloatField(
+                InputIntField(
                     label = "Thời điểm ghi bàn tổi đa",
                     value = thoiDiemGhiBanToiDa,
                     onValueChange = { thoiDiemGhiBanToiDa = it },
@@ -228,7 +271,7 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
-                    onClick = {  },
+                    onClick = onClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
