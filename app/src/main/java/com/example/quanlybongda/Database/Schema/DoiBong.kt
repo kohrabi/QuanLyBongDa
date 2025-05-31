@@ -36,6 +36,7 @@ data class DoiBong(
     val maMG : Int,
     @ColumnInfo(defaultValue = "false")
     val deleted : Boolean? = false,
+    val imageURL : String? = "",
 ) {
     @Ignore var tenSan : String = ""
 }
@@ -51,4 +52,5 @@ data class DoiBongBackup(
     val tenDoi : String,
     val maSan : Int,
     val maMG : Int,
+    val imageURL : String? = "",
 )

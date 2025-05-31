@@ -57,7 +57,7 @@ fun LoginScreen(
         if (!isError) {
             scope.launch {
                 try {
-                    val sessionToken = viewModel.loginIn(username, password);
+                    val sessionToken = viewModel.loginUser(username, password);
                     dataStore.saveSessionToken(sessionToken, context);
 
                     navigatePopUpTo(navController, "muaGiai");

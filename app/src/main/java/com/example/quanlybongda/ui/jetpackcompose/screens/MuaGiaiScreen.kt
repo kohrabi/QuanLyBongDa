@@ -8,13 +8,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -25,6 +28,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.DateConverter
 import com.example.quanlybongda.Database.Schema.MuaGiai
@@ -139,31 +143,42 @@ fun SeasonCard(
             )
             .padding(if (isSelected) 0.dp else 2.dp)
     ) {
-        Column(
+        Row(
             modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = season.tenMG,
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(bottom = 8.dp)
+        )
+        {
+            AsyncImage(
+                model = season.imageURL,
+                contentDescription = season.tenMG,
+                modifier = Modifier.size(64.dp).background(Color.White, CircleShape).clip(CircleShape),
             )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Column(
+                modifier = Modifier.padding(start = 16.dp).fillMaxHeight(),
+                verticalArrangement = Arrangement.SpaceBetween,)
+            {
                 Text(
-                    text = "Bắt đầu: ${DateConverter.LocalDateToString(season.ngayDienRa)}",
-                    color = Color.LightGray,
-                    fontSize = 14.sp
+                    text = season.tenMG,
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
-                Text(
-                    text = "Kết thúc: ${DateConverter.LocalDateToString(season.ngayKetThuc)}",
-                    color = Color.LightGray,
-                    fontSize = 14.sp
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Bắt đầu: ${DateConverter.LocalDateToString(season.ngayDienRa)}",
+                        color = Color.LightGray,
+                        fontSize = 12.sp
+                    )
+                    Text(
+                        text = "Kết thúc: ${DateConverter.LocalDateToString(season.ngayKetThuc)}",
+                        color = Color.LightGray,
+                        fontSize = 12.sp
+                    )
+                }
             }
         }
     }

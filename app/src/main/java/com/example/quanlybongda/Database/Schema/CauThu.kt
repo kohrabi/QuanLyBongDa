@@ -42,6 +42,7 @@ data class CauThu(
     val soAo: Int,
     @ColumnInfo(defaultValue = "false")
     val deleted : Boolean? = false,
+    val imageURL : String? = "",
 ) {
     @Ignore var tenLCT : String = "";
     @Ignore var banThang : Int = 0;
@@ -61,4 +62,5 @@ data class CauThuBackup(
     val maLCT: Int,
     val maDoi: Int,
     val soAo: Int,
+    val imageURL : String? = "",
 )

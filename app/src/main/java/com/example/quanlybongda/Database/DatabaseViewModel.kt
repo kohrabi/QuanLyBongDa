@@ -254,7 +254,7 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
         )
         userDAO.upsertUser(user);
 
-        return loginIn(username, passwordHash); // Return SessionToken
+        return loginUser(username, password); // Return SessionToken
     }
 
     suspend fun updateUserPassword(userId: Int, password: String) {
@@ -287,7 +287,7 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
         userDAO.deleteUser(userId);
     }
 
-    suspend fun loginIn(username: String, password: String) : String {
+    suspend fun loginUser(username: String, password: String) : String {
         val passwordHash = hashPassword(password);
         val user = userDAO.selectUserFromUsername(username) ?: throw IncorrectUsername();
         if (user.passwordHash != passwordHash)

@@ -81,7 +81,9 @@ data class LichThiDau(
     val deleted : Boolean? = false,
 ) {
     @Ignore var tenDoiMot: String? = null;
+    @Ignore var doiMotLogo: String? = null;
     @Ignore var tenDoiHai: String? = null;
+    @Ignore var doiHaiLogo: String? = null;
     @Ignore var tenDoiThang: String? = null;
     @Ignore var tenMG: String? = null;
 }

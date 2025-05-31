@@ -22,6 +22,7 @@ data class MuaGiai (
     val ngayKetThuc : LocalDate = LocalDate.now(),
     @ColumnInfo(defaultValue = "false")
     val deleted : Boolean? = false,
+    val imageURL : String? = "",
 )
 
 @Entity(
@@ -35,4 +36,5 @@ data class MuaGiaiBackup (
     val tenMG : String,
     val ngayDienRa : LocalDate = LocalDate.now(),
     val ngayKetThuc : LocalDate = LocalDate.now(),
+    val imageURL : String? = "",
 )

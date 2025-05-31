@@ -65,7 +65,6 @@ fun SignUpScreen(
                 try {
                     val sessionToken = viewModel.createUser(email, username, password);
                     dataStore.saveSessionToken(sessionToken, context);
-
                     navController.navigate("muaGiai");
                 }
                 catch (e : RuntimeException) {

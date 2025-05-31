@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -44,6 +45,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.DateConverter
 import com.example.quanlybongda.Database.Schema.DoiBong
@@ -84,8 +86,12 @@ fun LapLichScreen(
                 lichThiDaus = viewModel.lichThiDauDAO.selectLichThiDauMaMG(currentMuaGiai!!.maMG!!);
                 doiBongs = viewModel.doiBongDAO.selectAllDoiBong();
                 for (lichThiDau in lichThiDaus) {
-                    lichThiDau.tenDoiMot = doiBongs.find { it.maDoi == lichThiDau.doiMot }!!.tenDoi;
-                    lichThiDau.tenDoiHai = doiBongs.find { it.maDoi == lichThiDau.doiHai }!!.tenDoi;
+                    val doiMot = doiBongs.find { it.maDoi == lichThiDau.doiMot }!!;
+                    lichThiDau.tenDoiMot = doiMot.tenDoi;
+                    lichThiDau.doiMotLogo = doiMot.imageURL;
+                    val doiHai = doiBongs.find { it.maDoi == lichThiDau.doiHai }!!;
+                    lichThiDau.tenDoiHai = doiHai.tenDoi;
+                    lichThiDau.doiHaiLogo = doiHai.imageURL;
                     if (lichThiDau.doiThang == null)
                         lichThiDau.tenDoiThang = "Hòa";
                     else
@@ -139,8 +145,10 @@ fun LapLichScreen(
             items(lichThiDaus) { lichThiDau ->
                 MatchInfoRowNoLogos(
                     lichThiDau.tenDoiMot ?: "",
+                    lichThiDau.doiMotLogo ?: "",
                     DateConverter.LocalDateTimeToString(lichThiDau.ngayGioThucTe),
                     lichThiDau.tenDoiHai ?: "",
+                    lichThiDau.doiHaiLogo ?: "",
                     onClick = {
                         navController.navigate("banThang/${lichThiDau.maTD}");
                     })
@@ -262,9 +270,11 @@ fun MatchScheduleHeader() {
 
 @Composable
 fun MatchInfoRowNoLogos(
-    team1Name: String,
+    tenDoiMot: String,
+    doiMotImageURL: String,
     matchDateTime: String,
-    team2Name: String,
+    tenDoiHai: String,
+    doiHaiImageURL: String,
     onClick : () -> Unit
 ) {
     Row(
@@ -276,9 +286,51 @@ fun MatchInfoRowNoLogos(
             .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(team1Name, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f), textAlign = TextAlign.Start)
-        Text(matchDateTime, color = darkTextMuted, fontSize = 10.sp, textAlign = TextAlign.Center, lineHeight = 12.sp, modifier = Modifier.weight(1f).padding(horizontal = 8.dp))
-        Text(team2Name, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f), textAlign = TextAlign.End)
+        Column(
+            Modifier.weight(1f),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally) {
+            AsyncImage(
+                doiMotImageURL,
+                contentDescription = "",
+                modifier = Modifier.size(64.dp),
+            )
+            Text(
+                text = tenDoiMot,
+                color = Color.White,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Start
+            )
+        }
+        Text(
+            text = matchDateTime,
+            color = darkTextMuted,
+            fontSize = 10.sp,
+            textAlign = TextAlign.Center,
+            lineHeight = 12.sp,
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 8.dp)
+        )
+
+        Column(
+            Modifier.weight(1f),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally) {
+            AsyncImage(
+                doiHaiImageURL,
+                contentDescription = "",
+                modifier = Modifier.size(64.dp),
+            )
+            Text(
+                text = tenDoiHai,
+                color = Color.White,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.End
+            )
+        }
     }
 }
 
