@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.ReturnTypes.BangXepHangNgay
 import com.example.quanlybongda.R
@@ -186,7 +187,8 @@ fun StandingsListHeader(modifier: Modifier = Modifier) {
             .padding(bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Spacer(modifier = Modifier.width(6.dp + 8.dp + 20.dp + 8.dp))
+//        Spacer(modifier = Modifier.width(6.dp + 8.dp))
+        Text("Logo", color = darkTextMuted, fontSize = 11.sp, modifier = Modifier.weight(1.0f))
         Text("Club", color = darkTextMuted, fontSize = 11.sp, modifier = Modifier.weight(2.2f))
         Text("W", color = darkTextMuted, fontSize = 11.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
         Text("D", color = darkTextMuted, fontSize = 11.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
@@ -211,8 +213,13 @@ fun StandingsListRow(team: BangXepHangNgay, modifier: Modifier = Modifier) {
 //                    shape = CircleShape
 //                )
 //        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Spacer(modifier = Modifier.width(8.dp))
+//        Spacer(modifier = Modifier.width(8.dp))
+//        Spacer(modifier = Modifier.width(8.dp))
+        AsyncImage(
+            model = team.imageURL,
+            contentDescription = "",
+            modifier = Modifier.size(32.dp).weight(1.0f)
+        )
         Text(
             text = team.tenDoi,
             color = com.example.quanlybongda.ui.theme.darkTextWhite,

@@ -113,7 +113,8 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
                 soTranThua = soTranThua,
                 soTranHoa = soTranHoa,
                 hieuSo = soTranThang * 3 + soTranHoa * 1 + soTranThua * 0,
-                hang = 0
+                hang = 0,
+                imageURL = doi.imageURL ?: ""
             )
             result.add(doiBXH);
         }

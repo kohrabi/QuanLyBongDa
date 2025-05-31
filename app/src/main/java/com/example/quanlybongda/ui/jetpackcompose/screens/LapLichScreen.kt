@@ -96,6 +96,10 @@ fun LapLichScreen(
                         lichThiDau.tenDoiThang = "Hòa";
                     else
                         lichThiDau.tenDoiThang = doiBongs.find { it.maDoi == lichThiDau.doiThang }!!.tenDoi;
+                    lichThiDau.banThangDoiMot = viewModel.banThangDAO.selectSoBanThangTranDauDoi(lichThiDau.maTD, lichThiDau.doiMot) +
+                            viewModel.banThangDAO.selectSoBanThangPhanLuoiTranDauDoi(lichThiDau.maTD, lichThiDau.doiHai);
+                    lichThiDau.banThangDoiHai = viewModel.banThangDAO.selectSoBanThangTranDauDoi(lichThiDau.maTD, lichThiDau.doiHai) +
+                            viewModel.banThangDAO.selectSoBanThangPhanLuoiTranDauDoi(lichThiDau.maTD, lichThiDau.doiMot);
                 }
                 lichThiDaus = lichThiDaus.sortedByDescending { it.ngayGioThucTe };
             }
@@ -128,13 +132,17 @@ fun LapLichScreen(
                 // Tăng khoảng cách giữa TopAppBar và FeaturedMatchCardUpdated
                 Spacer(modifier = Modifier.height(30.dp)) // << SỬA: Tăng khoảng cách
 
-                FeaturedMatchCardUpdated(
-                    team1Name = "Chelse",
-                    team1Scorers = "De Jong 66’\nDepay 79’", // Giữ \n để xuống dòng tự nhiên
-                    score = "2 - 2",
-                    team2Name = "Leicester",
-                    team2Scorers = "Alvarez 21’\nPalmer 70’" // Giữ \n
-                )
+                if (lichThiDaus.isNotEmpty()) {
+                    FeaturedMatchCardUpdated(
+                        team1Name = lichThiDaus[0].tenDoiMot ?: "",
+                        team1ImageURL = lichThiDaus[0].doiMotLogo ?: "",
+                        team1Scorers = "De Jong 66’\nDepay 79’", // Giữ \n để xuống dòng tự nhiên
+                        score = "${lichThiDaus[0].banThangDoiMot} - ${lichThiDaus[0].banThangDoiHai}",
+                        team2Name = lichThiDaus[0].tenDoiHai ?: "",
+                        team2ImageURL = lichThiDaus[0].doiHaiLogo ?: "",
+                        team2Scorers = "Alvarez 21’\nPalmer 70’" // Giữ \n
+                    )
+                }
                 // Tăng khoảng cách giữa FeaturedMatchCardUpdated và MatchScheduleHeader
                 Spacer(modifier = Modifier.height(60.dp)) // << SỬA: Tăng khoảng cách
 
@@ -162,9 +170,11 @@ fun LapLichScreen(
 fun FeaturedMatchCardUpdated(
     team1Name: String,
     team1Scorers: String,
+    team1ImageURL: String,
     score: String,
     team2Name: String,
-    team2Scorers: String
+    team2Scorers: String,
+    team2ImageURL: String,
 ) {
     Box(
         modifier = Modifier
@@ -197,14 +207,15 @@ fun FeaturedMatchCardUpdated(
                 TeamDisplayUpdated(
                     teamName = team1Name,
                     scorers = team1Scorers,
-                    horizontalAlignment = Alignment.Start, // Căn text của đội bên trong Column của đội
-                    textAlign = TextAlign.Start
+                    teamImageURL = team1ImageURL,
+                    horizontalAlignment = Alignment.CenterHorizontally, // Căn text của đội bên trong Column của đội
+                    textAlign = TextAlign.Center
                 )
 
                 Text(
                     score,
                     color = textScoreColor,
-                    fontSize = 38.sp,    // << SỬA: Tăng kích thước tỷ số hơn nữa
+                    fontSize = 28.sp,    // << SỬA: Tăng kích thước tỷ số hơn nữa
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
@@ -212,8 +223,9 @@ fun FeaturedMatchCardUpdated(
                 TeamDisplayUpdated(
                     teamName = team2Name,
                     scorers = team2Scorers,
-                    horizontalAlignment = Alignment.End, // Căn text của đội bên trong Column của đội
-                    textAlign = TextAlign.End
+                    teamImageURL = team2ImageURL,
+                    horizontalAlignment = Alignment.CenterHorizontally, // Căn text của đội bên trong Column của đội
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -223,16 +235,24 @@ fun FeaturedMatchCardUpdated(
 @Composable
 fun TeamDisplayUpdated( // Đổi tên và sửa đổi
     teamName: String,
+    teamImageURL: String,
     scorers: String,
     horizontalAlignment: Alignment.Horizontal,
     textAlign: TextAlign
 ) {
     Column(
         horizontalAlignment = horizontalAlignment,
+        verticalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .widthIn(min = 80.dp, max = 120.dp) // Đặt giới hạn chiều rộng cho cột này
         // .padding(top = 8.dp) // Thêm padding top để đẩy tên đội xuống thẳng hàng tỷ số
     ) {
+        AsyncImage(
+            model = teamImageURL,
+            contentDescription = "",
+            modifier = Modifier.size(60.dp)
+        )
+        Spacer(modifier = Modifier.height(8.dp)) // << SỬA: Thêm Spacer
         Text(
             text = teamName,
             color = Color.White,
@@ -242,14 +262,14 @@ fun TeamDisplayUpdated( // Đổi tên và sửa đổi
             maxLines = 1
         )
         // Spacer để đẩy tên cầu thủ xuống một chút so với tên đội
-        Spacer(modifier = Modifier.height(8.dp)) // << SỬA: Thêm Spacer
-        Text(
-            text = scorers, // scorers giờ đây có thể chứa \n để xuống dòng
-            color = Color.White.copy(alpha = 0.85f),
-            fontSize = 11.sp, // << SỬA: Tăng nhẹ font chữ người ghi bàn
-            textAlign = textAlign,
-            lineHeight = 14.sp // Tăng lineHeight để các dòng không quá sát nhau
-        )
+//        Spacer(modifier = Modifier.height(8.dp)) // << SỬA: Thêm Spacer
+//        Text(
+//            text = scorers, // scorers giờ đây có thể chứa \n để xuống dòng
+//            color = Color.White.copy(alpha = 0.85f),
+//            fontSize = 11.sp, // << SỬA: Tăng nhẹ font chữ người ghi bàn
+//            textAlign = textAlign,
+//            lineHeight = 14.sp // Tăng lineHeight để các dòng không quá sát nhau
+//        )
     }
 }
 
