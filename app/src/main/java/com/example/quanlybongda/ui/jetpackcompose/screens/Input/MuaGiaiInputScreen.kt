@@ -65,6 +65,7 @@ import java.time.LocalDate
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MuaGiaiInputScreen(
+    muaGiai: MuaGiai = MuaGiai(0, "", LocalDate.now(), LocalDate.now()),
     navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel()
@@ -76,9 +77,9 @@ fun MuaGiaiInputScreen(
     var submitted by remember { mutableStateOf(false) }
     var clicked by remember { mutableStateOf(false) }
 
-    var tenMG by remember { mutableStateOf("") }
-    var ngayDienRa by remember { mutableStateOf(LocalDate.now()) }
-    var ngayKetThuc by remember { mutableStateOf(LocalDate.now()) }
+    var tenMG by remember { mutableStateOf(muaGiai.tenMG) }
+    var ngayDienRa by remember { mutableStateOf(muaGiai.ngayDienRa) }
+    var ngayKetThuc by remember { mutableStateOf(muaGiai.ngayKetThuc) }
     val onClick : () -> Unit = {
         clicked = true;
         if (!submitted) {
@@ -87,6 +88,7 @@ fun MuaGiaiInputScreen(
                     return@launch;
                 viewModel.muaGiaiDAO.upsertDSMuaGiai(
                     MuaGiai(
+                        maMG = muaGiai.maMG,
                         tenMG = tenMG,
                         ngayDienRa = ngayDienRa,
                         ngayKetThuc = ngayKetThuc,
@@ -226,6 +228,6 @@ fun MuaGiaiInputScreen(
 @Composable
 fun MuaGiaiInputScreenPreview() {
     MaterialTheme {
-        MuaGiaiInputScreen(rememberNavController())
+        MuaGiaiInputScreen(navController = rememberNavController())
     }
 }

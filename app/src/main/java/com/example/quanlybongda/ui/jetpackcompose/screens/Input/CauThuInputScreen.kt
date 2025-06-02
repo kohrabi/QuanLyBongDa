@@ -49,17 +49,21 @@ import androidx.navigation.compose.rememberNavController
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.Schema.CauThu
 import com.example.quanlybongda.ui.jetpackcompose.screens.AppTopBar
+import com.example.quanlybongda.ui.jetpackcompose.screens.CauThuScreen
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputDatePicker
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputDropDownMenu
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputIntField
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputTextField
 import com.example.quanlybongda.ui.jetpackcompose.screens.OptionValue
 import com.example.quanlybongda.ui.jetpackcompose.screens.convertLocalDateTimeToMillis
+import com.example.quanlybongda.ui.jetpackcompose.screens.convertLocalDateToMillis
+import com.example.quanlybongda.ui.jetpackcompose.screens.convertMillisToLocalDate
 import com.example.quanlybongda.ui.jetpackcompose.screens.convertMillisToLocalDateTime
 import com.example.quanlybongda.ui.theme.DarkColorScheme
 import com.example.quanlybongda.ui.theme.Purple80
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 // import androidx.compose.ui.geometry.Offset // Cần nếu dùng Offset trong Brush
@@ -67,6 +71,7 @@ import java.time.LocalDateTime
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CauThuInputScreen(
+    cauThu: CauThu = CauThu(0, "", LocalDate.now(), "", 0, 0, 0),
     maDoi: Int,
     navController: NavController,
     modifier: Modifier = Modifier,
@@ -81,11 +86,11 @@ fun CauThuInputScreen(
 
     var loaiCTOptions by remember { mutableStateOf(listOf<OptionValue>()) }
 
-    var tenCT by remember { mutableStateOf("") }
-    var ngaySinh by remember { mutableStateOf(LocalDateTime.now()) }
+    var tenCT by remember { mutableStateOf(cauThu.tenCT) }
+    var ngaySinh by remember { mutableStateOf(cauThu.ngaySinh) }
     var loaiCT by remember { mutableStateOf(OptionValue.DEFAULT) }
-    var ghiChu by remember { mutableStateOf("") }
-    var soAo by remember { mutableStateOf<Int?>(0) }
+    var ghiChu by remember { mutableStateOf(cauThu.ghiChu) }
+    var soAo by remember { mutableStateOf<Int?>(cauThu.soAo) }
     val onClick = {
         clicked = true;
         coroutineScope.launch {
@@ -96,8 +101,9 @@ fun CauThuInputScreen(
                 return@launch;
             viewModel.cauThuDAO.upsertCauThu(
                 CauThu(
+                    maCT = cauThu.maCT,
                     tenCT = tenCT,
-                    ngaySinh = ngaySinh.toLocalDate(),
+                    ngaySinh = ngaySinh,
                     maLCT = loaiCT.value!!,
                     maDoi = maDoi,
                     ghiChu = ghiChu,
@@ -113,6 +119,8 @@ fun CauThuInputScreen(
     LaunchedEffect(Unit) {
         val loaiCTs = viewModel.cauThuDAO.selectAllLoaiCT();
         loaiCTOptions = loaiCTs.map { OptionValue(value = it.maLCT, label = it.tenLCT) }
+
+        loaiCT = loaiCTOptions.find { it.value == cauThu.maLCT } ?: OptionValue.DEFAULT;
     }
 
     Scaffold(
@@ -156,10 +164,10 @@ fun CauThuInputScreen(
 
                 InputDatePicker(
                     label = "Ngày sinh",
-                    value = convertLocalDateTimeToMillis(ngaySinh),
+                    value = convertLocalDateToMillis(ngaySinh),
                     onDateSelected = {
                         if (it != null)
-                            ngaySinh = convertMillisToLocalDateTime(it)
+                            ngaySinh = convertMillisToLocalDate(it)
                     },
                     onDismiss = {}
                 )
@@ -238,6 +246,6 @@ fun CauThuInputScreen(
 @Composable
 fun SignInScreen3Preview() {
     MaterialTheme {
-        CauThuInputScreen(1, rememberNavController())
+        CauThuInputScreen(maDoi = 1, navController = rememberNavController())
     }
 }

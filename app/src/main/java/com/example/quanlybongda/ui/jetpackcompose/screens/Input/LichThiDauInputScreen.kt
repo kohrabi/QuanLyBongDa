@@ -65,12 +65,15 @@ import com.example.quanlybongda.ui.theme.DarkColorScheme
 import com.example.quanlybongda.ui.theme.Purple80
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LichThiDauInputScreen(
+    lichThiDau: LichThiDau = LichThiDau(0, 0, 0, 0, 0, 0,
+        0, LocalDateTime.now(), LocalDateTime.now(), 0.0f, 0),
     navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel()
@@ -96,10 +99,10 @@ fun LichThiDauInputScreen(
     var doiHai by remember { mutableStateOf(OptionValue.DEFAULT) }
     var doiThang by remember { mutableStateOf(OptionValue.DEFAULT) }
 
-    var ngayGioDuKien by remember { mutableStateOf(LocalDateTime.now()) }
-    var ngayGioThucTe by remember { mutableStateOf(LocalDateTime.now()) }
+    var ngayGioDuKien by remember { mutableStateOf(lichThiDau.ngayGioDuKien) }
+    var ngayGioThucTe by remember { mutableStateOf(lichThiDau.ngayGioThucTe) }
     var trongTai by remember { mutableStateOf(OptionValue.DEFAULT) }
-    var thoiGianDaThiDau by remember { mutableStateOf<Float?>(0.0f) }
+    var thoiGianDaThiDau by remember { mutableStateOf<Float?>(lichThiDau.thoiGianDaThiDau) }
     val onClick = {
         clicked = true;
         coroutineScope.launch {
@@ -118,6 +121,7 @@ fun LichThiDauInputScreen(
                 return@launch;
             viewModel.lichThiDauDAO.upsertLichThiDau(
                 LichThiDau(
+                    maTD = lichThiDau.maTD,
                     maMG = currentMuaGiai!!.maMG,
                     maVTD = vongTD.value!!,
                     maSan = doiBongs.find { it.maDoi == doiMot.value }!!.maSan,
@@ -138,9 +142,26 @@ fun LichThiDauInputScreen(
 
     LaunchedEffect(Unit) {
         doiBongs = viewModel.doiBongDAO.selectAllDoiBong();
-        trongTaiOptions = viewModel.lichThiDauDAO.selectAllTrongTai().map { OptionValue(value = it.maMG, label = it.tenTT) };
+        trongTaiOptions = viewModel.lichThiDauDAO.selectAllTrongTai().map { OptionValue(value = it.maTT, label = it.tenTT) };
         doiBongOptions = doiBongs.map { OptionValue(value = it.maDoi!!, label = it.tenDoi) };
         vongTDOptions = viewModel.lichThiDauDAO.selectAllVongTD().map { OptionValue(it.maVTD, it.tenVTD) };
+
+        if (lichThiDau.maVTD != 0)
+            vongTD = vongTDOptions.find { lichThiDau.maVTD == it.value } ?: OptionValue.DEFAULT;
+        if (lichThiDau.doiMot != 0)
+            doiMot = doiBongOptions.find { lichThiDau.doiMot == it.value } ?: OptionValue.DEFAULT;
+        if (lichThiDau.doiHai != 0)
+            doiHai = doiBongOptions.find { lichThiDau.doiHai == it.value } ?: OptionValue.DEFAULT;
+        if (lichThiDau.maTT != 0)
+            trongTai = trongTaiOptions.find { lichThiDau.maTT == it.value } ?: OptionValue.DEFAULT;
+        val options = mutableListOf<OptionValue>();
+        options.add(OptionValue(null, "Hòa"));
+        if (doiMot.value != null)
+            options.add(doiMot);
+        if (doiHai.value != null)
+            options.add(doiHai);
+        doiThangOptions = options;
+        doiThang = doiThangOptions.find { lichThiDau.doiThang == it.value } ?: OptionValue.DEFAULT;
     }
 
     LaunchedEffect(doiMot, doiHai) {
@@ -321,6 +342,6 @@ fun LichThiDauInputScreen(
 @Composable
 fun LichThiDauInputScreenPreview() {
     MaterialTheme {
-        LichThiDauInputScreen(rememberNavController())
+        LichThiDauInputScreen(navController = rememberNavController())
     }
 }

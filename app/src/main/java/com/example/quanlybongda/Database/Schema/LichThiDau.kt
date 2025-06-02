@@ -86,7 +86,6 @@ data class LichThiDau(
     @Ignore var tenDoiHai: String? = null;
     @Ignore var doiHaiLogo: String? = null;
     @Ignore var tenDoiThang: String? = null;
-    @Ignore var tenMG: String? = null;
     @Ignore var banThangDoiHai: Int = 0;
 }
 

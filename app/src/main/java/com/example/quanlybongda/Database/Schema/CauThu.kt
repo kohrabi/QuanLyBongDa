@@ -6,10 +6,8 @@ import androidx.room.ForeignKey
 import androidx.room.Ignore
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.example.quanlybongda.Database.Schema.Loai.LoaiBT
 import com.example.quanlybongda.Database.Schema.Loai.LoaiCT
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 @Entity(
     indices = arrayOf(
@@ -46,6 +44,7 @@ data class CauThu(
 ) {
     @Ignore var tenLCT : String = "";
     @Ignore var banThang : Int = 0;
+    @Ignore var doiImageURL : String = "";
 }
 
 @Entity(

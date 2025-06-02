@@ -83,6 +83,11 @@ fun TraCuuScreen(
         isSearching = true;
         viewModel.viewModelScope.launch {
             cauThus = viewModel.cauThuDAO.searchCauThu("%${searchArgument}%");
+            for (cauThu in cauThus) {
+                viewModel.viewModelScope.launch {
+                    cauThu.doiImageURL = viewModel.doiBongDAO.selectDoiBongMaDoi(cauThu.maDoi)?.imageURL ?: "";
+                }
+            }
             isSearching = false;
         }
     }
@@ -118,7 +123,11 @@ fun TraCuuScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(cauThus) { cauThu ->
-                PlayerCard(player = cauThu)
+                PlayerCard(
+                    player = cauThu,
+                    onClick = {
+                        navController.navigate("cauThu/${cauThu.maDoi}");
+                    })
             }
         }
     }

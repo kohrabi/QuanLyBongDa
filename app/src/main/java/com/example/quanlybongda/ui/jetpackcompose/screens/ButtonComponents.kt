@@ -1,5 +1,6 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -59,6 +60,7 @@ fun <T> SwipeToDeleteContainer(
             return@rememberSwipeToDismissBoxState true;
         },
     )
+    var isUpdating by remember() { mutableStateOf(false) }
 
     LaunchedEffect(isRemoved) {
         if (isRemoved) {
@@ -66,13 +68,21 @@ fun <T> SwipeToDeleteContainer(
             isRemoved = onDelete(item);
         }
     }
+    LaunchedEffect(dismissState.progress) {
+        Log.d("TAG", dismissState.progress.toString());
+    }
 
-    if (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
-        LaunchedEffect(Unit) {
-            if (dismissState.currentValue == SwipeToDismissBoxValue.StartToEnd) {
-                onUpdate(item);
-            }
+    LaunchedEffect(dismissState.currentValue) {
+        if (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
+            val state = dismissState.currentValue;
             dismissState.reset()
+            if (!isUpdating && state == SwipeToDismissBoxValue.StartToEnd) {
+                onUpdate(item);
+                isUpdating = true;
+            }
+        }
+        else {
+            isUpdating = false;
         }
     }
 
@@ -100,9 +110,11 @@ fun DeleteBackground(
     swipeToDismissBoxState: SwipeToDismissBoxState,
     backgroundModifier: Modifier = Modifier,
 ) {
+
+    // Color(0xFFDC456F), Color(0xFFB06AB3)
     val animatedColor by animateColorAsState(
-        if (swipeToDismissBoxState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) Color.Green
-        else if (swipeToDismissBoxState.dismissDirection == SwipeToDismissBoxValue.EndToStart) Color.Red
+        if (swipeToDismissBoxState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) Color(0xFF74C27A)
+        else if (swipeToDismissBoxState.dismissDirection == SwipeToDismissBoxValue.EndToStart) Color(0xFFDC456F)
         else Color.Transparent,
         label = "color"
     )
@@ -112,7 +124,7 @@ fun DeleteBackground(
             .drawBehind {
                 drawRect(animatedColor)
             }
-            .fillMaxSize(),
+        .fillMaxSize(),
         contentAlignment =
             if (swipeToDismissBoxState.dismissDirection == SwipeToDismissBoxValue.StartToEnd)
                 Alignment.CenterStart

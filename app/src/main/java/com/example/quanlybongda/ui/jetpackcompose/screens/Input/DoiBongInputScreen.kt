@@ -67,6 +67,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DoiBongInputScreen(
+    doiBong: DoiBong = DoiBong(0, "", 0, 0),
     navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel()
@@ -79,7 +80,7 @@ fun DoiBongInputScreen(
     var clicked by remember { mutableStateOf(false) }
 
     val currentMuaGiai by DatabaseViewModel.currentMuaGiai.collectAsState()
-    var tenDoi by remember { mutableStateOf("") }
+    var tenDoi by remember { mutableStateOf(doiBong.tenDoi) }
     var sanNhaOptions by remember { mutableStateOf(listOf<OptionValue>()) }
     var sanNha by remember { mutableStateOf(OptionValue.DEFAULT) }
 
@@ -114,6 +115,8 @@ fun DoiBongInputScreen(
 
     LaunchedEffect(Unit) {
         sanNhaOptions = viewModel.sanNhaDAO.selectAllSanNha().map { OptionValue(it.maSan, it.tenSan) };
+
+        sanNha = sanNhaOptions.find { it.value == doiBong.maSan } ?: OptionValue.DEFAULT;
     }
 
     Scaffold(
@@ -212,6 +215,6 @@ fun DoiBongInputScreen(
 @Composable
 fun DoiBongInputScreenPreview() {
     MaterialTheme {
-        DoiBongInputScreen(rememberNavController())
+        DoiBongInputScreen(navController = rememberNavController())
     }
 }

@@ -26,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -41,6 +42,7 @@ import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
 import com.example.quanlybongda.ui.theme.darkCardBackground
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.selects.select
 
 // Data class for Season information
 data class Season(
@@ -64,11 +66,23 @@ fun MuaGiaiScreen(
     var muaGiais by remember { mutableStateOf(listOf<MuaGiai>()) }
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    var selectedValue by remember { mutableStateOf<MuaGiai?>(null) }
     // List of seasons with detailed information
 
     LaunchedEffect(Unit) {
         viewModel.viewModelScope.launch {
             muaGiais = viewModel.muaGiaiDAO.selectAllMuaGiai();
+        }
+    }
+
+    DisposableEffect(snackbarHostState) {
+        onDispose {
+            if (selectedValue != null) {
+                viewModel.viewModelScope.launch {
+                    viewModel.muaGiaiDAO.deleteDSMuaGiai(selectedValue!!);
+                    selectedValue = null;
+                }
+            }
         }
     }
 
@@ -104,6 +118,13 @@ fun MuaGiaiScreen(
                     SwipeToDeleteContainer(
                         item = muaGiai,
                         onDelete = {
+                            if (selectedValue != null) {
+                                viewModel.viewModelScope.launch {
+                                    viewModel.muaGiaiDAO.deleteDSMuaGiai(selectedValue!!);
+                                    selectedValue = null;
+                                }
+                            }
+                            selectedValue = muaGiai;
                             val result = snackbarHostState
                                 .showSnackbar(
                                     message = "Deleted ${muaGiai.tenMG}",
@@ -116,7 +137,8 @@ fun MuaGiaiScreen(
                                 }
                                 SnackbarResult.Dismissed -> {
                                     viewModel.viewModelScope.launch {
-                                        viewModel.muaGiaiDAO.deleteDSMuaGiai(muaGiai);
+                                        viewModel.muaGiaiDAO.deleteDSMuaGiai(selectedValue!!);
+                                        selectedValue = null;
                                     }
                                     return@SwipeToDeleteContainer true;
                                 }
@@ -124,6 +146,12 @@ fun MuaGiaiScreen(
                         },
                         onUpdate = {
                             navController.navigate("muaGiaiInput");
+                            val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle;
+                            savedStateHandle?.set("maMG", it.maMG);
+                            savedStateHandle?.set("tenMG", it.tenMG);
+                            savedStateHandle?.set("ngayDienRa", it.ngayDienRa);
+                            savedStateHandle?.set("ngayKetThuc", it.ngayKetThuc);
+                            savedStateHandle?.set("imageURL", it.imageURL);
                         },
                         content = {
                             SeasonCard(
