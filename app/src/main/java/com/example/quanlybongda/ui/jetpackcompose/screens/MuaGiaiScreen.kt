@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
@@ -62,6 +63,7 @@ fun MuaGiaiScreen(
     val selectedMuaGiai by DatabaseViewModel.currentMuaGiai.collectAsState()
     var muaGiais by remember { mutableStateOf(listOf<MuaGiai>()) }
     val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
     // List of seasons with detailed information
 
     LaunchedEffect(Unit) {
@@ -72,6 +74,10 @@ fun MuaGiaiScreen(
 
     // Main screen layout without bottomBar
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState)
+        },
         floatingActionButton = {
             AddFloatingButton("Tạo mùa giải", onClick = { navController.navigate("muaGiaiInput") })
         },
@@ -97,7 +103,28 @@ fun MuaGiaiScreen(
                 items(muaGiais) { muaGiai ->
                     SwipeToDeleteContainer(
                         item = muaGiai,
-                        onDelete = {  },
+                        onDelete = {
+                            val result = snackbarHostState
+                                .showSnackbar(
+                                    message = "Deleted ${muaGiai.tenMG}",
+                                    actionLabel = "Undo",
+                                    duration = SnackbarDuration.Short
+                                )
+                            when (result) {
+                                SnackbarResult.ActionPerformed -> {
+                                    return@SwipeToDeleteContainer false;
+                                }
+                                SnackbarResult.Dismissed -> {
+                                    viewModel.viewModelScope.launch {
+                                        viewModel.muaGiaiDAO.deleteDSMuaGiai(muaGiai);
+                                    }
+                                    return@SwipeToDeleteContainer true;
+                                }
+                            }
+                        },
+                        onUpdate = {
+                            navController.navigate("muaGiaiInput");
+                        },
                         content = {
                             SeasonCard(
                                 season = muaGiai,
@@ -113,7 +140,8 @@ fun MuaGiaiScreen(
                             )
                         },
                         modifier = Modifier
-                            .fillMaxSize()
+                            .fillMaxSize(),
+                        backgroundModifier = Modifier.clip(RoundedCornerShape(16.dp))
                     )
                 }
             }
@@ -138,10 +166,10 @@ fun SeasonCard(
             .fillMaxWidth()
             .clickable { onSeasonSelect() }
             .then(
-                if (isSelected) Modifier.border(2.dp, Purple80, RoundedCornerShape(16.dp))
-                else Modifier.border(2.dp, Color.Transparent, RoundedCornerShape(16.dp))
+                if (isSelected) Modifier.border(6.dp, Purple80, RoundedCornerShape(16.dp))
+                else Modifier.border(6.dp, Color.Transparent, RoundedCornerShape(16.dp))
             )
-            .padding(if (isSelected) 0.dp else 2.dp)
+//            .padding(4.dp)
     ) {
         Row(
             modifier = Modifier.padding(16.dp)
