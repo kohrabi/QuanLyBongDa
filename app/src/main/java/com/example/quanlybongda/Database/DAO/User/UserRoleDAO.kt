@@ -23,7 +23,7 @@ interface UserRoleDAO {
         WHERE HasRole.groupId=:groupId
         GROUP BY UserRole.roleId
     """)
-    fun selectRolesInGroup(groupId : Int) : LiveData<List<UserRole>>;
+    suspend fun selectRolesInGroup(groupId : Int) : List<UserRole>;
 
     @Query("SELECT HasRole.roleId FROM HasRole WHERE HasRole.groupId=:groupId")
     suspend fun selectRoleIdsInGroup(groupId : Int) : List<Int>;

@@ -1,16 +1,12 @@
 package com.example.quanlybongda.Database.DAO.User
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Query
-import androidx.room.Update
 import androidx.room.Upsert
 import com.example.quanlybongda.Database.ReturnTypes.SessionValidationResult
 import com.example.quanlybongda.Database.Schema.User.Session
 import com.example.quanlybongda.Database.Schema.User.User
 import kotlinx.coroutines.flow.Flow
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Dao
@@ -59,5 +55,12 @@ interface UserDAO {
 
     @Query("UPDATE User SET passwordHash=:passwordHash WHERE id=:userId")
     suspend fun updateUserPasswordHash(userId: Int, passwordHash : String);
+
+    @Query("""
+        UPDATE User
+        SET groupId=:groupId
+        WHERE id=:userId
+    """)
+    suspend fun updateUserGroup(userId: Int, groupId: Int);
 
 }

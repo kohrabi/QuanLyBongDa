@@ -73,6 +73,8 @@ fun DoiBongScreen(
     var doiBongs by remember { mutableStateOf(listOf<DoiBong>()) }
     val snackbarHostState = remember { SnackbarHostState() }
     var selectedValue by remember { mutableStateOf<DoiBong?>(null) }
+    val user by viewModel.user.collectAsState()
+    var isEditable by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.viewModelScope.launch {
@@ -82,8 +84,15 @@ fun DoiBongScreen(
                 for (doiBong in doiBongs) {
                     doiBong.tenSan = sanNha.find { doiBong.maSan == it.maSan }!!.tenSan;
                 }
-
             }
+        }
+    }
+
+    LaunchedEffect(user) {
+        if (user == null)
+            return@LaunchedEffect;
+        viewModel.viewModelScope.launch {
+            isEditable = viewModel.checkPageEditable(user!!.groupId, "doi");
         }
     }
 
@@ -111,7 +120,8 @@ fun DoiBongScreen(
             )
         },
         floatingActionButton = {
-            AddFloatingButton("Tạo đội bóng", onClick = { navController.navigate("doiBongInput") })
+            if (isEditable)
+                AddFloatingButton("Tạo đội bóng", onClick = { navController.navigate("doiBongInput") })
         },
         containerColor = DarkColorScheme.background,
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -129,6 +139,7 @@ fun DoiBongScreen(
             items(doiBongs) { doiBong ->
                 SwipeToDeleteContainer(
                     item = doiBong,
+                    isEditable = isEditable,
                     onDelete = {
                         if (selectedValue != null) {
                             viewModel.viewModelScope.launch {

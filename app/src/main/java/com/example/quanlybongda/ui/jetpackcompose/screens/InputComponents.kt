@@ -328,6 +328,10 @@ fun InputDatePicker(
         }
     }
 
+    LaunchedEffect(value) {
+        datePickerState.selectedDateMillis = value;
+    }
+
     TextField(
         value = selectedDate,
         label = { Text(label) },

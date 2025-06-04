@@ -1,6 +1,7 @@
 
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -43,6 +44,7 @@ import com.example.quanlybongda.ui.theme.darkCardBackground
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
+import kotlin.text.find
 
 // Data class for Season information
 data class Season(
@@ -67,11 +69,24 @@ fun MuaGiaiScreen(
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     var selectedValue by remember { mutableStateOf<MuaGiai?>(null) }
+    var isEditable by remember { mutableStateOf(false) }
+    val user by viewModel.user.collectAsState()
     // List of seasons with detailed information
 
     LaunchedEffect(Unit) {
+        if (user == null)
+            return@LaunchedEffect
         viewModel.viewModelScope.launch {
             muaGiais = viewModel.muaGiaiDAO.selectAllMuaGiai();
+            Log.d("TAG", ("cauthu".toRegex(RegexOption.IGNORE_CASE).containsMatchIn("muagiai")).toString());
+        }
+    }
+
+    LaunchedEffect(user) {
+        if (user == null)
+            return@LaunchedEffect;
+        viewModel.viewModelScope.launch {
+            isEditable = viewModel.checkPageEditable(user!!.groupId, "muagiai");
         }
     }
 
@@ -93,7 +108,8 @@ fun MuaGiaiScreen(
                 hostState = snackbarHostState)
         },
         floatingActionButton = {
-            AddFloatingButton("Tạo mùa giải", onClick = { navController.navigate("muaGiaiInput") })
+            if (isEditable)
+                AddFloatingButton("Tạo mùa giải", onClick = { navController.navigate("muaGiaiInput") })
         },
         topBar = {
             AppTopBar(
@@ -117,6 +133,7 @@ fun MuaGiaiScreen(
                 items(muaGiais) { muaGiai ->
                     SwipeToDeleteContainer(
                         item = muaGiai,
+                        isEditable = isEditable,
                         onDelete = {
                             if (selectedValue != null) {
                                 viewModel.viewModelScope.launch {

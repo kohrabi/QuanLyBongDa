@@ -1,6 +1,7 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
 // Thêm import cần thiết để lấy chiều cao thanh trạng thái
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +36,7 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -78,6 +81,10 @@ fun CauThuScreen(
     var cauThus by remember { mutableStateOf(listOf<CauThu>()) }
     val snackbarHostState = remember { SnackbarHostState() }
     var selectedValue by remember { mutableStateOf<CauThu?>(null) }
+    val user by viewModel.user.collectAsState()
+    val context = LocalContext.current;
+    var soCauThuMax by remember { mutableStateOf(0) }
+    var isEditable by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.viewModelScope.launch {
@@ -88,6 +95,15 @@ fun CauThuScreen(
                 cauThu.tenLCT = loaiCTs.find { it.maLCT == cauThu.maLCT }!!.tenLCT;
                 cauThu.doiImageURL = doiBong?.imageURL ?: "";
             }
+            soCauThuMax = viewModel.thamSoDAO.selectThamSo("soCauThuMax")!!.giaTri;
+        }
+    }
+
+    LaunchedEffect(user) {
+        if (user == null)
+            return@LaunchedEffect;
+        viewModel.viewModelScope.launch {
+            isEditable = viewModel.checkPageEditable(user!!.groupId, "cauthu");
         }
     }
 
@@ -123,7 +139,17 @@ fun CauThuScreen(
             )
         },
         floatingActionButton = {
-            AddFloatingButton("Cầu thủ", onClick = { navController.navigate("cauThuInput/${maDoi}")})
+            if (isEditable) {
+                AddFloatingButton(
+                    "Cầu thủ",
+                    onClick = {
+                        if (cauThus.size > soCauThuMax) {
+                            Toast.makeText(context, "Vượt quá cầu thủ tối đa", Toast.LENGTH_SHORT).show();
+                            return@AddFloatingButton;
+                        }
+                        navController.navigate("cauThuInput/${maDoi}")
+                    })
+            }
         },
         containerColor = DarkColorScheme.background,
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -140,6 +166,7 @@ fun CauThuScreen(
             items(cauThus) { cauThu ->
                 SwipeToDeleteContainer(
                     item = cauThu,
+                    isEditable = isEditable,
                     onDelete = {
                         if (selectedValue != null) {
                             viewModel.viewModelScope.launch {
@@ -251,29 +278,6 @@ fun PlayerCard(player: CauThu, onClick : () -> Unit = {}) {
                     contentDescription = "",
                     modifier = Modifier.size(64.dp)
                 )
-                //                // Nhãn "Goal"
-                //                Text(
-                //                    text = "Goal",
-                //                    style = TextStyle(
-                //                        fontSize = 8.76.sp,
-                //                        lineHeight = 9.64.sp,
-                //                        fontWeight = FontWeight(500),
-                //                        color = Color(0xFF797979),
-                //                        textAlign = TextAlign.Start
-                //                    ),
-                //                    modifier = Modifier.padding(bottom = 4.dp)
-                //                )
-                // Số bàn thắng (Goals)
-                //                Text(
-                //                    text = "${player.goals}",
-                //                    style = TextStyle(
-                //                        fontSize = 21.03.sp,
-                //                        lineHeight = 14.71.sp,
-                //                        fontWeight = FontWeight(600),
-                //                        color = Color(0xFFD2B5FF),
-                //                        textAlign = TextAlign.Start
-                //                    )
-                //                )
             }
 
             // Phần bên phải: Position, Birth day, Note

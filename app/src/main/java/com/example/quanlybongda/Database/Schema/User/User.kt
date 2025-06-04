@@ -3,6 +3,7 @@ package com.example.quanlybongda.Database.Schema.User
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Ignore
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.time.LocalDateTime
@@ -31,7 +32,9 @@ data class User(
     val username : String,
     @ColumnInfo(defaultValue = "1")
     val groupId : Int = 1,
-)
+) {
+    @Ignore var groupName : String = "";
+}
 
 @Entity(
     foreignKeys = arrayOf(

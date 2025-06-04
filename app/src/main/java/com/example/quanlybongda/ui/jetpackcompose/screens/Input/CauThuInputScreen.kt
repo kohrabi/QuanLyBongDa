@@ -1,5 +1,6 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens.Input
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,9 +45,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.Database.DateConverter
 import com.example.quanlybongda.Database.Schema.CauThu
 import com.example.quanlybongda.ui.jetpackcompose.screens.AppTopBar
 import com.example.quanlybongda.ui.jetpackcompose.screens.CauThuScreen
@@ -91,6 +94,8 @@ fun CauThuInputScreen(
     var loaiCT by remember { mutableStateOf(OptionValue.DEFAULT) }
     var ghiChu by remember { mutableStateOf(cauThu.ghiChu) }
     var soAo by remember { mutableStateOf<Int?>(cauThu.soAo) }
+    var tuoiMin by remember { mutableStateOf(0L) }
+    var tuoiMax by remember { mutableStateOf(90L) }
     val onClick = {
         clicked = true;
         coroutineScope.launch {
@@ -99,6 +104,12 @@ fun CauThuInputScreen(
             if (loaiCT.value == null ||
                 soAo == null)
                 return@launch;
+            val ngaySinhMin = LocalDate.now().minusYears(tuoiMax);
+            val ngaySinhMax = LocalDate.now().minusYears(tuoiMin);
+            if (ngaySinh.isBefore(ngaySinhMin) || ngaySinh.isAfter(ngaySinhMax)) {
+                Toast.makeText(context, "Ngày sinh phải lớn hơn ${ngaySinhMin} " +
+                        "và bé hơn ${ngaySinhMax}", Toast.LENGTH_SHORT).show();
+            }
             viewModel.cauThuDAO.upsertCauThu(
                 CauThu(
                     maCT = cauThu.maCT,
@@ -117,10 +128,15 @@ fun CauThuInputScreen(
     };
 
     LaunchedEffect(Unit) {
-        val loaiCTs = viewModel.cauThuDAO.selectAllLoaiCT();
-        loaiCTOptions = loaiCTs.map { OptionValue(value = it.maLCT, label = it.tenLCT) }
+        viewModel.viewModelScope.launch {
 
-        loaiCT = loaiCTOptions.find { it.value == cauThu.maLCT } ?: OptionValue.DEFAULT;
+            val loaiCTs = viewModel.cauThuDAO.selectAllLoaiCT();
+            loaiCTOptions = loaiCTs.map { OptionValue(value = it.maLCT, label = it.tenLCT) }
+
+            loaiCT = loaiCTOptions.find { it.value == cauThu.maLCT } ?: OptionValue.DEFAULT;
+            tuoiMin = viewModel.thamSoDAO.selectThamSo("tuoiMin")!!.giaTri.toLong();
+            tuoiMax = viewModel.thamSoDAO.selectThamSo("tuoiMax")!!.giaTri.toLong();
+        }
     }
 
     Scaffold(
@@ -166,8 +182,16 @@ fun CauThuInputScreen(
                     label = "Ngày sinh",
                     value = convertLocalDateToMillis(ngaySinh),
                     onDateSelected = {
-                        if (it != null)
+                        if (it != null) {
                             ngaySinh = convertMillisToLocalDate(it)
+                            val ngaySinhMin = LocalDate.now().minusYears(tuoiMax);
+                            val ngaySinhMax = LocalDate.now().minusYears(tuoiMin);
+                            if (ngaySinh.isBefore(ngaySinhMin) || ngaySinh.isAfter(ngaySinhMax)) {
+                                Toast.makeText(context, "Ngày sinh phải lớn hơn ${ngaySinhMin} " +
+                                        "và bé hơn ${ngaySinhMax}", Toast.LENGTH_SHORT).show();
+                            }
+                            ngaySinh = ngaySinh.coerceIn(ngaySinhMin, ngaySinhMax);
+                        }
                     },
                     onDismiss = {}
                 )

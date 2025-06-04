@@ -13,6 +13,8 @@ import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,10 +23,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ComponentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -39,6 +43,7 @@ import com.example.quanlybongda.Database.Schema.CauThu
 import com.example.quanlybongda.Database.Schema.DoiBong
 import com.example.quanlybongda.Database.Schema.LichThiDau
 import com.example.quanlybongda.Database.Schema.MuaGiai
+import com.example.quanlybongda.Database.Schema.User.User
 import com.example.quanlybongda.ui.jetpackcompose.screens.*
 import com.example.quanlybongda.ui.jetpackcompose.screens.Input.*
 import com.example.quanlybongda.ui.theme.DarkColorScheme
@@ -46,6 +51,7 @@ import com.example.quanlybongda.ui.theme.Purple80
 import com.example.quanlybongda.ui.theme.PurpleGrey80
 import com.example.quanlybongda.ui.theme.darkContentBackground
 import com.example.quanlybongda.ui.theme.darkTextMuted
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -81,7 +87,6 @@ fun AppNavigation() {
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute by remember { derivedStateOf { currentBackStackEntry?.destination?.route ?: homeRoute } }
     val viewModel : DatabaseViewModel = hiltViewModel();
-
     val routes = listOf(
         BottomNavigationRoute("baoCao", "Báo cáo", Icons.Default.Home),
         BottomNavigationRoute("lapLich", "Lập lịch", Icons.Default.Schedule),
@@ -146,6 +151,40 @@ fun AppNavigation() {
                 CauThuScreen(backStackEntry.arguments?.getInt("maDoi") ?: 0, navController, modifier, viewModel)
             }
 
+            composable("cauThuInput/{maDoi}", arguments = listOf(navArgument("maDoi") { type = NavType.IntType})) { backStackEntry ->
+
+                val savedStateHandle = backStackEntry.savedStateHandle;
+                val cauThu = CauThu(
+                    maCT = savedStateHandle.get("maCT") ?: 0,
+                    tenCT = savedStateHandle.get("tenCT") ?: "",
+                    maLCT = savedStateHandle.get("maLCT") ?: 0,
+                    maDoi = savedStateHandle.get("maDoi") ?: 0,
+                    soAo = savedStateHandle.get("soAo") ?: 0,
+                    ghiChu = savedStateHandle.get("ghiChu") ?: "",
+                    ngaySinh = savedStateHandle.get("ngaySinh") ?: LocalDate.now(),
+                    imageURL = savedStateHandle.get("imageURL") ?: "",
+                )
+                CauThuInputScreen(cauThu, backStackEntry.arguments?.getInt("maDoi") ?: 0, navController, modifier, viewModel)
+            }
+
+            composable("userInput/{userID}", arguments = listOf(navArgument("userID") { type = NavType.IntType})) {backStackEntry ->
+
+                val savedStateHandle = backStackEntry.savedStateHandle;
+                val user = User(
+                    id = savedStateHandle.get("id")!!,
+                    email = savedStateHandle.get("email") ?: "",
+                    passwordHash = "",
+                    username = savedStateHandle.get("username") ?: "",
+                    groupId = savedStateHandle.get("groupId") ?: 0
+                )
+                UserInputScreen(
+                    user = user,
+                    navController = navController,
+                    modifier = modifier,
+                    viewModel = viewModel
+                );
+
+            }
             composable("cauThuInput/{maDoi}", arguments = listOf(navArgument("maDoi") { type = NavType.IntType})) { backStackEntry ->
 
                 val savedStateHandle = backStackEntry.savedStateHandle;

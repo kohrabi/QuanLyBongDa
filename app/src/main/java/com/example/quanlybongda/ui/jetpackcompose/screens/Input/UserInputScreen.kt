@@ -1,7 +1,6 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens.Input
 
 // import androidx.compose.ui.geometry.Offset // Cần nếu dùng Offset trong Brush
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,7 +19,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
@@ -29,6 +27,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,32 +40,27 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.quanlybongda.Database.DatabaseViewModel
-import com.example.quanlybongda.Database.Schema.MuaGiai
+import com.example.quanlybongda.Database.Schema.User.User
 import com.example.quanlybongda.ui.jetpackcompose.screens.AppTopBar
-import com.example.quanlybongda.ui.jetpackcompose.screens.InputDatePicker
-import com.example.quanlybongda.ui.jetpackcompose.screens.InputError
+import com.example.quanlybongda.ui.jetpackcompose.screens.InputDropDownMenu
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputTextField
 import com.example.quanlybongda.ui.jetpackcompose.screens.OptionValue
-import com.example.quanlybongda.ui.jetpackcompose.screens.convertLocalDateToMillis
-import com.example.quanlybongda.ui.jetpackcompose.screens.convertMillisToLocalDate
 import com.example.quanlybongda.ui.theme.DarkColorScheme
 import com.example.quanlybongda.ui.theme.Purple80
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MuaGiaiInputScreen(
-    muaGiai: MuaGiai = MuaGiai(0, "", LocalDate.now(), LocalDate.now()),
+fun UserInputScreen(
+    user: User,
     navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel()
@@ -78,30 +72,16 @@ fun MuaGiaiInputScreen(
     var submitted by remember { mutableStateOf(false) }
     var clicked by remember { mutableStateOf(false) }
 
-    var tenMG by remember { mutableStateOf(muaGiai.tenMG) }
-    var ngayDienRa by remember { mutableStateOf(muaGiai.ngayDienRa) }
-    var ngayKetThuc by remember { mutableStateOf(muaGiai.ngayKetThuc) }
+    var email by remember { mutableStateOf(user.email) }
+    var group by remember { mutableStateOf(OptionValue(null, "Vui lòng chọn mùa giải")) }
+    var groupOptions by remember { mutableStateOf(listOf<OptionValue>()) }
     val onClick : () -> Unit = {
         clicked = true;
         if (!submitted) {
             coroutineScope.launch {
-                if (tenMG.isEmpty())
-                    return@launch;
-                if (ngayDienRa.isAfter(ngayKetThuc)) {
-                    Toast.makeText(context, "Ngày diễn ra phải sau hơn ngày kết thúc ${ngayKetThuc}", Toast.LENGTH_SHORT).show();
-                    return@launch;
-                }
-                if (ngayKetThuc.isBefore(ngayDienRa)) {
-                    Toast.makeText(context, "Ngày kết thúc phải trước hơn ngày diễn ra ${ngayDienRa}", Toast.LENGTH_SHORT).show();
-                    return@launch;
-                }
-                viewModel.muaGiaiDAO.upsertDSMuaGiai(
-                    MuaGiai(
-                        maMG = muaGiai.maMG,
-                        tenMG = tenMG,
-                        ngayDienRa = ngayDienRa,
-                        ngayKetThuc = ngayKetThuc,
-                    )
+                viewModel.userDAO.updateUserGroup(
+                    user.id,
+                    group.value!!,
                 )
                 submitted = true;
                 delay(500);
@@ -110,11 +90,18 @@ fun MuaGiaiInputScreen(
         }
     };
 
+    LaunchedEffect(Unit) {
+        viewModel.viewModelScope.launch {
+            groupOptions = viewModel.userGroupDAO.selectAllUserGroup().map { OptionValue(it.groupId, it.groupName) };
+            group = groupOptions.find { it.value == user.groupId }!!;
+        }
+    }
+
     Scaffold(
         containerColor = DarkColorScheme.background,
         topBar = {
             AppTopBar(
-                title = "Nhập mùa giải",
+                title = "User Input",
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
@@ -141,42 +128,24 @@ fun MuaGiaiInputScreen(
                     .padding(horizontal = 16.dp, vertical = 24.dp)
             ) {
                 // Username
-                InputTextField(
-                    value = tenMG,
-                    label = "Tên mùa giải",
-                    onValueChange = { tenMG = it },
-                    isError = tenMG.isEmpty() && clicked,
-                    errorMessage = "Tên mùa giải trống");
-                Spacer(modifier = Modifier.height(16.dp))
+//
+//                InputTextField(
+//                    value = email,
+//                    label = "Email",
+//                    onValueChange = { email = it },
+//                    isError = email.isEmpty() && clicked,
+//                    errorMessage = "Email trống");
+//                Spacer(modifier = Modifier.height(16.dp))
 
-                InputDatePicker(
-                    label = "Ngày bắt đầu",
-                    value = convertLocalDateToMillis(ngayDienRa),
-                    onDateSelected = {
-                        if (it != null) {
-                            ngayDienRa = convertMillisToLocalDate(it);
-                            if (ngayDienRa.isAfter(ngayKetThuc)) {
-                                Toast.makeText(context, "Ngày diễn ra phải sau hơn ngày kết thúc ${ngayKetThuc}", Toast.LENGTH_SHORT).show();
-                                ngayDienRa = ngayKetThuc;
-                            }
-                        }
+                InputDropDownMenu(
+                    label = "User group",
+                    options = groupOptions,
+                    selectedOption = group,
+                    onOptionSelected = {
+                        group = it;
                     },
-                    onDismiss = {});
-                Spacer(modifier = Modifier.height(16.dp))
-
-                InputDatePicker(
-                    label = "Ngày kết thúc",
-                    value = convertLocalDateToMillis(ngayKetThuc),
-                    onDateSelected =  {
-                        if (it != null) {
-                            ngayKetThuc = convertMillisToLocalDate(it);
-                            if (ngayKetThuc.isBefore(ngayDienRa)) {
-                                Toast.makeText(context, "Ngày kết thúc phải trước hơn ngày diễn ra ${ngayDienRa}", Toast.LENGTH_SHORT).show();
-                                ngayKetThuc = ngayDienRa;
-                            }
-                        }
-                    },
-                    onDismiss = {});
+                    showEmptyError = group.value == null
+                );
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
@@ -238,13 +207,5 @@ fun MuaGiaiInputScreen(
             }
             Spacer(modifier = Modifier.height(16.dp))
         }
-    }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF101010)
-@Composable
-fun MuaGiaiInputScreenPreview() {
-    MaterialTheme {
-        MuaGiaiInputScreen(navController = rememberNavController())
     }
 }

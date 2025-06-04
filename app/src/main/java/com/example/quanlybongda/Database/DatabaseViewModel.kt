@@ -156,22 +156,22 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
         return result;
     }
 
-//    suspend fun checkPageViewable(groupId : Int, pageName: String) : Boolean {
-//        val roles = userRoleDAO.selectRolesInGroup(groupId);
-//        roles.observe(this) { role ->
-//            if (pageName.matches(Regex(role.viewablePage)))
-//                return true;
-//        }
-//        return false;
-//    }
-//
-//    suspend fun checkPageEditable(groupId : Int, pageName: String) : Boolean {
-//        val roles = userRoleDAO.selectRolesInGroup(groupId);
-//        for (role in roles)
-//            if (pageName.matches(Regex(role.viewablePage)))
-//                return role.canEdit;
-//        return false;
-//    }
+    suspend fun checkPageViewable(groupId : Int, pageName: String) : Boolean {
+        val roles = userRoleDAO.selectRolesInGroup(groupId);
+        for (role in roles)
+            if (role.viewablePage.toRegex(RegexOption.IGNORE_CASE).containsMatchIn(pageName))
+                return true;
+        return false;
+    }
+
+    suspend fun checkPageEditable(groupId : Int, pageName: String) : Boolean {
+        val roles = userRoleDAO.selectRolesInGroup(groupId);
+        for (role in roles) {
+            if (role.viewablePage.toRegex(RegexOption.IGNORE_CASE).containsMatchIn(pageName))
+                return role.canEdit;
+        }
+        return false;
+    }
 
 
     fun generateSecureRandomBytes(size: Int): ByteArray {

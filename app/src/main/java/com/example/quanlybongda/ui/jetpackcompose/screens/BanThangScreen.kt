@@ -23,6 +23,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,6 +70,8 @@ fun BanThangScreen(
     var tiSoDoiMot by remember { mutableStateOf(0) }
     var tiSoDoiHai by remember { mutableStateOf(0) }
     var banThangs by remember { mutableStateOf(listOf<BanThang>()) }
+    val user by viewModel.user.collectAsState()
+    var isEditable by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.viewModelScope.launch {
@@ -94,6 +97,14 @@ fun BanThangScreen(
         }
     }
 
+    LaunchedEffect(user) {
+        if (user == null)
+            return@LaunchedEffect;
+        viewModel.viewModelScope.launch {
+            isEditable = viewModel.checkPageEditable(user!!.groupId, "banthang");
+        }
+    }
+
     Scaffold(
         containerColor = DarkColorScheme.background,
         topBar = {
@@ -103,7 +114,8 @@ fun BanThangScreen(
             )
         },
         floatingActionButton = {
-            AddFloatingButton("Tạo bàn thắng", onClick = { navController.navigate("banThangInput/${maTD}") })
+            if (isEditable)
+                AddFloatingButton("Tạo bàn thắng", onClick = { navController.navigate("banThangInput/${maTD}") })
         },
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { innerPadding ->

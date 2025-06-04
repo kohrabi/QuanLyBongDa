@@ -91,6 +91,8 @@ fun LapLichScreen(
     val state = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
     var selectedValue by remember { mutableStateOf<LichThiDau?>(null) }
+    val user by viewModel.user.collectAsState()
+    var isEditable by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.viewModelScope.launch {
@@ -118,6 +120,14 @@ fun LapLichScreen(
         }
     }
 
+    LaunchedEffect(user) {
+        if (user == null)
+            return@LaunchedEffect;
+        viewModel.viewModelScope.launch {
+            isEditable = viewModel.checkPageEditable(user!!.groupId, "trandau");
+        }
+    }
+
     DisposableEffect(snackbarHostState) {
         onDispose {
             if (selectedValue != null) {
@@ -142,7 +152,8 @@ fun LapLichScreen(
             )
         },
         floatingActionButton = {
-            AddFloatingButton("Tạo lịch thi đấu", onClick = { navController.navigate("lichThiDauInput") })
+            if (isEditable)
+                AddFloatingButton("Tạo lịch thi đấu", onClick = { navController.navigate("lichThiDauInput") })
         },
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     )  { innerPadding ->
@@ -180,6 +191,7 @@ fun LapLichScreen(
             items(lichThiDaus) { lichThiDau ->
                 SwipeToDeleteContainer(
                     item = lichThiDau,
+                    isEditable = isEditable,
                     onDelete = {
 
                         if (selectedValue != null) {

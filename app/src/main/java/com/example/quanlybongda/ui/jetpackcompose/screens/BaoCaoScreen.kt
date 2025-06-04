@@ -167,13 +167,13 @@ fun BaoCaoScreen(
 
                 itemsIndexed(teams) { index, team ->
                     StandingsListRow(team = team)
-                    if (index < teams.lastIndex) {
+//                    if (index < teams.lastIndex) {
                         HorizontalDivider(
                             modifier = Modifier.padding(vertical = 8.dp),
                             thickness = 0.5.dp,
                             color = darkTextMuted.copy(alpha = 0.2f)
                         )
-                    }
+//                    }
                 }
 
 //                item {

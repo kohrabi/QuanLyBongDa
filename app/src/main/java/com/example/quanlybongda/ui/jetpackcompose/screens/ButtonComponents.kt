@@ -47,6 +47,7 @@ fun <T> SwipeToDeleteContainer(
     onUpdate: (T) -> Unit = {},
     onDelete: suspend (T) -> Boolean,
     animationDuration : Int = 500,
+    isEditable: Boolean = false,
     content: @Composable (T) -> Unit,
     modifier: Modifier = Modifier,
     backgroundModifier: Modifier = Modifier,
@@ -96,6 +97,8 @@ fun <T> SwipeToDeleteContainer(
             backgroundContent = {
                 DeleteBackground(dismissState, backgroundModifier);
             },
+            enableDismissFromEndToStart = isEditable,
+            enableDismissFromStartToEnd = isEditable,
             modifier = Modifier.fillMaxSize()
         ) {
             content(item);
