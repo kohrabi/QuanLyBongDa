@@ -98,7 +98,7 @@ abstract class AppDatabase : RoomDatabase() {
                 )
                     .createFromAsset("database/db.sqlite")
 //                    .allowMainThreadQueries()
-                    .fallbackToDestructiveMigration()
+//                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance;
                 return instance;

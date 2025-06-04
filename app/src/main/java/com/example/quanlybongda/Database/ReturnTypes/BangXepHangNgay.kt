@@ -13,5 +13,6 @@ data class BangXepHangNgay(
     val hieuSo: Int,
     val hang: Int,
     val imageURL : String,
+
 ) {
 }

@@ -27,6 +27,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,19 +43,24 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.ReturnTypes.BangXepHangNgay
+import com.example.quanlybongda.Database.Schema.MuaGiai
 import com.example.quanlybongda.R
 import com.example.quanlybongda.ui.theme.DarkColorScheme
 import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
 import com.example.quanlybongda.ui.theme.darkContentBackground
 import com.example.quanlybongda.ui.theme.darkTextMuted
+import com.example.quanlybongda.ui.theme.darkTextWhite
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 
@@ -68,10 +74,29 @@ fun BaoCaoScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val context = LocalContext.current
     var teams by remember { mutableStateOf(listOf<BangXepHangNgay>()) }
-    var ngayBaoCao by remember { mutableStateOf(LocalDate.of(2025, 5, 11)) }
+    val muaGiai by DatabaseViewModel.currentMuaGiai.collectAsState()
+//    var ngayBaoCao by remember { mutableStateOf(LocalDate.of(2025, 5, 11)) }
+//
+//    LaunchedEffect(ngayBaoCao) {
+//        teams = viewModel.selectBXHDoiNgay(ngayBaoCao).sortedByDescending { it.hieuSo }
+//    }
+    var muaGiaiOptions by remember { mutableStateOf(listOf<OptionValue>()) }
+    var selectedMuaGiai by remember { mutableStateOf(OptionValue(null, "Vui lòng chọn mùa giải")) }
 
-    LaunchedEffect(ngayBaoCao) {
-        teams = viewModel.selectBXHDoiNgay(ngayBaoCao).sortedByDescending { it.hieuSo }
+    LaunchedEffect(Unit) {
+        if (muaGiai != null)
+            selectedMuaGiai = OptionValue(muaGiai!!.maMG, muaGiai!!.tenMG);
+        viewModel.viewModelScope.launch {
+            muaGiaiOptions = viewModel.muaGiaiDAO.selectAllMuaGiai().map { OptionValue(it.maMG, it.tenMG) };
+        }
+    }
+
+    LaunchedEffect(selectedMuaGiai) {
+        viewModel.viewModelScope.launch {
+            if (selectedMuaGiai.value != null) {
+                teams = viewModel.selectBXHDoiMuaGiai(selectedMuaGiai.value!!).sortedByDescending { it.hieuSo };
+            }
+        }
     }
 
     Scaffold(
@@ -105,14 +130,15 @@ fun BaoCaoScreen(
                 contentPadding = PaddingValues(top = 24.dp, bottom = 16.dp)
             ) {
                 item {
-                    InputDatePicker("Ngày báo cáo",
-                        value = convertLocalDateToMillis(ngayBaoCao),
-                        onDateSelected =  {
-                            if (it != null) {
-                                ngayBaoCao = convertMillisToLocalDate(it);
-                            }
+                    InputDropDownMenu(
+                        label = "Mùa giải",
+                        options = muaGiaiOptions,
+                        selectedOption = selectedMuaGiai,
+                        onOptionSelected = {
+                            selectedMuaGiai = it
                         },
-                        onDismiss = {});
+                        showEmptyError = selectedMuaGiai.value == null,
+                    )
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -127,7 +153,7 @@ fun BaoCaoScreen(
                         ) {
                             Text(
                                 text = "Table Standings",
-                                color = com.example.quanlybongda.ui.theme.darkTextWhite,
+                                color = darkTextWhite,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -160,7 +186,7 @@ fun BaoCaoScreen(
 }
 
 @Composable
-fun StandingsTopAppBar(statusBarHeight: androidx.compose.ui.unit.Dp) {
+fun StandingsTopAppBar(statusBarHeight: Dp) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -170,7 +196,7 @@ fun StandingsTopAppBar(statusBarHeight: androidx.compose.ui.unit.Dp) {
     ) {
         Text(
             text = "Standings",
-            color = com.example.quanlybongda.ui.theme.darkTextWhite,
+            color = darkTextWhite,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -222,15 +248,15 @@ fun StandingsListRow(team: BangXepHangNgay, modifier: Modifier = Modifier) {
         )
         Text(
             text = team.tenDoi,
-            color = com.example.quanlybongda.ui.theme.darkTextWhite,
+            color = darkTextWhite,
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.weight(2.2f)
         )
-        Text("${team.soTranThang}", color = com.example.quanlybongda.ui.theme.darkTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("${team.soTranHoa}", color = com.example.quanlybongda.ui.theme.darkTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("${team.soTranThua}", color = com.example.quanlybongda.ui.theme.darkTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("${team.hieuSo}", color = com.example.quanlybongda.ui.theme.darkTextWhite, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(0.7f), textAlign = TextAlign.End)
+        Text("${team.soTranThang}", color = darkTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("${team.soTranHoa}", color = darkTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("${team.soTranThua}", color = darkTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("${team.hieuSo}", color = darkTextWhite, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(0.7f), textAlign = TextAlign.End)
     }
 }
 

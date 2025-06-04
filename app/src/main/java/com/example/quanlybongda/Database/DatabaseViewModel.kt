@@ -121,6 +121,41 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
         return result;
     }
 
+    suspend fun selectBXHDoiMuaGiai(maMG: Int) : List<BangXepHangNgay> {
+        // Tat ca cac doi co tran co trung
+        var result = mutableListOf<BangXepHangNgay>();
+
+        val selectDoi = lichThiDauDAO.selectLichThiDauMaMG(maMG);
+
+        // Chuyen no thanh set
+        val doiCoTranTrongNgay = selectDoi.flatMap { listOf(it.doiMot, it.doiHai) }.toSet();
+        for (doiCoTran in doiCoTranTrongNgay) {
+            val doi = doiBongDAO.selectDoiBongMaDoi(doiCoTran);
+            if (doi == null) {
+                Log.e("TAG", "Khong ton tai doi bong nay");
+                continue;
+            }
+
+            val soTran = lichThiDauDAO.countLichThiDauMaMG(doiCoTran, maMG);
+            val soTranThang = lichThiDauDAO.countLichThiDauThangMaMG(doiCoTran, maMG);
+            val soTranThua = lichThiDauDAO.countLichThiDauThuaMaMG(doiCoTran, maMG);
+            val soTranHoa = soTran - soTranThang - soTranThua;
+            val doiBXH  = BangXepHangNgay(
+                maDoi = doi.maDoi!!,
+                tenDoi = doi.tenDoi,
+                soTran = soTran,
+                soTranThang = soTranThang,
+                soTranThua = soTranThua,
+                soTranHoa = soTranHoa,
+                hieuSo = soTranThang * 3 + soTranHoa * 1 + soTranThua * 0,
+                hang = 0,
+                imageURL = doi.imageURL ?: ""
+            )
+            result.add(doiBXH);
+        }
+        return result;
+    }
+
 //    suspend fun checkPageViewable(groupId : Int, pageName: String) : Boolean {
 //        val roles = userRoleDAO.selectRolesInGroup(groupId);
 //        roles.observe(this) { role ->

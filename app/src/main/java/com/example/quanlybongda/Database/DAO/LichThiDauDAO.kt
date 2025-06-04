@@ -72,4 +72,27 @@ interface LichThiDauDAO {
     """)
     suspend fun countLichThiDauThuaMaDoi(maDoi : Int, localDate: LocalDate) : Int;
 
+
+    @Query("""
+        SELECT count(*) FROM LichThiDau AS LTD
+        WHERE LTD.maMG=:maMG AND (LTD.doiMot=:maDoi OR LTD.doiHai=:maDoi)
+    """)
+    suspend fun countLichThiDauMaMG(maDoi : Int, maMG: Int) : Int;
+
+
+    @Query("""
+        SELECT count(*) FROM LichThiDau AS LTD
+        WHERE LTD.maMG=:maMG AND LTD.doiThang = :maDoi
+    """)
+    suspend fun countLichThiDauThangMaMG(maDoi : Int, maMG: Int) : Int;
+
+
+    @Query("""
+        SELECT count(*) FROM LichThiDau AS LTD
+        WHERE LTD.maMG=:maMG AND 
+                (LTD.doiMot=:maDoi OR LTD.doiHai=:maDoi) AND
+                (LTD.doiThang IS NOT NULL AND LTD.doiThang<>:maDoi)
+    """)
+    suspend fun countLichThiDauThuaMaMG(maDoi : Int, maMG: Int) : Int;
+
 }

@@ -59,6 +59,7 @@ fun <T> SwipeToDeleteContainer(
             }
             return@rememberSwipeToDismissBoxState true;
         },
+        positionalThreshold = { it * 0.9f }
     )
     var isUpdating by remember() { mutableStateOf(false) }
 
@@ -67,9 +68,6 @@ fun <T> SwipeToDeleteContainer(
             delay(animationDuration.toLong());
             isRemoved = onDelete(item);
         }
-    }
-    LaunchedEffect(dismissState.progress) {
-        Log.d("TAG", dismissState.progress.toString());
     }
 
     LaunchedEffect(dismissState.currentValue) {

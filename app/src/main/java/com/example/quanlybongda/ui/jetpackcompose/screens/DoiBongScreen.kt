@@ -201,7 +201,7 @@ fun TeamCard(team: DoiBong, onClick : () -> Unit) {
             AsyncImage(
                 model = team.imageURL,
                 contentDescription = team.tenDoi,
-                modifier = Modifier.size(64.dp).background(Color.White, CircleShape).clip(CircleShape),
+                modifier = Modifier.size(64.dp),
             )
             Column(
                 modifier = Modifier
