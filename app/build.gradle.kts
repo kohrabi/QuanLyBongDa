@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 
     id("kotlin-kapt")
 }
@@ -40,10 +41,16 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
-
 dependencies {
+    // Retrofit
+    implementation("com.google.code.gson:gson")
+    implementation("com.squareup.retrofit2:retrofit:3.0.0")
+    // Retrofit with Scalar Converter
+    implementation("com.squareup.retrofit2:converter-scalars:3.0.0")
+    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
 
     implementation(libs.androidx.room.runtime)
 
@@ -95,4 +102,8 @@ dependencies {
 
 kapt {
     correctErrorTypes = true
+}
+
+secrets {
+    propertiesFileName = "local.properties"
 }

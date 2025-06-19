@@ -16,6 +16,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import com.example.quanlybongda.Database.Exceptions.*
+import retrofit2.Retrofit
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.security.SecureRandom
 import java.time.LocalDateTime
 

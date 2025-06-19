@@ -1,7 +1,6 @@
 
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -15,11 +14,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -27,24 +23,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.DateConverter
-import com.example.quanlybongda.Database.Schema.MuaGiai
+import com.example.quanlybongda.Services.FootballAPI
+import com.example.quanlybongda.Services.gson
 import com.example.quanlybongda.homeRoute
 import com.example.quanlybongda.navigatePopUpTo
+import com.example.quanlybongda.Services.Data.Competition
 import com.example.quanlybongda.ui.theme.DarkColorScheme
 import com.example.quanlybongda.ui.theme.Purple80
 import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
 import com.example.quanlybongda.ui.theme.darkCardBackground
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.selects.select
-import kotlin.text.find
+import kotlin.jvm.java
 
 // Data class for Season information
 data class Season(
@@ -65,10 +61,10 @@ fun MuaGiaiScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val context = LocalContext.current;
     val selectedMuaGiai by DatabaseViewModel.currentMuaGiai.collectAsState()
-    var muaGiais by remember { mutableStateOf(listOf<MuaGiai>()) }
+    var muaGiais by remember { mutableStateOf(listOf<Competition>()) }
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    var selectedValue by remember { mutableStateOf<MuaGiai?>(null) }
+    var selectedValue by remember { mutableStateOf<Competition?>(null) }
     var isEditable by remember { mutableStateOf(false) }
     val user by viewModel.user.collectAsState()
     // List of seasons with detailed information
@@ -77,27 +73,21 @@ fun MuaGiaiScreen(
         if (user == null)
             return@LaunchedEffect
         viewModel.viewModelScope.launch {
-            muaGiais = viewModel.muaGiaiDAO.selectAllMuaGiai();
-            Log.d("TAG", ("cauthu".toRegex(RegexOption.IGNORE_CASE).containsMatchIn("muagiai")).toString());
-        }
-    }
-
-    LaunchedEffect(user) {
-        if (user == null)
-            return@LaunchedEffect;
-        viewModel.viewModelScope.launch {
-            isEditable = viewModel.checkPageEditable(user!!.groupId, "muagiai");
+            val test = FootballAPI.retrofitService.getCompetitions();
+            val competitions = test.getAsJsonArray("competitions");
+            val result = gson.fromJson(competitions, Array<Competition>::class.java)
+            muaGiais = result.toList();
         }
     }
 
     DisposableEffect(snackbarHostState) {
         onDispose {
-            if (selectedValue != null) {
-                viewModel.viewModelScope.launch {
-                    viewModel.muaGiaiDAO.deleteDSMuaGiai(selectedValue!!);
-                    selectedValue = null;
-                }
-            }
+//            if (selectedValue != null) {
+//                viewModel.viewModelScope.launch {
+//                    viewModel.muaGiaiDAO.deleteDSMuaGiai(selectedValue!!);
+//                    selectedValue = null;
+//                }
+//            }
         }
     }
 
@@ -137,14 +127,14 @@ fun MuaGiaiScreen(
                         onDelete = {
                             if (selectedValue != null) {
                                 viewModel.viewModelScope.launch {
-                                    viewModel.muaGiaiDAO.deleteDSMuaGiai(selectedValue!!);
+//                                    viewModel.muaGiaiDAO.deleteDSMuaGiai(selectedValue!!);
                                     selectedValue = null;
                                 }
                             }
                             selectedValue = muaGiai;
                             val result = snackbarHostState
                                 .showSnackbar(
-                                    message = "Deleted ${muaGiai.tenMG}",
+                                    message = "Deleted ${muaGiai.name}",
                                     actionLabel = "Undo",
                                     duration = SnackbarDuration.Short
                                 )
@@ -154,7 +144,7 @@ fun MuaGiaiScreen(
                                 }
                                 SnackbarResult.Dismissed -> {
                                     viewModel.viewModelScope.launch {
-                                        viewModel.muaGiaiDAO.deleteDSMuaGiai(selectedValue!!);
+//                                        viewModel.muaGiaiDAO.deleteDSMuaGiai(selectedValue!!);
                                         selectedValue = null;
                                     }
                                     return@SwipeToDeleteContainer true;
@@ -164,20 +154,20 @@ fun MuaGiaiScreen(
                         onUpdate = {
                             navController.navigate("muaGiaiInput");
                             val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle;
-                            savedStateHandle?.set("maMG", it.maMG);
-                            savedStateHandle?.set("tenMG", it.tenMG);
-                            savedStateHandle?.set("ngayDienRa", it.ngayDienRa);
-                            savedStateHandle?.set("ngayKetThuc", it.ngayKetThuc);
-                            savedStateHandle?.set("imageURL", it.imageURL);
+//                            savedStateHandle?.set("maMG", it.maMG);
+//                            savedStateHandle?.set("tenMG", it.tenMG);
+//                            savedStateHandle?.set("ngayDienRa", it.ngayDienRa);
+//                            savedStateHandle?.set("ngayKetThuc", it.ngayKetThuc);
+//                            savedStateHandle?.set("imageURL", it.imageURL);
                         },
                         content = {
                             SeasonCard(
                                 season = muaGiai,
-                                isSelected = selectedMuaGiai?.maMG == muaGiai.maMG,
+                                isSelected = selectedMuaGiai?.maMG == muaGiai.id,
                                 onSeasonSelect = {
-                                    viewModel.selectMuaGiai(muaGiai)
+//                                    viewModel.selectMuaGiai(muaGiai)
                                     coroutineScope.launch {
-                                        Toast.makeText(context, "Chọn mùa giải ${muaGiai.tenMG} thành công", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(context, "Chọn mùa giải ${muaGiai.name} thành công", Toast.LENGTH_SHORT).show();
                                         delay(500)
                                         navigatePopUpTo(navController, homeRoute);
                                     }
@@ -197,7 +187,7 @@ fun MuaGiaiScreen(
 // Composable for a single Season Card
 @Composable
 fun SeasonCard(
-    season: MuaGiai,
+    season: Competition,
     isSelected: Boolean,
     onSeasonSelect: () -> Unit
 ) {
@@ -221,8 +211,8 @@ fun SeasonCard(
         )
         {
             AsyncImage(
-                model = season.imageURL,
-                contentDescription = season.tenMG,
+                model = season.emblem,
+                contentDescription = season.name,
                 modifier = Modifier.size(64.dp).background(Color.White, CircleShape).clip(CircleShape),
             )
             Column(
@@ -230,7 +220,7 @@ fun SeasonCard(
                 verticalArrangement = Arrangement.SpaceBetween,)
             {
                 Text(
-                    text = season.tenMG,
+                    text = season.name,
                     color = Color.White,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -242,12 +232,12 @@ fun SeasonCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Bắt đầu: ${DateConverter.LocalDateToString(season.ngayDienRa)}",
+                        text = "Bắt đầu: ${DateConverter.LocalDateToString(season.currentSeason.startDate)}",
                         color = Color.LightGray,
                         fontSize = 12.sp
                     )
                     Text(
-                        text = "Kết thúc: ${DateConverter.LocalDateToString(season.ngayKetThuc)}",
+                        text = "Kết thúc: ${DateConverter.LocalDateToString(season.currentSeason.endDate)}",
                         color = Color.LightGray,
                         fontSize = 12.sp
                     )
