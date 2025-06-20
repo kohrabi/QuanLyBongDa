@@ -55,6 +55,9 @@ import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.ReturnTypes.BangXepHangNgay
 import com.example.quanlybongda.Database.Schema.MuaGiai
 import com.example.quanlybongda.R
+import com.example.quanlybongda.Services.Data.Standing
+import com.example.quanlybongda.Services.Data.TeamStandingInfo
+import com.example.quanlybongda.Services.FootballAPI
 import com.example.quanlybongda.ui.theme.DarkColorScheme
 import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
 import com.example.quanlybongda.ui.theme.darkContentBackground
@@ -73,31 +76,32 @@ fun BaoCaoScreen(
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val context = LocalContext.current
-    var teams by remember { mutableStateOf(listOf<BangXepHangNgay>()) }
+    var teams by remember { mutableStateOf(listOf<TeamStandingInfo>()) }
     val muaGiai by DatabaseViewModel.currentMuaGiai.collectAsState()
 //    var ngayBaoCao by remember { mutableStateOf(LocalDate.of(2025, 5, 11)) }
 //
 //    LaunchedEffect(ngayBaoCao) {
 //        teams = viewModel.selectBXHDoiNgay(ngayBaoCao).sortedByDescending { it.hieuSo }
 //    }
-    var muaGiaiOptions by remember { mutableStateOf(listOf<OptionValue>()) }
-    var selectedMuaGiai by remember { mutableStateOf(OptionValue(null, "Vui lòng chọn mùa giải")) }
+//    var muaGiaiOptions by remember { mutableStateOf(listOf<OptionValue>()) }
+//    var selectedMuaGiai by remember { mutableStateOf(OptionValue(null, "Vui lòng chọn mùa giải")) }
 
     LaunchedEffect(Unit) {
-        if (muaGiai != null)
-            selectedMuaGiai = OptionValue(muaGiai!!.maMG, muaGiai!!.tenMG);
-        viewModel.viewModelScope.launch {
-            muaGiaiOptions = viewModel.muaGiaiDAO.selectAllMuaGiai().map { OptionValue(it.maMG, it.tenMG) };
-        }
+        teams = FootballAPI.retrofitService.getCompetitionStandings("PL").standings.get(0).table;
+//        if (muaGiai != null)
+//            selectedMuaGiai = OptionValue(muaGiai!!.maMG, muaGiai!!.tenMG);
+//        viewModel.viewModelScope.launch {
+//            muaGiaiOptions = viewModel.muaGiaiDAO.selectAllMuaGiai().map { OptionValue(it.maMG, it.tenMG) };
+//        }
     }
 
-    LaunchedEffect(selectedMuaGiai) {
-        viewModel.viewModelScope.launch {
-            if (selectedMuaGiai.value != null) {
-                teams = viewModel.selectBXHDoiMuaGiai(selectedMuaGiai.value!!).sortedByDescending { it.hieuSo };
-            }
-        }
-    }
+//    LaunchedEffect(selectedMuaGiai) {
+//        viewModel.viewModelScope.launch {
+//            if (selectedMuaGiai.value != null) {
+//                teams = viewModel.selectBXHDoiMuaGiai(selectedMuaGiai.value!!).sortedByDescending { it.hieuSo };
+//            }
+//        }
+//    }
 
     Scaffold(
         containerColor = DarkColorScheme.background,
@@ -130,15 +134,15 @@ fun BaoCaoScreen(
                 contentPadding = PaddingValues(top = 24.dp, bottom = 16.dp)
             ) {
                 item {
-                    InputDropDownMenu(
-                        label = "Mùa giải",
-                        options = muaGiaiOptions,
-                        selectedOption = selectedMuaGiai,
-                        onOptionSelected = {
-                            selectedMuaGiai = it
-                        },
-                        showEmptyError = selectedMuaGiai.value == null,
-                    )
+//                    InputDropDownMenu(
+//                        label = "Mùa giải",
+//                        options = muaGiaiOptions,
+//                        selectedOption = selectedMuaGiai,
+//                        onOptionSelected = {
+//                            selectedMuaGiai = it
+//                        },
+//                        showEmptyError = selectedMuaGiai.value == null,
+//                    )
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -224,7 +228,7 @@ fun StandingsListHeader(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun StandingsListRow(team: BangXepHangNgay, modifier: Modifier = Modifier) {
+fun StandingsListRow(team: TeamStandingInfo, modifier: Modifier = Modifier) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
@@ -242,21 +246,21 @@ fun StandingsListRow(team: BangXepHangNgay, modifier: Modifier = Modifier) {
 //        Spacer(modifier = Modifier.width(8.dp))
 //        Spacer(modifier = Modifier.width(8.dp))
         AsyncImage(
-            model = team.imageURL,
+            model = team.team.crest,
             contentDescription = "",
             modifier = Modifier.size(32.dp).weight(1.0f)
         )
         Text(
-            text = team.tenDoi,
+            text = team.team.name,
             color = darkTextWhite,
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.weight(2.2f)
         )
-        Text("${team.soTranThang}", color = darkTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("${team.soTranHoa}", color = darkTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("${team.soTranThua}", color = darkTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("${team.hieuSo}", color = darkTextWhite, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(0.7f), textAlign = TextAlign.End)
+        Text("${team.won}", color = darkTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("${team.draw}", color = darkTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("${team.lost}", color = darkTextWhite, fontSize = 13.sp, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text("${team.points}", color = darkTextWhite, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(0.7f), textAlign = TextAlign.End)
     }
 }
 

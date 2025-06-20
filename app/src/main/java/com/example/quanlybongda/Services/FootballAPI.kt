@@ -3,13 +3,17 @@ package com.example.quanlybongda.Services
 import com.example.quanlybongda.BuildConfig
 import com.example.quanlybongda.Services.Converters.LocalDateConverter
 import com.example.quanlybongda.Services.Converters.LocalDateTimeConverter
+import com.example.quanlybongda.Services.Data.CompetitionResponse
+import com.example.quanlybongda.Services.Data.StandingsResponse
+import com.example.quanlybongda.Services.Data.MatchResponse
+import com.example.quanlybongda.Services.Data.TeamResponse
 import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
+import retrofit2.http.Path
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -41,7 +45,16 @@ private val retrofit = Retrofit.Builder()
 
 interface FootballAPIService {
     @GET("competitions/")
-    suspend fun getCompetitions() : JsonObject
+    suspend fun getCompetitions() : CompetitionResponse;
+
+    @GET("competitions/{id}/teams")
+    suspend fun getCompetitionTeams(@Path("id") id: String, @retrofit2.http.Query("season") season: Int = 2024) : TeamResponse;
+
+    @GET("competitions/{id}/matches")
+    suspend fun getCompetitionMatches(@Path("id") id: String, @retrofit2.http.Query("season") season: Int = 2024) : MatchResponse;
+
+    @GET("competitions/{id}/standings")
+    suspend fun getCompetitionStandings(@Path("id") id: String, @retrofit2.http.Query("season") season: Int = 2024) : StandingsResponse;
 }
 
 object FootballAPI {

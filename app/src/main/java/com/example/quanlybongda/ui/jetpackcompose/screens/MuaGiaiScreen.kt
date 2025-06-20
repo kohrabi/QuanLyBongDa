@@ -72,12 +72,9 @@ fun MuaGiaiScreen(
     LaunchedEffect(Unit) {
         if (user == null)
             return@LaunchedEffect
-        viewModel.viewModelScope.launch {
-            val test = FootballAPI.retrofitService.getCompetitions();
-            val competitions = test.getAsJsonArray("competitions");
-            val result = gson.fromJson(competitions, Array<Competition>::class.java)
-            muaGiais = result.toList();
-        }
+        muaGiais = FootballAPI.retrofitService.getCompetitions().competition;
+//        viewModel.viewModelScope.launch {
+//        }
     }
 
     DisposableEffect(snackbarHostState) {

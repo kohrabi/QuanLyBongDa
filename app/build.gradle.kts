@@ -46,7 +46,7 @@ android {
 }
 dependencies {
     // Retrofit
-    implementation("com.google.code.gson:gson")
+    implementation("com.google.code.gson:gson:2.13.1")
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
     // Retrofit with Scalar Converter
     implementation("com.squareup.retrofit2:converter-scalars:3.0.0")

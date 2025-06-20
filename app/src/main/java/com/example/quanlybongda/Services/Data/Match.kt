@@ -1,7 +1,23 @@
 package com.example.quanlybongda.Services.Data
 
 import com.google.gson.annotations.SerializedName
+import java.time.LocalDate
 import java.time.LocalDateTime
+
+data class ResultSet(
+    val count: Int,
+    val first: LocalDate,
+    val last: LocalDate,
+    val played: Int
+)
+
+data class MatchResponse(
+    val filters: Filters,
+    val resultSet: ResultSet,
+    val competition: CompetitionInfo,
+    val matches: List<Match>,
+)
+
 
 data class Match(
     val id: Int,

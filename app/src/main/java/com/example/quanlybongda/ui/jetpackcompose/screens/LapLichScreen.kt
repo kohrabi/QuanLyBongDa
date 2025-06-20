@@ -57,6 +57,10 @@ import com.example.quanlybongda.Database.DateConverter
 import com.example.quanlybongda.Database.Schema.DoiBong
 import com.example.quanlybongda.Database.Schema.LichThiDau
 import com.example.quanlybongda.Database.Schema.MuaGiai
+import com.example.quanlybongda.Services.Data.Competition
+import com.example.quanlybongda.Services.Data.Match
+import com.example.quanlybongda.Services.FootballAPI
+import com.example.quanlybongda.Services.gson
 import com.example.quanlybongda.homeRoute
 import com.example.quanlybongda.navigatePopUpTo
 import com.example.quanlybongda.ui.theme.DarkColorScheme
@@ -86,7 +90,7 @@ fun LapLichScreen(
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val currentMuaGiai by DatabaseViewModel.currentMuaGiai.collectAsState()
-    var lichThiDaus by remember { mutableStateOf(listOf<LichThiDau>()) }
+    var lichThiDaus by remember { mutableStateOf(listOf<Match>()) }
     var doiBongs by remember { mutableStateOf(listOf<DoiBong>()) }
     val state = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -95,47 +99,48 @@ fun LapLichScreen(
     var isEditable by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        viewModel.viewModelScope.launch {
-            if (currentMuaGiai != null) {
-                lichThiDaus = viewModel.lichThiDauDAO.selectLichThiDauMaMG(currentMuaGiai!!.maMG!!);
-                doiBongs = viewModel.doiBongDAO.selectAllDoiBong();
-                for (lichThiDau in lichThiDaus) {
-                    val doiMot = doiBongs.find { it.maDoi == lichThiDau.doiMot }!!;
-                    lichThiDau.tenDoiMot = doiMot.tenDoi;
-                    lichThiDau.doiMotLogo = doiMot.imageURL;
-                    val doiHai = doiBongs.find { it.maDoi == lichThiDau.doiHai }!!;
-                    lichThiDau.tenDoiHai = doiHai.tenDoi;
-                    lichThiDau.doiHaiLogo = doiHai.imageURL;
-                    if (lichThiDau.doiThang == null)
-                        lichThiDau.tenDoiThang = "Hòa";
-                    else
-                        lichThiDau.tenDoiThang = doiBongs.find { it.maDoi == lichThiDau.doiThang }!!.tenDoi;
-                    lichThiDau.banThangDoiMot = viewModel.banThangDAO.selectSoBanThangTranDauDoi(lichThiDau.maTD, lichThiDau.doiMot) +
-                            viewModel.banThangDAO.selectSoBanThangPhanLuoiTranDauDoi(lichThiDau.maTD, lichThiDau.doiHai);
-                    lichThiDau.banThangDoiHai = viewModel.banThangDAO.selectSoBanThangTranDauDoi(lichThiDau.maTD, lichThiDau.doiHai) +
-                            viewModel.banThangDAO.selectSoBanThangPhanLuoiTranDauDoi(lichThiDau.maTD, lichThiDau.doiMot);
-                }
-                lichThiDaus = lichThiDaus.sortedByDescending { it.ngayGioThucTe };
-            }
-        }
+        lichThiDaus = FootballAPI.retrofitService.getCompetitionMatches("PL").matches;
+//        viewModel.viewModelScope.launch {
+//            if (currentMuaGiai != null) {
+//                lichThiDaus = viewModel.lichThiDauDAO.selectLichThiDauMaMG(currentMuaGiai!!.maMG!!);
+//                doiBongs = viewModel.doiBongDAO.selectAllDoiBong();
+//                for (lichThiDau in lichThiDaus) {
+//                    val doiMot = doiBongs.find { it.maDoi == lichThiDau.doiMot }!!;
+//                    lichThiDau.tenDoiMot = doiMot.tenDoi;
+//                    lichThiDau.doiMotLogo = doiMot.imageURL;
+//                    val doiHai = doiBongs.find { it.maDoi == lichThiDau.doiHai }!!;
+//                    lichThiDau.tenDoiHai = doiHai.tenDoi;
+//                    lichThiDau.doiHaiLogo = doiHai.imageURL;
+//                    if (lichThiDau.doiThang == null)
+//                        lichThiDau.tenDoiThang = "Hòa";
+//                    else
+//                        lichThiDau.tenDoiThang = doiBongs.find { it.maDoi == lichThiDau.doiThang }!!.tenDoi;
+//                    lichThiDau.banThangDoiMot = viewModel.banThangDAO.selectSoBanThangTranDauDoi(lichThiDau.maTD, lichThiDau.doiMot) +
+//                            viewModel.banThangDAO.selectSoBanThangPhanLuoiTranDauDoi(lichThiDau.maTD, lichThiDau.doiHai);
+//                    lichThiDau.banThangDoiHai = viewModel.banThangDAO.selectSoBanThangTranDauDoi(lichThiDau.maTD, lichThiDau.doiHai) +
+//                            viewModel.banThangDAO.selectSoBanThangPhanLuoiTranDauDoi(lichThiDau.maTD, lichThiDau.doiMot);
+//                }
+//                lichThiDaus = lichThiDaus.sortedByDescending { it.ngayGioThucTe };
+//            }
+//        }
     }
 
-    LaunchedEffect(user) {
-        if (user == null)
-            return@LaunchedEffect;
-        viewModel.viewModelScope.launch {
-            isEditable = viewModel.checkPageEditable(user!!.groupId, "trandau");
-        }
-    }
+//    LaunchedEffect(user) {
+//        if (user == null)
+//            return@LaunchedEffect;
+//        viewModel.viewModelScope.launch {
+//            isEditable = viewModel.checkPageEditable(user!!.groupId, "trandau");
+//        }
+//    }
 
     DisposableEffect(snackbarHostState) {
         onDispose {
-            if (selectedValue != null) {
-                viewModel.viewModelScope.launch {
-                    viewModel.lichThiDauDAO.deleteLichThiDau(selectedValue!!);
-                    selectedValue = null;
-                }
-            }
+//            if (selectedValue != null) {
+//                viewModel.viewModelScope.launch {
+//                    viewModel.lichThiDauDAO.deleteLichThiDau(selectedValue!!);
+//                    selectedValue = null;
+//                }
+//            }
         }
     }
 
@@ -172,12 +177,12 @@ fun LapLichScreen(
 
                 if (lichThiDaus.isNotEmpty()) {
                     FeaturedMatchCardUpdated(
-                        team1Name = lichThiDaus[0].tenDoiMot ?: "",
-                        team1ImageURL = lichThiDaus[0].doiMotLogo ?: "",
+                        team1Name = lichThiDaus[0].homeTeam.name ?: "",
+                        team1ImageURL = lichThiDaus[0].homeTeam.crest ?: "",
                         team1Scorers = "De Jong 66’\nDepay 79’", // Giữ \n để xuống dòng tự nhiên
-                        score = "${lichThiDaus[0].banThangDoiMot} - ${lichThiDaus[0].banThangDoiHai}",
-                        team2Name = lichThiDaus[0].tenDoiHai ?: "",
-                        team2ImageURL = lichThiDaus[0].doiHaiLogo ?: "",
+                        score = "${lichThiDaus[0].score.fullTime.home ?: "?"} - ${lichThiDaus[0].score.fullTime.away ?: "?"}",
+                        team2Name = lichThiDaus[0].awayTeam.name ?: "",
+                        team2ImageURL = lichThiDaus[0].awayTeam.crest ?: "",
                         team2Scorers = "Alvarez 21’\nPalmer 70’" // Giữ \n
                     )
                 }
@@ -193,14 +198,13 @@ fun LapLichScreen(
                     item = lichThiDau,
                     isEditable = isEditable,
                     onDelete = {
-
-                        if (selectedValue != null) {
-                            viewModel.viewModelScope.launch {
-                                viewModel.lichThiDauDAO.deleteLichThiDau(selectedValue!!);
-                                selectedValue = null;
-                            }
-                        }
-                        selectedValue = lichThiDau
+//                        if (selectedValue != null) {
+//                            viewModel.viewModelScope.launch {
+//                                viewModel.lichThiDauDAO.deleteLichThiDau(selectedValue!!);
+//                                selectedValue = null;
+//                            }
+//                        }
+//                        selectedValue = lichThiDau
                         val result = snackbarHostState
                             .showSnackbar(
                                 message = "Deleted",
@@ -212,38 +216,38 @@ fun LapLichScreen(
                                 return@SwipeToDeleteContainer false;
                             }
                             SnackbarResult.Dismissed -> {
-                                viewModel.viewModelScope.launch {
-                                    viewModel.lichThiDauDAO.deleteLichThiDau(selectedValue!!);
-                                    selectedValue = null;
-                                }
+//                                viewModel.viewModelScope.launch {
+//                                    viewModel.lichThiDauDAO.deleteLichThiDau(selectedValue!!);
+//                                    selectedValue = null;
+//                                }
                                 return@SwipeToDeleteContainer true;
                             }
                         }
                     },
                     onUpdate = {
-                        navController.navigate("lichThiDauInput");
-                        val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle;
-                        savedStateHandle?.set("maTD", it.maTD);
-                        savedStateHandle?.set("maMG", it.maMG);
-                        savedStateHandle?.set("maVTD", it.maVTD);
-                        savedStateHandle?.set("maSan", it.maSan);
-                        savedStateHandle?.set("doiMot", it.doiMot);
-                        savedStateHandle?.set("doiHai", it.doiHai);
-                        savedStateHandle?.set("doiThang", it.doiThang);
-                        savedStateHandle?.set("ngayGioDuKien", it.ngayGioDuKien);
-                        savedStateHandle?.set("ngayGioThucTe", it.ngayGioThucTe);
-                        savedStateHandle?.set("thoiGianDaThiDau", it.thoiGianDaThiDau);
-                        savedStateHandle?.set("maTT", it.maTT);
+//                        navController.navigate("lichThiDauInput");
+//                        val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle;
+//                        savedStateHandle?.set("maTD", it.maTD);
+//                        savedStateHandle?.set("maMG", it.maMG);
+//                        savedStateHandle?.set("maVTD", it.maVTD);
+//                        savedStateHandle?.set("maSan", it.maSan);
+//                        savedStateHandle?.set("doiMot", it.doiMot);
+//                        savedStateHandle?.set("doiHai", it.doiHai);
+//                        savedStateHandle?.set("doiThang", it.doiThang);
+//                        savedStateHandle?.set("ngayGioDuKien", it.ngayGioDuKien);
+//                        savedStateHandle?.set("ngayGioThucTe", it.ngayGioThucTe);
+//                        savedStateHandle?.set("thoiGianDaThiDau", it.thoiGianDaThiDau);
+//                        savedStateHandle?.set("maTT", it.maTT);
                     },
                     content = {
                         MatchInfoRowNoLogos(
-                            lichThiDau.tenDoiMot ?: "",
-                            lichThiDau.doiMotLogo ?: "",
-                            DateConverter.LocalDateTimeToString(lichThiDau.ngayGioThucTe),
-                            lichThiDau.tenDoiHai ?: "",
-                            lichThiDau.doiHaiLogo ?: "",
+                            lichThiDau.homeTeam.name,
+                            lichThiDau.homeTeam.crest ?: "",
+                            DateConverter.LocalDateTimeToString(lichThiDau.utcDate),
+                            lichThiDau.awayTeam.name ?: "",
+                            lichThiDau.awayTeam.crest ?: "",
                             onClick = {
-                                navController.navigate("banThang/${lichThiDau.maTD}");
+//                                navController.navigate("banThang/${lichThiDau.maTD}");
                             })
                     },
                     modifier = Modifier

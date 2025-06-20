@@ -3,6 +3,14 @@ package com.example.quanlybongda.Services.Data
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+data class TeamResponse(
+    val count: Int,
+    val filters: Filters,
+    val competition: CompetitionInfo,
+    val season: Season,
+    val teams: List<Team>,
+)
+
 data class Team(
     val id: Int,
     val area: AreaInfo,
@@ -65,6 +73,6 @@ data class Staff(
 )
 
 data class Contract(
-    val start: LocalDate,
-    val until: LocalDate
+    val start: String,
+    val until: String
 )

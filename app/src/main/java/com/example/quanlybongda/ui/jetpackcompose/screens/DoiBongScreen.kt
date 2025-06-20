@@ -51,6 +51,9 @@ import coil.compose.AsyncImage
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.Schema.DoiBong
 import com.example.quanlybongda.Database.Schema.MuaGiai
+import com.example.quanlybongda.Services.Data.Team
+import com.example.quanlybongda.Services.FootballAPI
+import com.example.quanlybongda.Services.gson
 import com.example.quanlybongda.homeRoute
 import com.example.quanlybongda.navigatePopUpTo
 import com.example.quanlybongda.ui.theme.DarkColorScheme
@@ -70,39 +73,40 @@ fun DoiBongScreen(
     // List of football teams (sample data)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val currentMuaGiai by DatabaseViewModel.currentMuaGiai.collectAsState()
-    var doiBongs by remember { mutableStateOf(listOf<DoiBong>()) }
+    var doiBongs by remember { mutableStateOf(listOf<Team>()) }
     val snackbarHostState = remember { SnackbarHostState() }
-    var selectedValue by remember { mutableStateOf<DoiBong?>(null) }
+    var selectedValue by remember { mutableStateOf<Team?>(null) }
     val user by viewModel.user.collectAsState()
     var isEditable by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        viewModel.viewModelScope.launch {
-            if (currentMuaGiai != null) {
-                doiBongs = viewModel.doiBongDAO.selectDoiBongMuaGiai(currentMuaGiai!!.maMG!!);
-                val sanNha = viewModel.sanNhaDAO.selectAllSanNha();
-                for (doiBong in doiBongs) {
-                    doiBong.tenSan = sanNha.find { doiBong.maSan == it.maSan }!!.tenSan;
-                }
-            }
-        }
+        doiBongs = FootballAPI.retrofitService.getCompetitionTeams("PL").teams;
+//        viewModel.viewModelScope.launch {
+//            if (currentMuaGiai != null) {
+//                doiBongs = viewModel.doiBongDAO.selectDoiBongMuaGiai(currentMuaGiai!!.maMG!!);
+//                val sanNha = viewModel.sanNhaDAO.selectAllSanNha();
+//                for (doiBong in doiBongs) {
+//                    doiBong.tenSan = sanNha.find { doiBong.maSan == it.maSan }!!.tenSan;
+//                }
+//            }
+//        }
     }
 
-    LaunchedEffect(user) {
-        if (user == null)
-            return@LaunchedEffect;
-        viewModel.viewModelScope.launch {
-            isEditable = viewModel.checkPageEditable(user!!.groupId, "doi");
-        }
-    }
+//    LaunchedEffect(user) {
+//        if (user == null)
+//            return@LaunchedEffect;
+//        viewModel.viewModelScope.launch {
+//            isEditable = viewModel.checkPageEditable(user!!.groupId, "doi");
+//        }
+//    }
 
     DisposableEffect(snackbarHostState) {
         onDispose {
             if (selectedValue != null) {
-                viewModel.viewModelScope.launch {
-                    viewModel.doiBongDAO.deleteDoiBong(selectedValue!!);
-                    selectedValue = null;
-                }
+//                viewModel.viewModelScope.launch {
+//                    viewModel.doiBongDAO.deleteDoiBong(selectedValue!!);
+//                    selectedValue = null;
+//                }
             }
         }
     }
@@ -142,15 +146,15 @@ fun DoiBongScreen(
                     isEditable = isEditable,
                     onDelete = {
                         if (selectedValue != null) {
-                            viewModel.viewModelScope.launch {
-                                viewModel.doiBongDAO.deleteDoiBong(selectedValue!!);
-                                selectedValue = null;
-                            }
+//                            viewModel.viewModelScope.launch {
+//                                viewModel.doiBongDAO.deleteDoiBong(selectedValue!!);
+//                                selectedValue = null;
+//                            }
                         }
                         selectedValue = doiBong;
                         val result = snackbarHostState
                             .showSnackbar(
-                                message = "Deleted ${doiBong.tenDoi}",
+                                message = "Deleted ${doiBong.name}",
                                 actionLabel = "Undo",
                                 duration = SnackbarDuration.Short
                             )
@@ -159,28 +163,28 @@ fun DoiBongScreen(
                                 return@SwipeToDeleteContainer false;
                             }
                             SnackbarResult.Dismissed -> {
-                                viewModel.viewModelScope.launch {
-                                    viewModel.doiBongDAO.deleteDoiBong(selectedValue!!);
-                                    selectedValue = null;
-                                }
+//                                viewModel.viewModelScope.launch {
+//                                    viewModel.doiBongDAO.deleteDoiBong(selectedValue!!);
+//                                    selectedValue = null;
+//                                }
                                 return@SwipeToDeleteContainer true;
                             }
                         }
                     },
                     onUpdate = {
-                        navController.navigate("doiBongInput");
-                        val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle;
-                        savedStateHandle?.set("maDoi", it.maDoi);
-                        savedStateHandle?.set("tenDoi", it.tenDoi);
-                        savedStateHandle?.set("maSan", it.maSan);
-                        savedStateHandle?.set("maMG", it.maMG);
-                        savedStateHandle?.set("imageURL", it.imageURL);
+//                        navController.navigate("doiBongInput");
+//                        val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle;
+//                        savedStateHandle?.set("maDoi", it.maDoi);
+//                        savedStateHandle?.set("tenDoi", it.tenDoi);
+//                        savedStateHandle?.set("maSan", it.maSan);
+//                        savedStateHandle?.set("maMG", it.maMG);
+//                        savedStateHandle?.set("imageURL", it.imageURL);
                     },
                     content = {
                         TeamCard(
                             team = doiBong,
                             onClick = {
-                                navController.navigate("cauThu/${doiBong.maDoi}");
+//                                navController.navigate("cauThu/${doiBong.id}");
                             })
                     },
                     modifier = Modifier.fillMaxSize(),
@@ -193,7 +197,7 @@ fun DoiBongScreen(
 
 // Composable for a single Team Card
 @Composable
-fun TeamCard(team: DoiBong, onClick : () -> Unit) {
+fun TeamCard(team: Team, onClick : () -> Unit) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
@@ -210,8 +214,8 @@ fun TeamCard(team: DoiBong, onClick : () -> Unit) {
             .padding(16.dp)
         ) {
             AsyncImage(
-                model = team.imageURL,
-                contentDescription = team.tenDoi,
+                model = team.crest,
+                contentDescription = team.name,
                 modifier = Modifier.size(64.dp),
             )
             Column(
@@ -223,14 +227,14 @@ fun TeamCard(team: DoiBong, onClick : () -> Unit) {
             ) {
 
                 Text(
-                    text = team.tenDoi,
+                    text = team.name,
                     color = Color.White, // Thay MaterialTheme.colorScheme.onSurface
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Center
                 )
                 Text(
-                    text = team.tenSan,
+                    text = team.venue ?: "Chưa có sân nhà",
                     color = Color.LightGray,
                     fontSize = 16.sp,
                     textAlign = TextAlign.Center

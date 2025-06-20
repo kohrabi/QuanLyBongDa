@@ -3,6 +3,13 @@ package com.example.quanlybongda.Services.Data
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+
+data class CompetitionResponse(
+    val count: Int,
+    val filters: Filters,
+    val competition: List<Competition>,
+)
+
 data class Competition(
     val id: Int,
     val area: AreaInfo,
