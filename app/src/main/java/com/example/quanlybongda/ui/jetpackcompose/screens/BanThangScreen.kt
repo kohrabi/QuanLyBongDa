@@ -47,6 +47,7 @@ import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.Schema.BanThang
 import com.example.quanlybongda.Database.Schema.LichThiDau
 import com.example.quanlybongda.R
+import com.example.quanlybongda.Services.FootballAPIViewModel
 import com.example.quanlybongda.ui.theme.DarkColorScheme
 import kotlinx.coroutines.launch
 
@@ -63,7 +64,8 @@ fun BanThangScreen(
     maTD: Int,
     navController: NavController,
     modifier: Modifier = Modifier,
-    viewModel: DatabaseViewModel = hiltViewModel()
+    viewModel: DatabaseViewModel = hiltViewModel(),
+    apiViewModel: FootballAPIViewModel = hiltViewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var lichThiDau by remember { mutableStateOf<LichThiDau?>(null) }

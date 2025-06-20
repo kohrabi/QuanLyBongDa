@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -53,10 +55,13 @@ import com.example.quanlybongda.Database.Schema.DoiBong
 import com.example.quanlybongda.Database.Schema.MuaGiai
 import com.example.quanlybongda.Services.Data.Team
 import com.example.quanlybongda.Services.FootballAPI
+import com.example.quanlybongda.Services.FootballAPIViewModel
+import com.example.quanlybongda.Services.LoadingState
 import com.example.quanlybongda.Services.gson
 import com.example.quanlybongda.homeRoute
 import com.example.quanlybongda.navigatePopUpTo
 import com.example.quanlybongda.ui.theme.DarkColorScheme
+import com.example.quanlybongda.ui.theme.Purple80
 import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
 import com.example.quanlybongda.ui.theme.darkCardBackground
 import kotlinx.coroutines.delay
@@ -69,47 +74,21 @@ fun DoiBongScreen(
     navController : NavController,
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel(),
+    apiViewModel: FootballAPIViewModel = hiltViewModel()
 ) { // Đổi tên từ FootballTeamScreen thành DoiBong
     // List of football teams (sample data)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val currentMuaGiai by DatabaseViewModel.currentMuaGiai.collectAsState()
-    var doiBongs by remember { mutableStateOf(listOf<Team>()) }
+    val doiBongs by apiViewModel.teams.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var selectedValue by remember { mutableStateOf<Team?>(null) }
     val user by viewModel.user.collectAsState()
     var isEditable by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        doiBongs = FootballAPI.retrofitService.getCompetitionTeams("PL").teams;
-//        viewModel.viewModelScope.launch {
-//            if (currentMuaGiai != null) {
-//                doiBongs = viewModel.doiBongDAO.selectDoiBongMuaGiai(currentMuaGiai!!.maMG!!);
-//                val sanNha = viewModel.sanNhaDAO.selectAllSanNha();
-//                for (doiBong in doiBongs) {
-//                    doiBong.tenSan = sanNha.find { doiBong.maSan == it.maSan }!!.tenSan;
-//                }
-//            }
-//        }
+        apiViewModel.loadTeams()
     }
 
-//    LaunchedEffect(user) {
-//        if (user == null)
-//            return@LaunchedEffect;
-//        viewModel.viewModelScope.launch {
-//            isEditable = viewModel.checkPageEditable(user!!.groupId, "doi");
-//        }
-//    }
-
-    DisposableEffect(snackbarHostState) {
-        onDispose {
-            if (selectedValue != null) {
-//                viewModel.viewModelScope.launch {
-//                    viewModel.doiBongDAO.deleteDoiBong(selectedValue!!);
-//                    selectedValue = null;
-//                }
-            }
-        }
-    }
 
     // Main screen layout
     Scaffold(
@@ -131,65 +110,81 @@ fun DoiBongScreen(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { innerPadding ->
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(top = 12.dp)
-                .background(DarkColorScheme.background),
-            contentPadding = innerPadding,
-            verticalArrangement = Arrangement.spacedBy(12.dp) // Khoảng cách giữa các card
-        ) {
-            items(doiBongs) { doiBong ->
-                SwipeToDeleteContainer(
-                    item = doiBong,
-                    isEditable = isEditable,
-                    onDelete = {
-                        if (selectedValue != null) {
-//                            viewModel.viewModelScope.launch {
-//                                viewModel.doiBongDAO.deleteDoiBong(selectedValue!!);
-//                                selectedValue = null;
-//                            }
-                        }
-                        selectedValue = doiBong;
-                        val result = snackbarHostState
-                            .showSnackbar(
-                                message = "Deleted ${doiBong.name}",
-                                actionLabel = "Undo",
-                                duration = SnackbarDuration.Short
-                            )
-                        when (result) {
-                            SnackbarResult.ActionPerformed -> {
-                                return@SwipeToDeleteContainer false;
-                            }
-                            SnackbarResult.Dismissed -> {
+        when (doiBongs) {
+            is LoadingState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = Purple80,
+                        modifier = Modifier.size(48.dp)
+                    )
+                }
+            }
+
+            is LoadingState.Error -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Lỗi tải dữ liệu: ${(doiBongs as LoadingState.Error).message}",
+                        color = Color.Red
+                    )
+                }
+            }
+            is LoadingState.Success -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 12.dp)
+                        .background(DarkColorScheme.background),
+                    contentPadding = innerPadding,
+                    verticalArrangement = Arrangement.spacedBy(12.dp) // Khoảng cách giữa các card
+                ) {
+                    val result = (doiBongs as LoadingState.Success<List<Team>>).data;
+                    items(result) { doiBong ->
+                        SwipeToDeleteContainer(
+                            item = doiBong,
+                            isEditable = isEditable,
+                            onDelete = {
+                                if (selectedValue != null) {
+                                }
+                                selectedValue = doiBong;
+                                val result = snackbarHostState
+                                    .showSnackbar(
+                                        message = "Deleted ${doiBong.name}",
+                                        actionLabel = "Undo",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                when (result) {
+                                    SnackbarResult.ActionPerformed -> {
+                                        return@SwipeToDeleteContainer false;
+                                    }
+
+                                    SnackbarResult.Dismissed -> {
 //                                viewModel.viewModelScope.launch {
 //                                    viewModel.doiBongDAO.deleteDoiBong(selectedValue!!);
 //                                    selectedValue = null;
 //                                }
-                                return@SwipeToDeleteContainer true;
-                            }
-                        }
-                    },
-                    onUpdate = {
-//                        navController.navigate("doiBongInput");
-//                        val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle;
-//                        savedStateHandle?.set("maDoi", it.maDoi);
-//                        savedStateHandle?.set("tenDoi", it.tenDoi);
-//                        savedStateHandle?.set("maSan", it.maSan);
-//                        savedStateHandle?.set("maMG", it.maMG);
-//                        savedStateHandle?.set("imageURL", it.imageURL);
-                    },
-                    content = {
-                        TeamCard(
-                            team = doiBong,
-                            onClick = {
-//                                navController.navigate("cauThu/${doiBong.id}");
-                            })
-                    },
-                    modifier = Modifier.fillMaxSize(),
-                    backgroundModifier = Modifier.clip(RoundedCornerShape(16.dp))
-                )
+                                        return@SwipeToDeleteContainer true;
+                                    }
+                                }
+                            },
+                            onUpdate = {
+                            },
+                            content = {
+                                TeamCard(
+                                    team = doiBong,
+                                    onClick = {})
+                            },
+                            modifier = Modifier.fillMaxSize(),
+                            backgroundModifier = Modifier.clip(RoundedCornerShape(16.dp))
+                        )
+                    }
+                }
             }
         }
     }

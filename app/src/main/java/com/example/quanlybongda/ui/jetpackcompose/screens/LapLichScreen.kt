@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -60,10 +61,13 @@ import com.example.quanlybongda.Database.Schema.MuaGiai
 import com.example.quanlybongda.Services.Data.Competition
 import com.example.quanlybongda.Services.Data.Match
 import com.example.quanlybongda.Services.FootballAPI
+import com.example.quanlybongda.Services.FootballAPIViewModel
+import com.example.quanlybongda.Services.LoadingState
 import com.example.quanlybongda.Services.gson
 import com.example.quanlybongda.homeRoute
 import com.example.quanlybongda.navigatePopUpTo
 import com.example.quanlybongda.ui.theme.DarkColorScheme
+import com.example.quanlybongda.ui.theme.Purple80
 import com.example.quanlybongda.ui.theme.darkCardBackground
 import com.example.quanlybongda.ui.theme.darkTextMuted
 import kotlinx.coroutines.delay
@@ -86,11 +90,12 @@ val textScoreColor = Color(0xFFE0FF00) // Màu vàng chanh cho tỷ số, điề
 fun LapLichScreen(
     navController: NavController,
     modifier: Modifier = Modifier,
-    viewModel: DatabaseViewModel = hiltViewModel()
+    viewModel: DatabaseViewModel = hiltViewModel(),
+    apiViewModel: FootballAPIViewModel = hiltViewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val currentMuaGiai by DatabaseViewModel.currentMuaGiai.collectAsState()
-    var lichThiDaus by remember { mutableStateOf(listOf<Match>()) }
+    val lichThiDaus by apiViewModel.matches.collectAsState()
     var doiBongs by remember { mutableStateOf(listOf<DoiBong>()) }
     val state = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -99,49 +104,7 @@ fun LapLichScreen(
     var isEditable by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        lichThiDaus = FootballAPI.retrofitService.getCompetitionMatches("PL").matches;
-//        viewModel.viewModelScope.launch {
-//            if (currentMuaGiai != null) {
-//                lichThiDaus = viewModel.lichThiDauDAO.selectLichThiDauMaMG(currentMuaGiai!!.maMG!!);
-//                doiBongs = viewModel.doiBongDAO.selectAllDoiBong();
-//                for (lichThiDau in lichThiDaus) {
-//                    val doiMot = doiBongs.find { it.maDoi == lichThiDau.doiMot }!!;
-//                    lichThiDau.tenDoiMot = doiMot.tenDoi;
-//                    lichThiDau.doiMotLogo = doiMot.imageURL;
-//                    val doiHai = doiBongs.find { it.maDoi == lichThiDau.doiHai }!!;
-//                    lichThiDau.tenDoiHai = doiHai.tenDoi;
-//                    lichThiDau.doiHaiLogo = doiHai.imageURL;
-//                    if (lichThiDau.doiThang == null)
-//                        lichThiDau.tenDoiThang = "Hòa";
-//                    else
-//                        lichThiDau.tenDoiThang = doiBongs.find { it.maDoi == lichThiDau.doiThang }!!.tenDoi;
-//                    lichThiDau.banThangDoiMot = viewModel.banThangDAO.selectSoBanThangTranDauDoi(lichThiDau.maTD, lichThiDau.doiMot) +
-//                            viewModel.banThangDAO.selectSoBanThangPhanLuoiTranDauDoi(lichThiDau.maTD, lichThiDau.doiHai);
-//                    lichThiDau.banThangDoiHai = viewModel.banThangDAO.selectSoBanThangTranDauDoi(lichThiDau.maTD, lichThiDau.doiHai) +
-//                            viewModel.banThangDAO.selectSoBanThangPhanLuoiTranDauDoi(lichThiDau.maTD, lichThiDau.doiMot);
-//                }
-//                lichThiDaus = lichThiDaus.sortedByDescending { it.ngayGioThucTe };
-//            }
-//        }
-    }
-
-//    LaunchedEffect(user) {
-//        if (user == null)
-//            return@LaunchedEffect;
-//        viewModel.viewModelScope.launch {
-//            isEditable = viewModel.checkPageEditable(user!!.groupId, "trandau");
-//        }
-//    }
-
-    DisposableEffect(snackbarHostState) {
-        onDispose {
-//            if (selectedValue != null) {
-//                viewModel.viewModelScope.launch {
-//                    viewModel.lichThiDauDAO.deleteLichThiDau(selectedValue!!);
-//                    selectedValue = null;
-//                }
-//            }
-        }
+        apiViewModel.loadMatches()
     }
 
     Scaffold(
@@ -162,100 +125,76 @@ fun LapLichScreen(
         },
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     )  { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 12.dp)
-                .padding(horizontal = 16.dp)
-                .background(DarkColorScheme.background),
-            contentPadding = innerPadding,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            item {
-                // Tăng khoảng cách giữa TopAppBar và FeaturedMatchCardUpdated
-                Spacer(modifier = Modifier.height(30.dp)) // << SỬA: Tăng khoảng cách
-
-                if (lichThiDaus.isNotEmpty()) {
-                    FeaturedMatchCardUpdated(
-                        team1Name = lichThiDaus[0].homeTeam.name ?: "",
-                        team1ImageURL = lichThiDaus[0].homeTeam.crest ?: "",
-                        team1Scorers = "De Jong 66’\nDepay 79’", // Giữ \n để xuống dòng tự nhiên
-                        score = "${lichThiDaus[0].score.fullTime.home ?: "?"} - ${lichThiDaus[0].score.fullTime.away ?: "?"}",
-                        team2Name = lichThiDaus[0].awayTeam.name ?: "",
-                        team2ImageURL = lichThiDaus[0].awayTeam.crest ?: "",
-                        team2Scorers = "Alvarez 21’\nPalmer 70’" // Giữ \n
+        when (lichThiDaus) {
+            is LoadingState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = Purple80,
+                        modifier = Modifier.size(48.dp)
                     )
                 }
-                // Tăng khoảng cách giữa FeaturedMatchCardUpdated và MatchScheduleHeader
-                Spacer(modifier = Modifier.height(60.dp)) // << SỬA: Tăng khoảng cách
-
-                MatchScheduleHeader()
-                Spacer(modifier = Modifier.height(16.dp))
             }
 
-            items(lichThiDaus) { lichThiDau ->
-                SwipeToDeleteContainer(
-                    item = lichThiDau,
-                    isEditable = isEditable,
-                    onDelete = {
-//                        if (selectedValue != null) {
-//                            viewModel.viewModelScope.launch {
-//                                viewModel.lichThiDauDAO.deleteLichThiDau(selectedValue!!);
-//                                selectedValue = null;
-//                            }
-//                        }
-//                        selectedValue = lichThiDau
-                        val result = snackbarHostState
-                            .showSnackbar(
-                                message = "Deleted",
-                                actionLabel = "Undo",
-                                duration = SnackbarDuration.Short
+            is LoadingState.Error -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Lỗi tải dữ liệu: ${(lichThiDaus as LoadingState.Error).message}",
+                        color = Color.Red
+                    )
+                }
+            }
+            is LoadingState.Success -> {
+                val result = (lichThiDaus as LoadingState.Success<List<Match>>).data
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp)
+                        .padding(horizontal = 16.dp)
+                        .background(DarkColorScheme.background),
+                    contentPadding = innerPadding,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    item {
+                        // Tăng khoảng cách giữa TopAppBar và FeaturedMatchCardUpdated
+                        Spacer(modifier = Modifier.height(30.dp)) // << SỬA: Tăng khoảng cách
+
+                        if (result.isNotEmpty()) {
+                            FeaturedMatchCardUpdated(
+                                team1Name = result[0].homeTeam.name ?: "",
+                                team1ImageURL = result[0].homeTeam.crest ?: "",
+                                team1Scorers = "De Jong 66’\nDepay 79’", // Giữ \n để xuống dòng tự nhiên
+                                score = "${result[0].score.fullTime.home ?: "?"} - ${result[0].score.fullTime.away ?: "?"}",
+                                team2Name = result[0].awayTeam.name ?: "",
+                                team2ImageURL = result[0].awayTeam.crest ?: "",
+                                team2Scorers = "Alvarez 21’\nPalmer 70’" // Giữ \n
                             )
-                        when (result) {
-                            SnackbarResult.ActionPerformed -> {
-                                return@SwipeToDeleteContainer false;
-                            }
-                            SnackbarResult.Dismissed -> {
-//                                viewModel.viewModelScope.launch {
-//                                    viewModel.lichThiDauDAO.deleteLichThiDau(selectedValue!!);
-//                                    selectedValue = null;
-//                                }
-                                return@SwipeToDeleteContainer true;
-                            }
                         }
-                    },
-                    onUpdate = {
-//                        navController.navigate("lichThiDauInput");
-//                        val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle;
-//                        savedStateHandle?.set("maTD", it.maTD);
-//                        savedStateHandle?.set("maMG", it.maMG);
-//                        savedStateHandle?.set("maVTD", it.maVTD);
-//                        savedStateHandle?.set("maSan", it.maSan);
-//                        savedStateHandle?.set("doiMot", it.doiMot);
-//                        savedStateHandle?.set("doiHai", it.doiHai);
-//                        savedStateHandle?.set("doiThang", it.doiThang);
-//                        savedStateHandle?.set("ngayGioDuKien", it.ngayGioDuKien);
-//                        savedStateHandle?.set("ngayGioThucTe", it.ngayGioThucTe);
-//                        savedStateHandle?.set("thoiGianDaThiDau", it.thoiGianDaThiDau);
-//                        savedStateHandle?.set("maTT", it.maTT);
-                    },
-                    content = {
+                        // Tăng khoảng cách giữa FeaturedMatchCardUpdated và MatchScheduleHeader
+                        Spacer(modifier = Modifier.height(60.dp)) // << SỬA: Tăng khoảng cách
+
+                        MatchScheduleHeader()
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                    items(result) { lichThiDau ->
+
                         MatchInfoRowNoLogos(
                             lichThiDau.homeTeam.name,
                             lichThiDau.homeTeam.crest ?: "",
                             DateConverter.LocalDateTimeToString(lichThiDau.utcDate),
                             lichThiDau.awayTeam.name ?: "",
                             lichThiDau.awayTeam.crest ?: "",
-                            onClick = {
-//                                navController.navigate("banThang/${lichThiDau.maTD}");
-                            })
-                    },
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    backgroundModifier = Modifier.clip(RoundedCornerShape(20.dp))
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-            };
+                            onClick = {}
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                    };
+                }
+            }
         }
     }
 }

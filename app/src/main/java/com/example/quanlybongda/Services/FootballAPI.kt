@@ -10,6 +10,8 @@ import com.example.quanlybongda.Services.Data.TeamResponse
 import com.google.gson.GsonBuilder
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import retrofit2.Call
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
@@ -45,16 +47,16 @@ private val retrofit = Retrofit.Builder()
 
 interface FootballAPIService {
     @GET("competitions/")
-    suspend fun getCompetitions() : CompetitionResponse;
+    suspend fun getCompetitions() : Response<CompetitionResponse>;
 
     @GET("competitions/{id}/teams")
-    suspend fun getCompetitionTeams(@Path("id") id: String, @retrofit2.http.Query("season") season: Int = 2024) : TeamResponse;
+    suspend fun getCompetitionTeams(@Path("id") id: String, @retrofit2.http.Query("season") season: Int = 2024) : Response<TeamResponse>;
 
     @GET("competitions/{id}/matches")
-    suspend fun getCompetitionMatches(@Path("id") id: String, @retrofit2.http.Query("season") season: Int = 2024) : MatchResponse;
+    suspend fun getCompetitionMatches(@Path("id") id: String, @retrofit2.http.Query("season") season: Int = 2024) : Response<MatchResponse>;
 
     @GET("competitions/{id}/standings")
-    suspend fun getCompetitionStandings(@Path("id") id: String, @retrofit2.http.Query("season") season: Int = 2024) : StandingsResponse;
+    suspend fun getCompetitionStandings(@Path("id") id: String, @retrofit2.http.Query("season") season: Int = 2024) : Response<StandingsResponse>;
 }
 
 object FootballAPI {

@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
@@ -29,9 +30,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,24 +45,22 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.quanlybongda.Database.DatabaseViewModel
-import com.example.quanlybongda.Database.ReturnTypes.BangXepHangNgay
-import com.example.quanlybongda.Database.Schema.MuaGiai
 import com.example.quanlybongda.R
 import com.example.quanlybongda.Services.Data.Standing
+import com.example.quanlybongda.Services.Data.Team
 import com.example.quanlybongda.Services.Data.TeamStandingInfo
-import com.example.quanlybongda.Services.FootballAPI
+import com.example.quanlybongda.Services.FootballAPIViewModel
+import com.example.quanlybongda.Services.LoadingState
 import com.example.quanlybongda.ui.theme.DarkColorScheme
+import com.example.quanlybongda.ui.theme.Purple80
 import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
 import com.example.quanlybongda.ui.theme.darkContentBackground
 import com.example.quanlybongda.ui.theme.darkTextMuted
 import com.example.quanlybongda.ui.theme.darkTextWhite
-import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,35 +69,16 @@ fun BaoCaoScreen(
     navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel(),
+    apiViewModel: FootballAPIViewModel = hiltViewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val context = LocalContext.current
-    var teams by remember { mutableStateOf(listOf<TeamStandingInfo>()) }
-    val muaGiai by DatabaseViewModel.currentMuaGiai.collectAsState()
-//    var ngayBaoCao by remember { mutableStateOf(LocalDate.of(2025, 5, 11)) }
-//
-//    LaunchedEffect(ngayBaoCao) {
-//        teams = viewModel.selectBXHDoiNgay(ngayBaoCao).sortedByDescending { it.hieuSo }
-//    }
-//    var muaGiaiOptions by remember { mutableStateOf(listOf<OptionValue>()) }
-//    var selectedMuaGiai by remember { mutableStateOf(OptionValue(null, "Vui lòng chọn mùa giải")) }
-
+    val standings by apiViewModel.standings.collectAsState()
     LaunchedEffect(Unit) {
-        teams = FootballAPI.retrofitService.getCompetitionStandings("PL").standings.get(0).table;
-//        if (muaGiai != null)
-//            selectedMuaGiai = OptionValue(muaGiai!!.maMG, muaGiai!!.tenMG);
-//        viewModel.viewModelScope.launch {
-//            muaGiaiOptions = viewModel.muaGiaiDAO.selectAllMuaGiai().map { OptionValue(it.maMG, it.tenMG) };
-//        }
+        apiViewModel.loadStandings()
+
     }
 
-//    LaunchedEffect(selectedMuaGiai) {
-//        viewModel.viewModelScope.launch {
-//            if (selectedMuaGiai.value != null) {
-//                teams = viewModel.selectBXHDoiMuaGiai(selectedMuaGiai.value!!).sortedByDescending { it.hieuSo };
-//            }
-//        }
-//    }
 
     Scaffold(
         containerColor = DarkColorScheme.background,
@@ -127,64 +104,77 @@ fun BaoCaoScreen(
                 alpha = 0.3f
             )
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 14.dp),
-                contentPadding = PaddingValues(top = 24.dp, bottom = 16.dp)
-            ) {
-                item {
-//                    InputDropDownMenu(
-//                        label = "Mùa giải",
-//                        options = muaGiaiOptions,
-//                        selectedOption = selectedMuaGiai,
-//                        onOptionSelected = {
-//                            selectedMuaGiai = it
-//                        },
-//                        showEmptyError = selectedMuaGiai.value == null,
-//                    )
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(darkContentBackground.copy(alpha = 0.7f))
-                            .padding(16.dp)
+            when (standings) {
+                is LoadingState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = "Table Standings",
-                                color = darkTextWhite,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-                        StandingsListHeader()
-                        Spacer(modifier = Modifier.height(12.dp))
+                        CircularProgressIndicator(
+                            color = Purple80,
+                            modifier = Modifier.size(48.dp)
+                        )
                     }
                 }
 
-                itemsIndexed(teams) { index, team ->
-                    StandingsListRow(team = team)
-//                    if (index < teams.lastIndex) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(vertical = 8.dp),
-                            thickness = 0.5.dp,
-                            color = darkTextMuted.copy(alpha = 0.2f)
+                is LoadingState.Error -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Lỗi tải dữ liệu: ${(standings as LoadingState.Error).message}",
+                            color = Color.Red
                         )
-//                    }
+                    }
                 }
+                is LoadingState.Success -> {
+                    val result = (standings as LoadingState.Success<List<Standing>>).data[0].table;
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp),
+                        contentPadding = PaddingValues(top = 24.dp, bottom = 16.dp)
+                    ) {
+                        item {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(darkContentBackground.copy(alpha = 0.7f))
+                                    .padding(16.dp)
+                            ) {
+                                Row(
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        text = "Table Standings",
+                                        color = darkTextWhite,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
 
-//                item {
-//                    Spacer(modifier = Modifier.height(16.dp))
-//                    LeagueLegendStandings()
-//                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                                StandingsListHeader()
+                                Spacer(modifier = Modifier.height(12.dp))
+                            }
+                        }
+
+                        itemsIndexed(result) { index, team ->
+                            StandingsListRow(team = team)
+                            HorizontalDivider(
+                                modifier = Modifier.padding(vertical = 8.dp),
+                                thickness = 0.5.dp,
+                                color = darkTextMuted.copy(alpha = 0.2f)
+                            )
+                        }
+                    }
+                }
             }
+
         }
     }
 }

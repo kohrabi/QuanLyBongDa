@@ -26,6 +26,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.Exceptions.*
 import com.example.quanlybongda.Database.UserDataStore
+import com.example.quanlybongda.Services.FootballAPIViewModel
 import com.example.quanlybongda.navigatePopUpTo
 import kotlinx.coroutines.launch
 
@@ -33,7 +34,8 @@ import kotlinx.coroutines.launch
 fun LoginScreen(
     navController : NavController,
     modifier: Modifier = Modifier,
-    viewModel: DatabaseViewModel = hiltViewModel()
+    viewModel: DatabaseViewModel = hiltViewModel(),
+    apiViewModel: FootballAPIViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current;
     var userError by remember { mutableStateOf(InputError()) }

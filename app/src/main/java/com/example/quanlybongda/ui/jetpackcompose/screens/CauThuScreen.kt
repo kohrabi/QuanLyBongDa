@@ -61,6 +61,7 @@ import coil.compose.AsyncImage
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.DateConverter
 import com.example.quanlybongda.Database.Schema.CauThu
+import com.example.quanlybongda.Services.FootballAPIViewModel
 import com.example.quanlybongda.ui.theme.DarkColorScheme
 import com.example.quanlybongda.ui.theme.Purple40
 import com.example.quanlybongda.ui.theme.Purple80
@@ -76,6 +77,7 @@ fun CauThuScreen(
     navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel(),
+    apiViewModel: FootballAPIViewModel = hiltViewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var cauThus by remember { mutableStateOf(listOf<CauThu>()) }

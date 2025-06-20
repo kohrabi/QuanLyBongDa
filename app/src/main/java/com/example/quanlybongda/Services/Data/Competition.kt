@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 data class CompetitionResponse(
     val count: Int,
     val filters: Filters,
-    val competition: List<Competition>,
+    val competitions: List<Competition>,
 )
 
 data class Competition(

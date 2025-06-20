@@ -32,13 +32,15 @@ import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.ReturnTypes.CauThuBanThang
 import com.example.quanlybongda.Database.Schema.DoiBong
 import com.example.quanlybongda.R
+import com.example.quanlybongda.Services.FootballAPIViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun KetQuaTranDauScreen(
     navController: NavController,
     modifier: Modifier = Modifier,
-    viewModel: DatabaseViewModel = hiltViewModel()
+    viewModel: DatabaseViewModel = hiltViewModel(),
+    apiViewModel: FootballAPIViewModel = hiltViewModel()
 ) {
 
     var cauThus by remember { mutableStateOf(listOf<CauThuBanThang>()) }
