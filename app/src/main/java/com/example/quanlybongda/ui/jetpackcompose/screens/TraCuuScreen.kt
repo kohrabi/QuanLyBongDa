@@ -122,13 +122,13 @@ fun TraCuuScreen(
             contentPadding = innerPadding,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(cauThus) { cauThu ->
-                PlayerCard(
-                    player = cauThu,
-                    onClick = {
-                        navController.navigate("cauThu/${cauThu.maDoi}");
-                    })
-            }
+//            items(cauThus) { cauThu ->
+//                PlayerCard(
+//                    player = cauThu,
+//                    onClick = {
+//                        navController.navigate("cauThu/${cauThu.maDoi}");
+//                    })
+//            }
         }
     }
 }

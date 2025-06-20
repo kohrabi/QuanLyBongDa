@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">QuanLyBongDa</string>
+    <string name="default_player_avatar">https://static.vecteezy.com/system/resources/thumbnails/024/983/914/small/simple-user-default-icon-free-png.png</string>
 </resources>

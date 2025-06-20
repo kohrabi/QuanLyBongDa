@@ -1,6 +1,7 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
 // Thêm import cần thiết để lấy chiều cao thanh trạng thái
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -9,11 +10,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -44,12 +48,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,16 +67,26 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import coil.decode.SvgDecoder
+import coil.request.ImageRequest
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.DateConverter
 import com.example.quanlybongda.Database.Schema.CauThu
+import com.example.quanlybongda.R
+import com.example.quanlybongda.Services.Data.Match
+import com.example.quanlybongda.Services.Data.Player
+import com.example.quanlybongda.Services.Data.Team
 import com.example.quanlybongda.Services.FootballAPIViewModel
+import com.example.quanlybongda.Services.LoadingState
+import com.example.quanlybongda.Services.TheSportsDBAPI
 import com.example.quanlybongda.ui.theme.DarkColorScheme
 import com.example.quanlybongda.ui.theme.Purple40
 import com.example.quanlybongda.ui.theme.Purple80
 import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
 import com.example.quanlybongda.ui.theme.darkCardBackground
 import kotlinx.coroutines.launch
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 // Main Composable for the Player List Screen
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,45 +99,25 @@ fun CauThuScreen(
     apiViewModel: FootballAPIViewModel = hiltViewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-    var cauThus by remember { mutableStateOf(listOf<CauThu>()) }
-    val snackbarHostState = remember { SnackbarHostState() }
-    var selectedValue by remember { mutableStateOf<CauThu?>(null) }
     val user by viewModel.user.collectAsState()
     val context = LocalContext.current;
-    var soCauThuMax by remember { mutableStateOf(0) }
+    val snackbarHostState = remember { SnackbarHostState() }
     var isEditable by remember { mutableStateOf(false) }
 
+    val teams by apiViewModel.teams.collectAsState()
+    var currentTeam by remember { mutableStateOf<Team?>(null) }
+
+
     LaunchedEffect(Unit) {
-        viewModel.viewModelScope.launch {
-            val doiBong = viewModel.doiBongDAO.selectDoiBongMaDoi(maDoi);
-            cauThus = viewModel.cauThuDAO.selectCauThuDoiBong(maDoi);
-            val loaiCTs = viewModel.cauThuDAO.selectAllLoaiCT();
-            for (cauThu in cauThus) {
-                cauThu.tenLCT = loaiCTs.find { it.maLCT == cauThu.maLCT }!!.tenLCT;
-                cauThu.doiImageURL = doiBong?.imageURL ?: "";
+        when (teams) {
+            is LoadingState.Success -> {
+                val result = (teams as LoadingState.Success<List<Team>>).data;
+                currentTeam = result.find { it.id == maDoi }!!;
             }
-            soCauThuMax = viewModel.thamSoDAO.selectThamSo("soCauThuMax")!!.giaTri;
+            else -> {}
         }
     }
 
-    LaunchedEffect(user) {
-        if (user == null)
-            return@LaunchedEffect;
-        viewModel.viewModelScope.launch {
-            isEditable = viewModel.checkPageEditable(user!!.groupId, "cauthu");
-        }
-    }
-
-    DisposableEffect(snackbarHostState) {
-        onDispose {
-            if (selectedValue != null) {
-                viewModel.viewModelScope.launch {
-                    viewModel.cauThuDAO.deleteCauThu(selectedValue!!);
-                    selectedValue = null;
-                }
-            }
-        }
-    }
 
     Scaffold(
         snackbarHost = {
@@ -140,81 +139,32 @@ fun CauThuScreen(
                 }
             )
         },
-        floatingActionButton = {
-            if (isEditable) {
-                AddFloatingButton(
-                    "Cầu thủ",
-                    onClick = {
-                        if (cauThus.size > soCauThuMax) {
-                            Toast.makeText(context, "Vượt quá cầu thủ tối đa", Toast.LENGTH_SHORT).show();
-                            return@AddFloatingButton;
-                        }
-                        navController.navigate("cauThuInput/${maDoi}")
-                    })
-            }
-        },
         containerColor = DarkColorScheme.background,
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
     ) { innerPadding ->
+        if (currentTeam == null) {
+            // Hiển thị thông báo nếu không tìm thấy lịch thi đấu
+            Text(
+                text = "Không tìm thấy đội bóng với mã: $maDoi",
+                color = Color.Red,
+                modifier = Modifier.padding(innerPadding)
+            )
+            return@Scaffold
+        }
         // Danh sách cầu thủ
         LazyColumn(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .background(DarkColorScheme.background)
                 .padding(top = 12.dp)
                 .padding(horizontal = 16.dp),
             contentPadding = innerPadding,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(cauThus) { cauThu ->
-                SwipeToDeleteContainer(
-                    item = cauThu,
-                    isEditable = isEditable,
-                    onDelete = {
-                        if (selectedValue != null) {
-                            viewModel.viewModelScope.launch {
-                                viewModel.cauThuDAO.deleteCauThu(selectedValue!!);
-                                selectedValue = null;
-                            }
-                        }
-                        selectedValue = cauThu;
-                        val result = snackbarHostState
-                            .showSnackbar(
-                                message = "Deleted ${cauThu.tenCT}",
-                                actionLabel = "Undo",
-                                duration = SnackbarDuration.Short
-                            )
-                        when (result) {
-                            SnackbarResult.ActionPerformed -> {
-                                return@SwipeToDeleteContainer false;
-                            }
-                            SnackbarResult.Dismissed -> {
-                                viewModel.viewModelScope.launch {
-                                    viewModel.cauThuDAO.deleteCauThu(selectedValue!!);
-                                    selectedValue = null;
-                                }
-                                return@SwipeToDeleteContainer true;
-                            }
-                        }
-                    },
-                    onUpdate = {
-                        navController.navigate("cauThuInput/${it.maDoi}");
-                        val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle;
-                        savedStateHandle?.set("maCT", it.maCT);
-                        savedStateHandle?.set("tenCT", it.tenCT);
-                        savedStateHandle?.set("maLCT", it.maLCT);
-                        savedStateHandle?.set("maDoi", it.maDoi);
-                        savedStateHandle?.set("soAo", it.soAo);
-                        savedStateHandle?.set("ghiChu", it.ghiChu);
-                        savedStateHandle?.set("ngaySinh", it.ngaySinh);
-                        savedStateHandle?.set("imageURL", it.imageURL);
-                    },
-                    content = {
-                        PlayerCard(player = cauThu)
-                    },
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    backgroundModifier = Modifier.clip(RoundedCornerShape(16.dp))
-                )
+
+            items(currentTeam!!.squad) { cauThu ->
+
+                PlayerCard(team = currentTeam, player = cauThu)
             }
         }
     }
@@ -222,113 +172,183 @@ fun CauThuScreen(
 
 // Composable for a single Player Card
 @Composable
-fun PlayerCard(player: CauThu, onClick : () -> Unit = {}) {
+fun PlayerCard(team: Team?, player: Player, onClick : () -> Unit = {}) {
+    LaunchedEffect(player.id) {
+        if ((player.imageURL ?: "") != "") return@LaunchedEffect;
+        Log.d("PlayerCard", "Fetching image for player: ${player.name}");
+        val result = TheSportsDBAPI.retrofitService.searchPlayer(player.name.replace(" ", "_"));
+        if (result.isSuccessful) {
+            val playerData = result.body()?.player?.find { it.sportName == "Soccer" };
+            player.imageURL = playerData?.cutoutUrl ?: playerData?.thumbnailUrl ?: "";
+        }
+    }
+
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = darkCardBackground
         ),
-        modifier = Modifier.clickable { onClick() },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(160.dp)
+            .clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.Top
+        Box(
+            modifier = Modifier.fillMaxSize()
         ) {
-            // Phần bên trái: Mã cầu thủ, Tên cầu thủ, Goals, Số bàn thắng
-            Column(
+
+            // Main content row
+            Row(
                 modifier = Modifier
-                    .weight(1.5f)
-                    .padding(end = 16.dp), // Tăng khoảng cách với phần bên phải
-                horizontalAlignment = Alignment.Start
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .padding(top = 16.dp), // Extra padding to account for the shirt number
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Mã cầu thủ (trong vòng tròn tím)
+                // Left side: Player image and name
+                // Player image
                 Box(
                     modifier = Modifier
-                        .size(24.dp)
-                        .background(Purple40, shape = CircleShape),
+                        .fillMaxHeight()
+                        .weight(0.4f)
+                        .aspectRatio(1.0f)
+                        .clip(RoundedCornerShape(8.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "${player.soAo}",
-                        style = TextStyle(
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            textAlign = TextAlign.Center
-                        )
+                    AsyncImage(
+                        model = if ((player.imageURL ?: "") == "") stringResource(R.string.default_player_avatar) else player.imageURL,
+                        contentDescription = "Player Photo",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
                     )
                 }
-                Spacer(modifier = Modifier.height(12.dp))
-                // Tên cầu thủ
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                // Right side: Player info and team logo
+                Column(
+                    modifier = Modifier
+                        .weight(0.6f)
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Player name
+
+                    // Player position
+                    InfoRow(
+                        label = "Name:",
+                        value = player.name
+                    )
+
+                    // Player position
+                    InfoRow(
+                        label = "Position:",
+                        value = player.position ?: "Unknown"
+                    )
+
+                    // Nationality
+                    InfoRow(
+                        label = "Nationality:",
+                        value = player.nationality
+                    )
+
+                    // Date of birth
+                    InfoRow(
+                        label = "Born:",
+                        value = player.dateOfBirth?.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)) ?: "Unknown"
+                    )
+                }
+            }
+
+            // Player shirt number badge (top left)
+            Box(
+                modifier = Modifier
+                    .padding(12.dp)
+                    .size(32.dp)
+                    .background(
+                        brush = Brush.linearGradient(
+                            colors = listOf(Purple40, Purple80)
+                        ),
+                        shape = CircleShape
+                    )
+                    .align(Alignment.TopStart),
+                contentAlignment = Alignment.Center
+            ) {
                 Text(
-                    text = player.tenCT,
+                    text = "${player.shirtNumber ?: "?"}",
                     style = TextStyle(
-                        fontSize = 14.02.sp,
-                        lineHeight = 24.53.sp,
-                        fontWeight = FontWeight(500),
-                        color = Color.White,
-                        textAlign = TextAlign.Start,
-                        letterSpacing = 0.26.sp
-                    ),
-                    modifier = Modifier.padding(bottom = 12.dp)
-                )
-                AsyncImage(
-                    model = player.doiImageURL,
-                    contentDescription = "",
-                    modifier = Modifier.size(64.dp)
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.White
+                    )
                 )
             }
 
-            // Phần bên phải: Position, Birth day, Note
-            Column(
+            // Team logo - larger and at the top
+            Box(
                 modifier = Modifier
-                    .weight(2f)
-                    .padding(start = 16.dp, top = 36.dp), // Tăng padding(start) và top để đẩy xuống dưới
-                horizontalAlignment = Alignment.Start
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                contentAlignment = Alignment.CenterEnd
             ) {
-                // Vị trí (Player Type)
-                Text(
-                    text = player.tenLCT,
-                    style = TextStyle(
-                        fontSize = 14.02.sp,
-                        lineHeight = 24.53.sp,
-                        fontWeight = FontWeight(500),
-                        color = Color(0xFFFFFFFF),
-                        textAlign = TextAlign.Start,
-                        letterSpacing = 0.26.sp
-                    ),
-                    modifier = Modifier.padding(bottom = 12.dp)
-                )
-                // Ngày sinh (Birth day)
-                Text(
-                    text = DateConverter.LocalDateToString(player.ngaySinh),
-                    style = TextStyle(
-                        fontSize = 14.02.sp,
-                        lineHeight = 24.53.sp,
-                        fontWeight = FontWeight(500),
-                        color = Color(0xFFFFFFFF),
-                        textAlign = TextAlign.Start,
-                        letterSpacing = 0.26.sp
-                    ),
-                    modifier = Modifier.padding(bottom = 12.dp)
-                )
-                // Ghi chú (Note)
-                Text(
-                    text = player.ghiChu,
-                    style = TextStyle(
-                        fontSize = 14.02.sp,
-                        lineHeight = 24.53.sp,
-                        fontWeight = FontWeight(500),
-                        color = Color(0xFFFFFFFF),
-                        textAlign = TextAlign.Start,
-                        letterSpacing = 0.26.sp
-                    )
+                AsyncImage(
+                    model = team?.crest ?: "",
+                    contentDescription = "Team Logo",
+                    modifier = Modifier.size(48.dp),
+                    contentScale = ContentScale.Fit
                 )
             }
+
+            // Team logo - larger and at the top
+            team?.area?.flag.let {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp),
+                     contentAlignment = Alignment.BottomEnd
+                ) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(it)
+                            .decoderFactory(SvgDecoder.Factory())
+                            .build(),
+                        contentDescription = "Area Flag",
+                        modifier = Modifier.size(48.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+            }
+
         }
+    }
+}
+
+@Composable
+private fun InfoRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = TextStyle(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.White.copy(alpha = 0.7f)
+            )
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = value,
+            style = TextStyle(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White
+            ),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 

@@ -55,12 +55,14 @@ data class Player(
     val lastName: String?,
     val name: String,
     val position: String?,
-    val dateOfBirth: LocalDate,
+    val dateOfBirth: LocalDate?,
     val nationality: String,
     val shirtNumber: Int?,
     val marketValue: Long?,
-    val contract: Contract?
-)
+    val contract: Contract?,
+) {
+    var imageURL: String? = null;
+}
 
 data class Staff(
     val id: Int,

@@ -11,18 +11,24 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -40,11 +46,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,11 +64,14 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import coil.decode.SvgDecoder
+import coil.request.ImageRequest
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.DateConverter
 import com.example.quanlybongda.Database.Schema.DoiBong
 import com.example.quanlybongda.Database.Schema.LichThiDau
 import com.example.quanlybongda.Database.Schema.MuaGiai
+import com.example.quanlybongda.Services.Converters.LocalDateTimeConverter
 import com.example.quanlybongda.Services.Data.Competition
 import com.example.quanlybongda.Services.Data.Match
 import com.example.quanlybongda.Services.FootballAPI
@@ -72,11 +86,14 @@ import com.example.quanlybongda.ui.theme.darkCardBackground
 import com.example.quanlybongda.ui.theme.darkTextMuted
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.format.FormatStyle
+import java.util.Locale
 
 
 // Màu sắc từ thiết kế
 // Gradient cho thẻ chính - bạn có thể cần điều chỉnh lại các màu này cho chính xác với ảnh thiết kế (image_d0de8e.png)
-// Thiết kế có vẻ chuyển từ xanh dương đậm ở góc trên trái sang tím đậm ở góc dưới phải.
+// Thiết kế có vẻ chuyển từ xanh đương đậm ở góc trên trái sang tím đậm ở góc dưới phải.
 val featuredCardGradient = Brush.linearGradient(
     colors = listOf(Color(0xFF3A4E99), Color(0xFF7B429E)) // Ví dụ: Xanh đậm -> Tím đậm
     // Hoặc thử 3 màu nếu bạn thấy có điểm chuyển ở giữa
@@ -184,13 +201,9 @@ fun LapLichScreen(
                     items(result) { lichThiDau ->
 
                         MatchInfoRowNoLogos(
-                            lichThiDau.homeTeam.name,
-                            lichThiDau.homeTeam.crest ?: "",
-                            DateConverter.LocalDateTimeToString(lichThiDau.utcDate),
-                            lichThiDau.awayTeam.name ?: "",
-                            lichThiDau.awayTeam.crest ?: "",
+                            lichThiDau,
                             onClick = {
-                                navController.navigate("banThang/${lichThiDau.id}")
+//                                navController.navigate("banThang/${lichThiDau.id}")
                             }
                         )
                         Spacer(modifier = Modifier.height(12.dp))
@@ -211,6 +224,7 @@ fun FeaturedMatchCardUpdated(
     team2Scorers: String,
     team2ImageURL: String,
 ) {
+    val context = LocalContext.current
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -325,67 +339,256 @@ fun MatchScheduleHeader() {
 
 @Composable
 fun MatchInfoRowNoLogos(
-    tenDoiMot: String,
-    doiMotImageURL: String,
-    matchDateTime: String,
-    tenDoiHai: String,
-    doiHaiImageURL: String,
+    match: Match,
     onClick : () -> Unit
 ) {
-    Row(
+    val context = LocalContext.current
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(darkCardBackground)
-            .padding(horizontal = 16.dp, vertical = 20.dp)
-            .clickable { onClick() },
-        verticalAlignment = Alignment.CenterVertically
+            .clickable { onClick() }
     ) {
-        Column(
-            Modifier.weight(1f),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally) {
-            AsyncImage(
-                doiMotImageURL,
-                contentDescription = "",
-                modifier = Modifier.size(64.dp),
-            )
-            Text(
-                text = tenDoiMot,
-                color = Color.White,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Start
-            )
-        }
-        Text(
-            text = matchDateTime,
-            color = darkTextMuted,
-            fontSize = 10.sp,
-            textAlign = TextAlign.Center,
-            lineHeight = 12.sp,
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 8.dp)
-        )
 
-        Column(
-            Modifier.weight(1f),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally) {
-            AsyncImage(
-                doiHaiImageURL,
-                contentDescription = "",
-                modifier = Modifier.size(64.dp),
-            )
-            Text(
-                text = tenDoiHai,
-                color = Color.White,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.End
+        // Status gradient circle at the bottom
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .height(120.dp)
+        ) {
+            val statusColor = getStatusColor(match.status)
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .scale(2.0f)
+                    .offset(y = 24.dp)
+                    .background(
+                        brush = Brush.radialGradient(
+                            colors = listOf(statusColor, Color.Transparent),
+//                            center = Offset(500.dp.value, 300.dp.value),
+                            radius = 150f
+                        )
+                    )
             )
         }
+
+        // Main content
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
+            // Area flag and venue information
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Area flag
+                match.area.flag?.let { flagUrl ->
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(flagUrl)
+                            .decoderFactory(SvgDecoder.Factory())
+                            .build(),
+                        contentDescription = "Country flag",
+                        modifier = Modifier
+                            .size(20.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+
+                // Venue information
+                if (match.venue != null) {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = "Venue",
+                        tint = Color.White.copy(alpha = 0.7f),
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = match.venue,
+                        color = Color.White.copy(alpha = 0.7f),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Normal,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Teams and score
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Home team
+                Column(
+                    Modifier.weight(1f),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    AsyncImage(
+                        match.homeTeam.crest,
+                        contentDescription = "",
+                        modifier = Modifier.size(64.dp),
+                    )
+                    Text(
+                        text = match.homeTeam.name,
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                // Score and status in the middle
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                ) {
+                    // Status indicator
+                    StatusIndicator(status = match.status)
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Date/time
+                    Text(
+                        text = (match.utcDate).format(java.time.format.DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)),
+                        color = Color.White.copy(alpha = 0.7f),
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center
+                    )
+
+                    // Score (if match is not scheduled)
+                    if (match.status != "SCHEDULED" && match.status != "TIMED") {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "${match.score.fullTime.home ?: "-"}",
+                                color = Color.White,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = " - ",
+                                color = Color.White,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "${match.score.fullTime.away ?: "-"}",
+                                color = Color.White,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                // Away team
+                Column(
+                    Modifier.weight(1f),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    AsyncImage(
+                        match.awayTeam.crest,
+                        contentDescription = "",
+                        modifier = Modifier.size(64.dp),
+                    )
+                    Text(
+                        text = match.awayTeam.name,
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun StatusIndicator(status: String) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(24.dp)
+            .clip(CircleShape)
+            .background(getStatusColor(status))
+    ) {
+        when (status) {
+            "IN_PLAY", "PAUSED", "EXTRA_TIME", "PENALTY_SHOOTOUT" -> {
+                // Live indicator
+                Icon(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = "Live",
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+            "FINISHED" -> {
+                // Finished indicator
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Finished",
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+            "SUSPENDED", "POSTPONED", "CANCELLED" -> {
+                // Suspended/postponed indicator
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = "Suspended",
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+            "SCHEDULED", "TIMED" -> {
+                // Scheduled indicator
+                Icon(
+                    imageVector = Icons.Default.Schedule,
+                    contentDescription = "Scheduled",
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+            "AWARDED" -> {
+                // Awarded indicator
+                Icon(
+                    imageVector = Icons.Default.EmojiEvents,
+                    contentDescription = "Awarded",
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+    }
+}
+
+// Function to get color based on match status
+fun getStatusColor(status: String): Color {
+    return when (status) {
+        "IN_PLAY", "PAUSED" -> Color(0xFF4CAF50) // Green for live matches
+        "EXTRA_TIME", "PENALTY_SHOOTOUT" -> Color(0xFFFF9800) // Orange for extra time/penalties
+        "FINISHED" -> Color(0xFF2196F3) // Blue for finished
+        "SUSPENDED", "POSTPONED" -> Color(0xFFFFC107) // Amber for suspended/postponed
+        "CANCELLED" -> Color(0xFFF44336) // Red for cancelled
+        "AWARDED" -> Color(0xFFE91E63) // Pink for awarded
+        else -> Color(0xFF9E9E9E) // Grey for scheduled/timed/default
     }
 }
 

@@ -89,8 +89,9 @@ dependencies {
 
 // Coil (for image loading)
     implementation("io.coil-kt:coil-compose:2.6.0") // Kiểm tra phiên bản mới nhất
+    implementation("io.coil-kt:coil-svg:2.6.0")
 
-    
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

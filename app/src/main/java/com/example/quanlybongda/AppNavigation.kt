@@ -141,16 +141,16 @@ fun AppNavigation() {
             composable("settings") { SettingsScreen(navController, modifier, viewModel) }
 
             composable("baoCao") { BaoCaoScreen(navController, modifier, viewModel, apiViewModel) }
-            composable("banThang/{maTD}", arguments = listOf(navArgument("maTD") { type = NavType.IntType})) { backStackEntry ->
-                BanThangScreen(backStackEntry.arguments?.getInt("maTD") ?: 1, navController, modifier, viewModel, apiViewModel)
-            }
+//            composable("banThang/{maTD}", arguments = listOf(navArgument("maTD") { type = NavType.IntType})) { backStackEntry ->
+//                BanThangScreen(backStackEntry.arguments?.getInt("maTD") ?: 1, navController, modifier, viewModel, apiViewModel)
+//            }
             composable("hoSo") { KetQuaTranDauScreen(navController, modifier, viewModel) }
             composable("traCuu") { TraCuuScreen(navController, modifier, viewModel) }
             composable("lapLich") { LapLichScreen(navController, modifier, viewModel, apiViewModel) }
             composable("muaGiai") { MuaGiaiScreen(navController, modifier, viewModel, apiViewModel) }
             composable("doiBong") { DoiBongScreen(navController, modifier, viewModel, apiViewModel) }
             composable("cauThu/{maDoi}", arguments = listOf(navArgument("maDoi") { type = NavType.IntType})) { backStackEntry ->
-                CauThuScreen(backStackEntry.arguments?.getInt("maDoi") ?: 0, navController, modifier, viewModel)
+                CauThuScreen(backStackEntry.arguments?.getInt("maDoi") ?: 0, navController, modifier, viewModel, apiViewModel)
             }
 
             composable("cauThuInput/{maDoi}", arguments = listOf(navArgument("maDoi") { type = NavType.IntType})) { backStackEntry ->

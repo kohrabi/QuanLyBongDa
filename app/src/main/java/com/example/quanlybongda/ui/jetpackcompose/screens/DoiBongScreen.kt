@@ -178,7 +178,9 @@ fun DoiBongScreen(
                             content = {
                                 TeamCard(
                                     team = doiBong,
-                                    onClick = {})
+                                    onClick = {
+                                        navController.navigate("cauThu/${doiBong.id}")
+                                    })
                             },
                             modifier = Modifier.fillMaxSize(),
                             backgroundModifier = Modifier.clip(RoundedCornerShape(16.dp))
