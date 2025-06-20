@@ -10,6 +10,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 open class LoadingState<out T> {
@@ -20,6 +21,12 @@ open class LoadingState<out T> {
 
 @HiltViewModel
 class FootballAPIViewModel @Inject constructor() : ViewModel() {
+    private var _currentSeason : MutableStateFlow<Int> = MutableStateFlow(LocalDateTime.now().year);
+    val currentSeason : StateFlow<Int> get() = _currentSeason;
+
+    private var _currentCompetition : MutableStateFlow<Competition?> = MutableStateFlow(null);
+    val currentCompetition : StateFlow<Competition?> get() = _currentCompetition;
+
     private var _teams : MutableStateFlow<LoadingState<List<Team>>> = MutableStateFlow(LoadingState.Loading);
     val teams : StateFlow<LoadingState<List<Team>>> get() = _teams;
 
@@ -31,6 +38,20 @@ class FootballAPIViewModel @Inject constructor() : ViewModel() {
 
     private var _competitions : MutableStateFlow<LoadingState<List<Competition>>> = MutableStateFlow(LoadingState.Loading);
     val competitions : StateFlow<LoadingState<List<Competition>>> get() = _competitions;
+
+    fun setCurrentSeason(season: Int) {
+        _currentSeason.value = season;
+        _teams.value = LoadingState.Loading;
+        _matches.value = LoadingState.Loading;
+        _standings.value = LoadingState.Loading;
+    }
+
+    fun setCurrentCompetition(competition: Competition?) {
+        _currentCompetition.value = competition;
+        _teams.value = LoadingState.Loading;
+        _matches.value = LoadingState.Loading;
+        _standings.value = LoadingState.Loading;
+    }
 
     fun loadCompetitions() {
         if (_competitions.value is LoadingState.Success) return
@@ -56,7 +77,7 @@ class FootballAPIViewModel @Inject constructor() : ViewModel() {
         _teams.value = LoadingState.Loading
         viewModelScope.launch {
             try {
-                val teamsResponse = FootballAPI.retrofitService.getCompetitionTeams("PL");
+                val teamsResponse = FootballAPI.retrofitService.getCompetitionTeams(currentCompetition.value!!.code, currentSeason.value);
                 if (teamsResponse.isSuccessful) {
                     val teams = teamsResponse.body()!!.teams;
                     _teams.value = LoadingState.Success(teams)
@@ -75,7 +96,7 @@ class FootballAPIViewModel @Inject constructor() : ViewModel() {
         _matches.value = LoadingState.Loading
         viewModelScope.launch {
             try {
-                val matchesResponse = FootballAPI.retrofitService.getCompetitionMatches("PL");
+                val matchesResponse = FootballAPI.retrofitService.getCompetitionMatches(currentCompetition.value!!.code, currentSeason.value);
                 if (matchesResponse.isSuccessful) {
                     val matches = matchesResponse.body()!!.matches;
                     _matches.value = LoadingState.Success(matches)
@@ -94,7 +115,7 @@ class FootballAPIViewModel @Inject constructor() : ViewModel() {
         _standings.value = LoadingState.Loading
         viewModelScope.launch {
             try {
-                val standingsResponse = FootballAPI.retrofitService.getCompetitionStandings("PL");
+                val standingsResponse = FootballAPI.retrofitService.getCompetitionStandings(currentCompetition.value!!.code, currentSeason.value);
                 if (standingsResponse.isSuccessful) {
                     val standings = standingsResponse.body()!!.standings;
                     _standings.value = LoadingState.Success(standings)

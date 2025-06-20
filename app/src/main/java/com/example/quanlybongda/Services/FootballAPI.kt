@@ -16,6 +16,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Query
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -50,13 +51,13 @@ interface FootballAPIService {
     suspend fun getCompetitions() : Response<CompetitionResponse>;
 
     @GET("competitions/{id}/teams")
-    suspend fun getCompetitionTeams(@Path("id") id: String, @retrofit2.http.Query("season") season: Int = 2024) : Response<TeamResponse>;
+    suspend fun getCompetitionTeams(@Path("id") id: String, @Query("season") season: Int = 2024) : Response<TeamResponse>;
 
     @GET("competitions/{id}/matches")
-    suspend fun getCompetitionMatches(@Path("id") id: String, @retrofit2.http.Query("season") season: Int = 2024) : Response<MatchResponse>;
+    suspend fun getCompetitionMatches(@Path("id") id: String, @Query("season") season: Int = 2024) : Response<MatchResponse>;
 
     @GET("competitions/{id}/standings")
-    suspend fun getCompetitionStandings(@Path("id") id: String, @retrofit2.http.Query("season") season: Int = 2024) : Response<StandingsResponse>;
+    suspend fun getCompetitionStandings(@Path("id") id: String, @Query("season") season: Int = 2024) : Response<StandingsResponse>;
 }
 
 object FootballAPI {

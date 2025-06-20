@@ -189,7 +189,9 @@ fun LapLichScreen(
                             DateConverter.LocalDateTimeToString(lichThiDau.utcDate),
                             lichThiDau.awayTeam.name ?: "",
                             lichThiDau.awayTeam.crest ?: "",
-                            onClick = {}
+                            onClick = {
+                                navController.navigate("banThang/${lichThiDau.id}")
+                            }
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                     };

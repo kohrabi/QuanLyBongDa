@@ -47,7 +47,11 @@ import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.Schema.BanThang
 import com.example.quanlybongda.Database.Schema.LichThiDau
 import com.example.quanlybongda.R
+import com.example.quanlybongda.Services.Data.Goal
+import com.example.quanlybongda.Services.Data.Match
+import com.example.quanlybongda.Services.Data.Score
 import com.example.quanlybongda.Services.FootballAPIViewModel
+import com.example.quanlybongda.Services.LoadingState
 import com.example.quanlybongda.ui.theme.DarkColorScheme
 import kotlinx.coroutines.launch
 
@@ -68,42 +72,20 @@ fun BanThangScreen(
     apiViewModel: FootballAPIViewModel = hiltViewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-    var lichThiDau by remember { mutableStateOf<LichThiDau?>(null) }
-    var tiSoDoiMot by remember { mutableStateOf(0) }
-    var tiSoDoiHai by remember { mutableStateOf(0) }
-    var banThangs by remember { mutableStateOf(listOf<BanThang>()) }
+    val matches by apiViewModel.matches.collectAsState()
+    var lichThiDau by remember { mutableStateOf<Match?>(null) }
     val user by viewModel.user.collectAsState()
     var isEditable by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        viewModel.viewModelScope.launch {
-            lichThiDau = viewModel.lichThiDauDAO.selectLichThiDauMaTD(maTD);
-            tiSoDoiMot =
-                viewModel.banThangDAO.selectSoBanThangTranDauDoi(maTD, lichThiDau!!.doiMot) +
-                viewModel.banThangDAO.selectSoBanThangPhanLuoiTranDauDoi(maTD, lichThiDau!!.doiHai);
-            tiSoDoiHai = viewModel.banThangDAO.selectSoBanThangTranDauDoi(maTD, lichThiDau!!.doiHai) +
-                    viewModel.banThangDAO.selectSoBanThangPhanLuoiTranDauDoi(maTD, lichThiDau!!.doiMot);
-            val banThangsTemp = viewModel.banThangDAO.selectBanThang(maTD);
-            val loaiBTs = viewModel.banThangDAO.selectAllLoaiBT();
-            val cauThus = viewModel.cauThuDAO.selectCauThuTGTD(maTD);
-            for (banThang in banThangsTemp) {
-                val cauThu = cauThus.find { banThang.maCT == it.maCT }!!;
-                if (cauThu.maDoi == lichThiDau!!.doiMot)
-                    banThang.side = "L";
-                else if (cauThu.maDoi == lichThiDau!!.doiHai)
-                    banThang.side = "R";
-                banThang.tenCT = cauThu.tenCT;
-                banThang.tenLBT = loaiBTs.find { banThang.maLBT == it.maLBT }!!.tenLBT;
+        when (matches) {
+            is LoadingState.Success -> {
+                val result = (matches as LoadingState.Success<List<Match>>).data;
+                lichThiDau = result.find { it.id == maTD };
             }
-            banThangs = banThangsTemp;
-        }
-    }
+            else -> {
 
-    LaunchedEffect(user) {
-        if (user == null)
-            return@LaunchedEffect;
-        viewModel.viewModelScope.launch {
-            isEditable = viewModel.checkPageEditable(user!!.groupId, "banthang");
+            }
         }
     }
 
@@ -121,6 +103,16 @@ fun BanThangScreen(
         },
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { innerPadding ->
+        if (lichThiDau == null) {
+            // Hiển thị thông báo nếu không tìm thấy lịch thi đấu
+            Text(
+                text = "Không tìm thấy lịch thi đấu với mã: $maTD",
+                color = Color.Red,
+                modifier = Modifier.padding(innerPadding)
+            )
+            return@Scaffold
+        }
+
         Box(
             modifier = Modifier
                 .padding(innerPadding)
@@ -170,7 +162,7 @@ fun BanThangScreen(
                             modifier = Modifier.size(70.dp)
                         )
                         Text(
-                            text = "$tiSoDoiMot - $tiSoDoiHai",
+                            text = "${lichThiDau!!.score.fullTime.home} - ${lichThiDau!!.score.fullTime.away}",
                             color = scoreColor,
                             fontSize = 40.sp,
                             fontWeight = FontWeight.Bold
@@ -194,9 +186,13 @@ fun BanThangScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                items (banThangs){
+                items (lichThiDau?.goals ?: emptyList<Goal>()) { it ->
                     // Sử dụng một action placeholder, bạn có thể thay đổi nếu cần
-                    StatisticRowUpdated(side = it.side, player = it.tenCT, action = it.tenLBT, time = it.thoiDiem.toString(), modifier)
+                    StatisticRowUpdated(side = (it.team.id ?: "").toString(),
+                        player = it.scorer.name ?: "Unknown Player",
+                        action = it.type,
+                        time = it.minute.toString(),
+                        modifier)
                 }
 //                Spacer(modifier = Modifier.height(16.dp))
             }

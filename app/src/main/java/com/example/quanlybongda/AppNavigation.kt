@@ -142,7 +142,7 @@ fun AppNavigation() {
 
             composable("baoCao") { BaoCaoScreen(navController, modifier, viewModel, apiViewModel) }
             composable("banThang/{maTD}", arguments = listOf(navArgument("maTD") { type = NavType.IntType})) { backStackEntry ->
-                BanThangScreen(backStackEntry.arguments?.getInt("maTD") ?: 1, navController, modifier, viewModel)
+                BanThangScreen(backStackEntry.arguments?.getInt("maTD") ?: 1, navController, modifier, viewModel, apiViewModel)
             }
             composable("hoSo") { KetQuaTranDauScreen(navController, modifier, viewModel) }
             composable("traCuu") { TraCuuScreen(navController, modifier, viewModel) }

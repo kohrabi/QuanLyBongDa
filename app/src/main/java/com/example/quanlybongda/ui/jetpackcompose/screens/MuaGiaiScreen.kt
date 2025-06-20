@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -22,7 +23,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
@@ -39,6 +39,7 @@ import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
 import com.example.quanlybongda.ui.theme.darkCardBackground
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 // Data class for Season information
 data class Season(
@@ -58,14 +59,21 @@ fun MuaGiaiScreen(
     apiViewModel: FootballAPIViewModel = hiltViewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-    val context = LocalContext.current;
-    val selectedMuaGiai by DatabaseViewModel.currentMuaGiai.collectAsState()
-    val muaGiais by apiViewModel.competitions.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    var selectedValue by remember { mutableStateOf<Competition?>(null) }
+    val context = LocalContext.current;
+
     var isEditable by remember { mutableStateOf(false) }
     val user by viewModel.user.collectAsState()
+
+    val competitions by apiViewModel.competitions.collectAsState()
+    val currentCompetition by apiViewModel.currentCompetition.collectAsState()
+    var selectedValue by remember { mutableStateOf<Competition?>(null) }
+    val currentYear = LocalDate.now().year
+    val seasonOptions = (currentYear downTo (currentYear - 2)).map { OptionValue(it, it.toString()) }
+
+    val currentSeason by apiViewModel.currentSeason.collectAsState()
+    var selectedSeason by remember { mutableStateOf<OptionValue>(seasonOptions.find { it.value == currentSeason }!!) }
     // List of seasons with detailed information
 
     LaunchedEffect(Unit) {
@@ -94,7 +102,7 @@ fun MuaGiaiScreen(
     ) { paddingValues ->
         // List of Season Cards
 
-        when (muaGiais) {
+        when (competitions) {
             is LoadingState.Loading -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -113,13 +121,13 @@ fun MuaGiaiScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Lỗi tải dữ liệu: ${(muaGiais as LoadingState.Error).message}",
+                        text = "Lỗi tải dữ liệu: ${(competitions as LoadingState.Error).message}",
                         color = Color.Red
                     )
                 }
             }
 
-            is LoadingState.Success<List<Competition>> -> {
+            is LoadingState.Success -> {
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -129,16 +137,33 @@ fun MuaGiaiScreen(
                     contentPadding = paddingValues,
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    val competitions = (muaGiais as LoadingState.Success<List<Competition>>).data
-                    items(competitions.size) { index ->
+
+                    val competitions = (competitions as LoadingState.Success<List<Competition>>).data
+                    
+                    item {
+                        InputDropDownMenu(
+                            label = "Chọn năm mùa giải",
+                            options = seasonOptions,
+                            selectedOption = selectedSeason,
+                            onOptionSelected = {
+                                selectedSeason = it
+                                apiViewModel.setCurrentSeason(selectedSeason.value!!)
+                            },
+                            showEmptyError = false,
+                        )
+                    }
+                    items (competitions) { competition ->
                         SeasonCard(
-                            season = competitions[index],
-                            isSelected = selectedMuaGiai?.maMG == competitions[index].id,
+                            season = competition,
+                            currentSeason = currentSeason,
+                            isSelected = currentCompetition?.id == competition.id,
                             onSeasonSelect = {
+                                selectedValue = competition;
+                                apiViewModel.setCurrentCompetition(selectedValue);
                                 coroutineScope.launch {
                                     Toast.makeText(
                                         context,
-                                        "Chọn mùa giải ${competitions[index].name} thành công",
+                                        "Chọn mùa giải ${competition.name} thành công",
                                         Toast.LENGTH_SHORT
                                     ).show();
                                     delay(500)
@@ -157,6 +182,7 @@ fun MuaGiaiScreen(
 @Composable
 fun SeasonCard(
     season: Competition,
+    currentSeason: Int,
     isSelected: Boolean,
     onSeasonSelect: () -> Unit
 ) {
@@ -201,12 +227,12 @@ fun SeasonCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Bắt đầu: ${DateConverter.LocalDateToString(season.currentSeason.startDate)}",
+                        text = "Bắt đầu: ${DateConverter.LocalDateToString(season.currentSeason.startDate.withYear(currentSeason))}",
                         color = Color.LightGray,
                         fontSize = 12.sp
                     )
                     Text(
-                        text = "Kết thúc: ${DateConverter.LocalDateToString(season.currentSeason.endDate)}",
+                        text = "Kết thúc: ${DateConverter.LocalDateToString(season.currentSeason.endDate.withYear(currentSeason))}",
                         color = Color.LightGray,
                         fontSize = 12.sp
                     )
