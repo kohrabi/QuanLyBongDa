@@ -29,7 +29,9 @@ data class Team(
     val squad: List<Player>,
     val staff: List<Staff>?,
     val lastUpdated: LocalDateTime
-)
+) {
+    var isFavorite: Boolean = false
+}
 
 data class CompetitionInfo(
     val id: Int,

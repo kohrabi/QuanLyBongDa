@@ -4,12 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.quanlybongda.Services.Data.Competition
 import com.example.quanlybongda.Services.Data.Match
+import com.example.quanlybongda.Services.Data.Season
 import com.example.quanlybongda.Services.Data.Standing
 import com.example.quanlybongda.Services.Data.Team
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -72,17 +74,38 @@ class FootballAPIViewModel @Inject constructor() : ViewModel() {
                 if (competitionsResponse.isSuccessful) {
                     val competitions = competitionsResponse.body()!!.competitions.toMutableList();
                     _competitions.value = LoadingState.Success(competitions)
-                    loadCompetitionCurrentSeason();
+//                    loadCompetitionCurrentSeason();
 
                     // Load competition seasons details
                     for (i in competitions.indices) {
-                        val competitionResponse =
-                            FootballAPI.retrofitService.getCompetition(competitions[i].code).body();
-                        if (competitionResponse != null) {
-                            competitions[i].seasons = competitionResponse.seasons?.subList(0, 5);
+                        val currentYear = competitions[i].currentSeason.startDate.year;
+                        val seasons = mutableListOf<Season>();
+                        for (year in currentYear downTo currentYear - 2) {
+                            val season = competitions[i].currentSeason.copy(
+                                startDate = LocalDate.of(
+                                    year,
+                                    competitions[i].currentSeason.startDate.month,
+                                    competitions[i].currentSeason.startDate.dayOfMonth,
+                                ),
+                                endDate = LocalDate.of(
+                                    year,
+                                    competitions[i].currentSeason.endDate.month,
+                                    competitions[i].currentSeason.endDate.dayOfMonth,
+                                )
+                            );
+                            seasons.add(season);
                         }
+                        competitions[i].seasons = seasons;
                     }
                     _competitions.value = LoadingState.Success(competitions)
+//                    for (i in competitions.indices) {
+//                        val competitionResponse =
+//                            FootballAPI.retrofitService.getCompetition(competitions[i].code).body();
+//                        if (competitionResponse != null) {
+//                            competitions[i].seasons = competitionResponse.seasons?.subList(0, 5);
+//                        }
+//                        Thread.sleep(200);
+//                    }
 
                 } else {
                     _competitions.value = LoadingState.Error(competitionsResponse.message())

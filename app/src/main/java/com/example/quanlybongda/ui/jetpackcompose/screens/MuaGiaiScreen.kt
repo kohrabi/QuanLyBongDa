@@ -103,17 +103,6 @@ fun MuaGiaiScreen(
     ) { paddingValues ->
         // List of Season Cards
 
-        if (loadingSeasonDetail) {
-            Text(
-                text = "Đang tải dữ liệu mùa giải... Lý do là do nhà nghèo không có tiền mua API trả phí nên phải tải dữ liệu mùa giải từ API miễn phí, nên hơi lâu một chút.",
-                color = Color.White,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
         when (competitions) {
             is LoadingState.Loading -> {
                 Box(

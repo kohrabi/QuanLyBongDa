@@ -35,5 +35,5 @@ data class Season(
     val endDate: LocalDate,
     val currentMatchday: Int?,
     val winner: Team?,
-    val stages: List<String>
+    val stages: List<String>?
 )

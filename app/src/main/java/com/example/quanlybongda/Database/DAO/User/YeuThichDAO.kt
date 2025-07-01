@@ -1,7 +1,11 @@
 package com.example.quanlybongda.Database.DAO.User
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Query
+import androidx.room.Upsert
+import com.example.quanlybongda.Database.Schema.User.YeuThichCauThu
+import com.example.quanlybongda.Database.Schema.User.YeuThichDoiBong
 
 @Dao
 interface YeuThichDAO {
@@ -16,4 +20,16 @@ interface YeuThichDAO {
         WHERE userId=:userId
     """)
     suspend fun selectDoiBongYeuThich(userId: Int): List<Int>;
+
+    @Delete
+    suspend fun deleteCauThuYeuThich(yeuThichCauThu: YeuThichCauThu);
+
+    @Delete
+    suspend fun deleteDoiBongYeuThich(yeuThichCauThu: YeuThichDoiBong);
+
+    @Upsert
+    suspend fun upsertCauThuYeuThich(yeuThichCauThu: YeuThichCauThu);
+
+    @Upsert
+    suspend fun upsertDoiBongYeuThich(yeuThichDoiBong: YeuThichDoiBong);
 }

@@ -31,6 +31,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.HeartBroken
+import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -60,6 +62,7 @@ import coil.compose.AsyncImage
 import com.example.quanlybongda.Database.DatabaseViewModel
 import com.example.quanlybongda.Database.Schema.DoiBong
 import com.example.quanlybongda.Database.Schema.MuaGiai
+import com.example.quanlybongda.Database.Schema.User.YeuThichDoiBong
 import com.example.quanlybongda.Services.Data.Team
 import com.example.quanlybongda.Services.FootballAPI
 import com.example.quanlybongda.Services.FootballAPIViewModel
@@ -94,6 +97,16 @@ fun DoiBongScreen(
 
     LaunchedEffect(Unit) {
         apiViewModel.loadTeams()
+    }
+
+    LaunchedEffect(doiBongs) {
+        if (doiBongs is LoadingState.Success && user != null) {
+            val teams = (doiBongs as LoadingState.Success<List<Team>>).data
+            // Check if the user has favorite teams and update their state
+            teams.forEach { team ->
+                team.isFavorite = user?.doiBongYeuThich?.any { it == team.id } ?: false;
+            }
+        }
     }
 
 
@@ -153,44 +166,28 @@ fun DoiBongScreen(
                 ) {
                     val result = (doiBongs as LoadingState.Success<List<Team>>).data;
                     items(result) { doiBong ->
-                        SwipeToDeleteContainer(
+                        SwipeContainer(
                             item = doiBong,
-                            isEditable = isEditable,
-                            onDelete = {
-                                if (selectedValue != null) {
-                                }
-                                selectedValue = doiBong;
-                                val result = snackbarHostState
-                                    .showSnackbar(
-                                        message = "Deleted ${doiBong.name}",
-                                        actionLabel = "Undo",
-                                        duration = SnackbarDuration.Short
-                                    )
-                                when (result) {
-                                    SnackbarResult.ActionPerformed -> {
-                                        return@SwipeToDeleteContainer false;
-                                    }
-
-                                    SnackbarResult.Dismissed -> {
-//                                viewModel.viewModelScope.launch {
-//                                    viewModel.doiBongDAO.deleteDoiBong(selectedValue!!);
-//                                    selectedValue = null;
-//                                }
-                                        return@SwipeToDeleteContainer true;
-                                    }
-                                }
-                            },
-                            onUpdate = {
-                            },
                             content = {
                                 TeamCard(
                                     team = doiBong,
-                                    isFavorite = doiBong.id % 2 == 0,
+                                    isFavorite = doiBong.isFavorite,
                                     onClick = {
                                         navController.navigate("cauThu/${doiBong.id}")
                                     })
                             },
-                            modifier = Modifier.fillMaxSize(),
+                            rightIcon = Icons.Default.Star,
+                            rightSwipe = if (!doiBong.isFavorite) ({
+                                viewModel.addDoiBongYeuThich(doiBong.id);
+                                doiBong.isFavorite = true
+                            }) else null,
+                            rightColor = Color(0xFF74C27A),
+                            leftIcon = Icons.Default.HeartBroken,
+                            leftSwipe = if (!doiBong.isFavorite) ({
+                                viewModel.removeDoiBongYeuThich(doiBong.id);
+                                doiBong.isFavorite = false
+                            }) else null,
+                            leftColor = Color(0xFFDC456F),
                             backgroundModifier = Modifier.clip(RoundedCornerShape(16.dp))
                         )
                     }

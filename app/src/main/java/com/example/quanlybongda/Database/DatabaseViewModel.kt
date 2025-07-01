@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.quanlybongda.Database.DAO.*
 import com.example.quanlybongda.Database.DAO.User.*
 import com.example.quanlybongda.Database.ReturnTypes.*
@@ -16,6 +17,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import com.example.quanlybongda.Database.Exceptions.*
+import kotlinx.coroutines.launch
 import java.security.SecureRandom
 import java.time.LocalDateTime
 
@@ -121,6 +123,66 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
             result.add(doiBXH);
         }
         return result;
+    }
+
+    fun addDoiBongYeuThich(maDoi: Int) {
+        if (_user.value == null) {
+            Log.e("TAG", "Khong co user dang nhap");
+            return;
+        }
+        viewModelScope.launch {
+            yeuThichDAO.upsertDoiBongYeuThich(YeuThichDoiBong(
+                userId = _user.value!!.id,
+                maDoi = maDoi,
+            ));
+            _user.value!!.doiBongYeuThich = _user.value!!.doiBongYeuThich + maDoi;
+        }
+    }
+
+    fun addCauThuYeuThich(maCT: Int) {
+        if (_user.value == null) {
+            Log.e("TAG", "Khong co user dang nhap");
+            return;
+        }
+        viewModelScope.launch {
+            yeuThichDAO.upsertCauThuYeuThich(
+                YeuThichCauThu(
+                    userId = _user.value!!.id,
+                    maCT = maCT,
+                )
+            );
+            _user.value!!.cauThuYeuThich = _user.value!!.cauThuYeuThich + maCT;
+        }
+    }
+
+    fun removeDoiBongYeuThich(maDoi: Int) {
+        if (_user.value == null) {
+            Log.e("TAG", "Khong co user dang nhap");
+            return;
+        }
+        viewModelScope.launch {
+            yeuThichDAO.deleteDoiBongYeuThich(YeuThichDoiBong(
+                userId = _user.value!!.id,
+                maDoi = maDoi,
+            ));
+            _user.value!!.doiBongYeuThich = _user.value!!.doiBongYeuThich - maDoi;
+        }
+    }
+
+    fun removeCauThuYeuThich(maCT: Int) {
+        if (_user.value == null) {
+            Log.e("TAG", "Khong co user dang nhap");
+            return;
+        }
+        viewModelScope.launch {
+            yeuThichDAO.deleteCauThuYeuThich(
+                YeuThichCauThu(
+                    userId = _user.value!!.id,
+                    maCT = maCT,
+                )
+            );
+            _user.value!!.cauThuYeuThich = _user.value!!.cauThuYeuThich - maCT;
+        }
     }
 
     suspend fun selectBXHDoiMuaGiai(maMG: Int) : List<BangXepHangNgay> {

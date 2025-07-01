@@ -24,6 +24,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.HeartBroken
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -164,7 +166,18 @@ fun CauThuScreen(
 
             items(currentTeam!!.squad) { cauThu ->
 
-                PlayerCard(team = currentTeam, player = cauThu)
+                val isFavorite = user?.cauThuYeuThich?.any { it == cauThu.id } ?: false;
+                SwipeContainer(
+                    item = cauThu,
+                    content = {
+                        PlayerCard(team = currentTeam, player = cauThu)
+                    },
+                    leftIcon = Icons.Default.Star,
+                    leftSwipe = if (!isFavorite) ({ viewModel.addDoiBongYeuThich(cauThu.id); }) else null,
+                    rightIcon = Icons.Default.HeartBroken,
+                    rightSwipe = if (!isFavorite) ({ viewModel.addDoiBongYeuThich(cauThu.id); }) else null,
+                    backgroundModifier = Modifier.clip(RoundedCornerShape(16.dp))
+                )
             }
         }
     }

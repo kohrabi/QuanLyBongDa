@@ -1,28 +1,19 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxDefaults
 import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
@@ -31,13 +22,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 
@@ -95,7 +86,12 @@ fun <T> SwipeToDeleteContainer(
         SwipeToDismissBox(
             state = dismissState,
             backgroundContent = {
-                DeleteBackground(dismissState, backgroundModifier);
+                DeleteBackground(
+                    swipeToDismissBoxState = dismissState,
+                    leftIcon = Icons.Default.Edit,
+                    rightIcon = Icons.Default.Delete,
+                    backgroundModifier = backgroundModifier
+                );
             },
             enableDismissFromEndToStart = isEditable,
             enableDismissFromStartToEnd = isEditable,
@@ -106,16 +102,80 @@ fun <T> SwipeToDeleteContainer(
     }
 }
 
+
+@Composable
+fun <T> SwipeContainer(
+    item: T,
+    leftSwipe: ((T) -> Unit)? = null,
+    rightSwipe: ((T) -> Unit)? = null,
+    content: @Composable (T) -> Unit,
+    backgroundModifier: Modifier = Modifier,
+    leftIcon: ImageVector = Icons.Default.Restore,
+    rightIcon: ImageVector = Icons.Default.Delete,
+    leftColor: Color = Color(0xFF74C27A),
+    rightColor: Color = Color(0xFFDC456F)
+) {
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            if (value == SwipeToDismissBoxValue.EndToStart) {
+                if (rightSwipe != null) {
+                    rightSwipe(item);
+                }
+            }
+            else if (value == SwipeToDismissBoxValue.StartToEnd) {
+                if (leftSwipe != null) {
+                    leftSwipe(item);
+                }
+            }
+            return@rememberSwipeToDismissBoxState true;
+        },
+        positionalThreshold = { it * 0.9f }
+    )
+    var isUpdating by remember() { mutableStateOf(false) }
+
+    LaunchedEffect(dismissState.currentValue) {
+        if (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
+            delay(500);
+            withFrameNanos {}
+            dismissState.reset()
+        }
+    }
+
+    
+    SwipeToDismissBox(
+        state = dismissState,
+        backgroundContent = {
+            DeleteBackground(
+                swipeToDismissBoxState = dismissState,
+                leftIcon = leftIcon,
+                rightIcon = rightIcon,
+                backgroundModifier = backgroundModifier,
+                leftColor = leftColor,
+                rightColor = rightColor
+            );
+        },
+        enableDismissFromEndToStart = leftSwipe != null,
+        enableDismissFromStartToEnd = rightSwipe != null,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        content(item);
+    }
+}
+
 @Composable
 fun DeleteBackground(
     swipeToDismissBoxState: SwipeToDismissBoxState,
+    leftIcon: ImageVector = Icons.Default.Restore,
+    rightIcon: ImageVector = Icons.Default.Delete,
     backgroundModifier: Modifier = Modifier,
+    leftColor: Color = Color(0xFF74C27A),
+    rightColor: Color = Color(0xFFDC456F)
 ) {
 
     // Color(0xFFDC456F), Color(0xFFB06AB3)
     val animatedColor by animateColorAsState(
-        if (swipeToDismissBoxState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) Color(0xFF74C27A)
-        else if (swipeToDismissBoxState.dismissDirection == SwipeToDismissBoxValue.EndToStart) Color(0xFFDC456F)
+        if (swipeToDismissBoxState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) leftColor
+        else if (swipeToDismissBoxState.dismissDirection == SwipeToDismissBoxValue.EndToStart) rightColor
         else Color.Transparent,
         label = "color"
     )
@@ -133,7 +193,7 @@ fun DeleteBackground(
                 Alignment.CenterEnd) {
         if (swipeToDismissBoxState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) {
             Icon(
-                imageVector = Icons.Default.Edit,
+                imageVector = leftIcon,
                 contentDescription = null,
                 tint = Color.White,
                 modifier = Modifier.padding(8.dp)
@@ -141,7 +201,7 @@ fun DeleteBackground(
         }
         else if (swipeToDismissBoxState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
             Icon(
-                imageVector = Icons.Default.Delete,
+                imageVector = rightIcon,
                 contentDescription = null,
                 tint = Color.White,
                 modifier = Modifier.padding(8.dp)
