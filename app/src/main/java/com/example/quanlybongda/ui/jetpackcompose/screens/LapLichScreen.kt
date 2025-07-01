@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -182,14 +183,11 @@ fun LapLichScreen(
                         Spacer(modifier = Modifier.height(30.dp)) // << SỬA: Tăng khoảng cách
 
                         if (result.isNotEmpty()) {
-                            FeaturedMatchCardUpdated(
-                                team1Name = result[0].homeTeam.name ?: "",
-                                team1ImageURL = result[0].homeTeam.crest ?: "",
-                                team1Scorers = "De Jong 66’\nDepay 79’", // Giữ \n để xuống dòng tự nhiên
-                                score = "${result[0].score.fullTime.home ?: "?"} - ${result[0].score.fullTime.away ?: "?"}",
-                                team2Name = result[0].awayTeam.name ?: "",
-                                team2ImageURL = result[0].awayTeam.crest ?: "",
-                                team2Scorers = "Alvarez 21’\nPalmer 70’" // Giữ \n
+                            FeaturedMatch(
+                                result[0],
+                                onClick = {
+//                                navController.navigate("banThang/${lichThiDau.id}")
+                                }
                             )
                         }
                         // Tăng khoảng cách giữa FeaturedMatchCardUpdated và MatchScheduleHeader
@@ -198,8 +196,9 @@ fun LapLichScreen(
                         MatchScheduleHeader()
                         Spacer(modifier = Modifier.height(16.dp))
                     }
-                    items(result) { lichThiDau ->
-
+                    itemsIndexed(result) { index, lichThiDau ->
+                        if (index == 0)
+                            return@itemsIndexed;
                         MatchInfoRowNoLogos(
                             lichThiDau,
                             onClick = {
@@ -215,67 +214,183 @@ fun LapLichScreen(
 }
 
 @Composable
-fun FeaturedMatchCardUpdated(
-    team1Name: String,
-    team1Scorers: String,
-    team1ImageURL: String,
-    score: String,
-    team2Name: String,
-    team2Scorers: String,
-    team2ImageURL: String,
+fun FeaturedMatch(
+    match: Match,
+    onClick : () -> Unit
 ) {
     val context = LocalContext.current
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(170.dp) // Chiều cao thẻ
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(12.dp))
             .background(featuredCardGradient) // << SỬA: Sử dụng gradient mới
-            .padding(vertical = 16.dp, horizontal = 16.dp) // Tăng padding ngang một chút
+            .clickable { onClick() }
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally // Căn giữa "FULL TIME"
+
+        // Status gradient circle at the bottom
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .height(120.dp)
         ) {
-            Text(
-                "FULL TIME",
-                color = textGreenAccent,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.SemiBold,
-            )
-            // Spacer(modifier = Modifier.height(10.dp)) // Bỏ Spacer này để Row dưới tự căn chỉnh
-
-            // Row chứa tên đội và tỷ số, sẽ được căn giữa với nhau
-            Row(
+            val statusColor = getStatusColor(match.status)
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f), // Cho Row này chiếm không gian còn lại để dễ căn giữa
-                verticalAlignment = Alignment.CenterVertically, // Căn các item trong Row theo chiều dọc
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .matchParentSize()
+                    .scale(2.0f)
+                    .offset(y = 24.dp)
+                    .background(
+                        brush = Brush.radialGradient(
+                            colors = listOf(statusColor, Color.Transparent),
+//                            center = Offset(500.dp.value, 300.dp.value),
+                            radius = 150f
+                        )
+                    )
+            )
+        }
+
+        // Main content
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
+            // Area flag and venue information
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                TeamDisplayUpdated(
-                    teamName = team1Name,
-                    scorers = team1Scorers,
-                    teamImageURL = team1ImageURL,
-                    horizontalAlignment = Alignment.CenterHorizontally, // Căn text của đội bên trong Column của đội
-                    textAlign = TextAlign.Center
-                )
+                // Area flag
+                match.area.flag?.let { flagUrl ->
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(flagUrl)
+                            .decoderFactory(SvgDecoder.Factory())
+                            .build(),
+                        contentDescription = "Country flag",
+                        modifier = Modifier
+                            .size(20.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
 
-                Text(
-                    score,
-                    color = textScoreColor,
-                    fontSize = 28.sp,    // << SỬA: Tăng kích thước tỷ số hơn nữa
-                    fontWeight = FontWeight.Bold,
+                // Venue information
+                if (match.venue != null) {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = "Venue",
+                        tint = Color.White.copy(alpha = 0.7f),
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = match.venue,
+                        color = Color.White.copy(alpha = 0.7f),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Normal,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Teams and score
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Home team
+                Column(
+                    Modifier.weight(1f),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    AsyncImage(
+                        match.homeTeam.crest,
+                        contentDescription = "",
+                        modifier = Modifier.size(64.dp),
+                    )
+                    Text(
+                        text = match.homeTeam.name,
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                // Score and status in the middle
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
                     modifier = Modifier.padding(horizontal = 8.dp)
-                )
+                ) {
+                    // Status indicator
+                    StatusIndicator(status = match.status)
 
-                TeamDisplayUpdated(
-                    teamName = team2Name,
-                    scorers = team2Scorers,
-                    teamImageURL = team2ImageURL,
-                    horizontalAlignment = Alignment.CenterHorizontally, // Căn text của đội bên trong Column của đội
-                    textAlign = TextAlign.Center
-                )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Date/time
+                    Text(
+                        text = (match.utcDate).format(java.time.format.DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)),
+                        color = Color.White.copy(alpha = 0.7f),
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center
+                    )
+
+                    // Score (if match is not scheduled)
+                    if (match.status != "SCHEDULED" && match.status != "TIMED") {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "${match.score.fullTime.home ?: "-"}",
+                                color = Color.White,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = " - ",
+                                color = Color.White,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "${match.score.fullTime.away ?: "-"}",
+                                color = Color.White,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                // Away team
+                Column(
+                    Modifier.weight(1f),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    AsyncImage(
+                        match.awayTeam.crest,
+                        contentDescription = "",
+                        modifier = Modifier.size(64.dp),
+                    )
+                    Text(
+                        text = match.awayTeam.name,
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
         }
     }

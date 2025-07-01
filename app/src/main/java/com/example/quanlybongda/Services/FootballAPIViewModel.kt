@@ -39,6 +39,12 @@ class FootballAPIViewModel @Inject constructor() : ViewModel() {
     private var _competitions : MutableStateFlow<LoadingState<List<Competition>>> = MutableStateFlow(LoadingState.Loading);
     val competitions : StateFlow<LoadingState<List<Competition>>> get() = _competitions;
 
+    private var _currentSeasonCompetitions : MutableStateFlow<LoadingState<List<Competition>>> = MutableStateFlow(LoadingState.Loading);
+    val currentSeasonCompetitions : StateFlow<LoadingState<List<Competition>>> get() = _currentSeasonCompetitions;
+
+    private var _loadingSeasonDetail : MutableStateFlow<Boolean> = MutableStateFlow(false);
+    val loadingSeasonsDetail : StateFlow<Boolean> get() = _loadingSeasonDetail;
+
     fun setCurrentSeason(season: Int) {
         _currentSeason.value = season;
         _teams.value = LoadingState.Loading;
@@ -58,17 +64,71 @@ class FootballAPIViewModel @Inject constructor() : ViewModel() {
         _competitions.value = LoadingState.Loading
         viewModelScope.launch {
             try {
+                _loadingSeasonDetail.value = true;
                 val competitionsResponse = FootballAPI.retrofitService.getCompetitions();
+                if (competitionsResponse.body() == null) {
+                    throw RuntimeException("There was an error fetching competitions data. Please try again later.");
+                }
                 if (competitionsResponse.isSuccessful) {
-                    val competitions = competitionsResponse.body()!!.competitions;
+                    val competitions = competitionsResponse.body()!!.competitions.toMutableList();
                     _competitions.value = LoadingState.Success(competitions)
+                    loadCompetitionCurrentSeason();
+
+                    // Load competition seasons details
+                    for (i in competitions.indices) {
+                        val competitionResponse =
+                            FootballAPI.retrofitService.getCompetition(competitions[i].code).body();
+                        if (competitionResponse != null) {
+                            competitions[i].seasons = competitionResponse.seasons?.subList(0, 5);
+                        }
+                    }
+                    _competitions.value = LoadingState.Success(competitions)
+
                 } else {
                     _competitions.value = LoadingState.Error(competitionsResponse.message())
                 }
+                _loadingSeasonDetail.value = false;
             }
             catch (e: Exception) {
                 _competitions.value = LoadingState.Error(e.message ?: "Unknown error")
             }
+            loadCompetitionCurrentSeasonDetail();
+        }
+    }
+
+    fun loadCompetitionCurrentSeasonDetail() {
+        if (competitions.value is LoadingState.Error) {
+            _currentSeasonCompetitions.value = competitions.value;
+            return;
+        }
+        if (competitions.value !is LoadingState.Success) return;
+        viewModelScope.launch {
+            _currentSeasonCompetitions.value = LoadingState.Loading;
+            val result = mutableListOf<Competition>();
+            for (competition in (competitions.value as LoadingState.Success<List<Competition>>).data) {
+                for (season in competition.seasons ?: emptyList()) {
+                    if (season.startDate.year == currentSeason.value) {
+                        result.add(competition.copy(currentSeason = season));
+                        break;
+                    }
+                }
+            }
+            _currentSeasonCompetitions.value = LoadingState.Success(result);
+        }
+    }
+
+    fun loadCompetitionCurrentSeason() {
+        if (competitions.value !is LoadingState.Success) return;
+        viewModelScope.launch {
+            _currentSeasonCompetitions.value = LoadingState.Loading;
+            val result = mutableListOf<Competition>();
+            for (competition in (competitions.value as LoadingState.Success<List<Competition>>).data) {
+                if (competition.currentSeason.startDate.year == currentSeason.value) {
+                    result.add(competition);
+                    break;
+                }
+            }
+            _currentSeasonCompetitions.value = LoadingState.Success(result);
         }
     }
 

@@ -1,16 +1,20 @@
 package com.example.quanlybongda.Services
 
+import android.util.Log
+import android.widget.Toast
 import com.example.quanlybongda.BuildConfig
+import com.example.quanlybongda.MainActivity
 import com.example.quanlybongda.Services.Converters.LocalDateConverter
 import com.example.quanlybongda.Services.Converters.LocalDateTimeConverter
-import com.example.quanlybongda.Services.Data.CompetitionResponse
-import com.example.quanlybongda.Services.Data.StandingsResponse
+import com.example.quanlybongda.Services.Data.Competition
+import com.example.quanlybongda.Services.Data.CompetitionsResponse
 import com.example.quanlybongda.Services.Data.MatchResponse
+import com.example.quanlybongda.Services.Data.StandingsResponse
 import com.example.quanlybongda.Services.Data.TeamResponse
 import com.google.gson.GsonBuilder
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import retrofit2.Call
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -31,8 +35,42 @@ private val authInterceptor = Interceptor { chain ->
     chain.proceed(request)
 }
 
+private val logInterceptor = HttpLoggingInterceptor().apply {
+    level = HttpLoggingInterceptor.Level.BODY
+}
+
+private val requestRetryInterceptor = Interceptor { chain ->
+    val request = chain.proceed(chain.request());
+    val headers = request.headers;
+    val requestCounterReset = headers.find { it.first == "x-requestcounter-reset" };
+    val requestAvailable = headers.find { it.first == "x-requests-available-minute" };
+    if (requestAvailable != null) {
+        val availableCount = requestAvailable.second.toInt();
+        if (!request.isSuccessful && availableCount == 0 && requestCounterReset != null) {
+            val resetTime = requestCounterReset.second.toLong();
+            MainActivity.mainActivity.runOnUiThread(object : Runnable {
+                override fun run() {
+                    Toast.makeText(MainActivity.mainActivity,
+                        "Request limit reached. Waiting for $resetTime seconds to reset.", Toast.LENGTH_SHORT).show()
+                }
+            })
+
+            Log.wtf("FootballAPI", "Request limit reached. Waiting for $resetTime seconds to reset.");
+            Log.d("FootballAPI", request.toString());
+            Thread.sleep(resetTime * 1000);
+            request.close();
+            Log.d("FootballAPI", "Retrying request after waiting for $resetTime seconds.");
+            return@Interceptor chain.proceed(chain.request());
+        }
+    }
+    return@Interceptor request;
+}
+
 private val okHttpClient = OkHttpClient.Builder()
     .addInterceptor(authInterceptor)
+    .addInterceptor(logInterceptor)
+    .addInterceptor(requestRetryInterceptor)
+    .retryOnConnectionFailure(true)
     .build()
 
 val gson = GsonBuilder()
@@ -48,7 +86,7 @@ private val retrofit = Retrofit.Builder()
 
 interface FootballAPIService {
     @GET("competitions/")
-    suspend fun getCompetitions() : Response<CompetitionResponse>;
+    suspend fun getCompetitions() : Response<CompetitionsResponse>;
 
     @GET("competitions/{id}/teams")
     suspend fun getCompetitionTeams(@Path("id") id: String, @Query("season") season: Int = 2024) : Response<TeamResponse>;
@@ -58,6 +96,9 @@ interface FootballAPIService {
 
     @GET("competitions/{id}/standings")
     suspend fun getCompetitionStandings(@Path("id") id: String, @Query("season") season: Int = 2024) : Response<StandingsResponse>;
+
+    @GET("competitions/{code}")
+    suspend fun getCompetition(@Path("code") code: String) : Response<Competition>;
 }
 
 object FootballAPI {

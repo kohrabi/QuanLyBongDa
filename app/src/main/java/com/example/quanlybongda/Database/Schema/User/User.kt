@@ -34,6 +34,8 @@ data class User(
     val groupId : Int = 1,
 ) {
     @Ignore var groupName : String = "";
+    @Ignore var cauThuYeuThich: Set<Int> = setOf()
+    @Ignore var doiBongYeuThich: Set<Int> = setOf()
 }
 
 @Entity(

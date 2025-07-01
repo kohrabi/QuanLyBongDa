@@ -90,6 +90,8 @@ dependencies {
 // Coil (for image loading)
     implementation("io.coil-kt:coil-compose:2.6.0") // Kiểm tra phiên bản mới nhất
     implementation("io.coil-kt:coil-svg:2.6.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
 
 
     testImplementation(libs.junit)

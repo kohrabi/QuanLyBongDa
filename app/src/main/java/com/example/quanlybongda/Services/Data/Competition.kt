@@ -3,8 +3,7 @@ package com.example.quanlybongda.Services.Data
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-
-data class CompetitionResponse(
+data class CompetitionsResponse(
     val count: Int,
     val filters: Filters,
     val competitions: List<Competition>,
@@ -18,7 +17,8 @@ data class Competition(
     val type: String,
     val emblem: String?,
     val currentSeason: Season,
-    val seasons: List<Season>,
+    var seasons: List<Season>?,
+    val numberOfAvailableSeasons: Int,
     val lastUpdated: LocalDateTime
 )
 

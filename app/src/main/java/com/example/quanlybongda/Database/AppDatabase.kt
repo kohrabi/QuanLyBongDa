@@ -33,6 +33,9 @@ import com.example.quanlybongda.Database.Schema.User.*
         CauThu::class,
         DoiBong::class,
 
+        YeuThichDoiBong::class,
+        YeuThichCauThu::class,
+
 //        ThamGiaDB::class,
         ThamGiaTD::class,
 
@@ -80,6 +83,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract val lichThiDauDAO: LichThiDauDAO;
     abstract val banThangDAO: BanThangDAO;
     abstract val thePhatDAO: ThePhatDAO;
+    abstract val yeuThichDAO: YeuThichDAO
 
 
     companion object {

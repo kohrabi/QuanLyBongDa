@@ -1,7 +1,7 @@
 package com.example.quanlybongda
 
+import android.app.Activity
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -18,20 +18,25 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.core.view.WindowCompat
 import com.example.quanlybongda.Database.DatabaseViewModel
-import com.example.quanlybongda.Services.FootballAPI
 import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
 import dagger.hilt.android.AndroidEntryPoint
 import com.example.quanlybongda.ui.theme.*
-import kotlinx.coroutines.runBlocking
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val databaseViewModel: DatabaseViewModel by viewModels()
 
+    companion object
+    {
+
+        lateinit var mainActivity: Activity
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        mainActivity = this
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(DarkColorScheme.surfaceContainer.toArgb())
         )

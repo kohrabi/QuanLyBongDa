@@ -66,9 +66,10 @@ fun MuaGiaiScreen(
     var isEditable by remember { mutableStateOf(false) }
     val user by viewModel.user.collectAsState()
 
-    val competitions by apiViewModel.competitions.collectAsState()
+    val competitions by apiViewModel.currentSeasonCompetitions.collectAsState()
     val currentCompetition by apiViewModel.currentCompetition.collectAsState()
     var selectedValue by remember { mutableStateOf<Competition?>(null) }
+    val loadingSeasonDetail by apiViewModel.loadingSeasonsDetail.collectAsState()
     val currentYear = LocalDate.now().year
     val seasonOptions = (currentYear downTo (currentYear - 2)).map { OptionValue(it, it.toString()) }
 
@@ -102,6 +103,17 @@ fun MuaGiaiScreen(
     ) { paddingValues ->
         // List of Season Cards
 
+        if (loadingSeasonDetail) {
+            Text(
+                text = "Đang tải dữ liệu mùa giải... Lý do là do nhà nghèo không có tiền mua API trả phí nên phải tải dữ liệu mùa giải từ API miễn phí, nên hơi lâu một chút.",
+                color = Color.White,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(paddingValues)
+                    .padding(16.dp),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
         when (competitions) {
             is LoadingState.Loading -> {
                 Box(
@@ -148,6 +160,7 @@ fun MuaGiaiScreen(
                             onOptionSelected = {
                                 selectedSeason = it
                                 apiViewModel.setCurrentSeason(selectedSeason.value!!)
+                                apiViewModel.loadCompetitionCurrentSeasonDetail();
                             },
                             showEmptyError = false,
                         )
@@ -227,12 +240,12 @@ fun SeasonCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Bắt đầu: ${DateConverter.LocalDateToString(season.currentSeason.startDate.withYear(currentSeason))}",
+                        text = "Bắt đầu: ${DateConverter.LocalDateToString(season.currentSeason.startDate)}",
                         color = Color.LightGray,
                         fontSize = 12.sp
                     )
                     Text(
-                        text = "Kết thúc: ${DateConverter.LocalDateToString(season.currentSeason.endDate.withYear(currentSeason))}",
+                        text = "Kết thúc: ${DateConverter.LocalDateToString(season.currentSeason.endDate)}",
                         color = Color.LightGray,
                         fontSize = 12.sp
                     )

@@ -16,8 +16,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import com.example.quanlybongda.Database.Exceptions.*
-import retrofit2.Retrofit
-import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.security.SecureRandom
 import java.time.LocalDateTime
 
@@ -43,6 +41,7 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
     public val thamSoDAO : ThamSoDAO;
     public val thePhatDAO : ThePhatDAO;
     public val banThangDAO : BanThangDAO;
+    public val yeuThichDAO: YeuThichDAO;
 
     public val userDAO : UserDAO;
     public val userRoleDAO : UserRoleDAO;
@@ -60,6 +59,7 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
         banThangDAO = appDatabase.banThangDAO;
         userRoleDAO = appDatabase.userRoleDAO;
         userGroupDAO = appDatabase.userGroupDAO;
+        yeuThichDAO = appDatabase.yeuThichDAO;
         userDAO = appDatabase.userDAO;
     }
 
@@ -334,6 +334,9 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
         val sessionToken = generateSessionToken();
         createSession(sessionToken, user.id);
         validateSessionToken(sessionToken);
+
+        user.doiBongYeuThich = yeuThichDAO.selectDoiBongYeuThich(user.id).toSet();
+        user.cauThuYeuThich = yeuThichDAO.selectCauThuYeuThich(user.id).toSet();
 
         return sessionToken;
     }
