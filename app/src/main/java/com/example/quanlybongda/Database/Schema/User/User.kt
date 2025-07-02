@@ -30,6 +30,8 @@ data class User(
     val email : String,
     val passwordHash : String,
     val username : String,
+    @ColumnInfo(defaultValue = "0")
+    val soDu: Int = 0,
     @ColumnInfo(defaultValue = "1")
     val groupId : Int = 1,
 ) {

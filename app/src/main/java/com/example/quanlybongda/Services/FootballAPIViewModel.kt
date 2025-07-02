@@ -2,6 +2,8 @@ package com.example.quanlybongda.Services
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.Database.Schema.User.CaDo
 import com.example.quanlybongda.Services.Data.Competition
 import com.example.quanlybongda.Services.Data.Match
 import com.example.quanlybongda.Services.Data.Season
@@ -14,6 +16,8 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.inject.Inject
+import kotlin.random.Random
+import kotlin.random.nextInt
 
 open class LoadingState<out T> {
     object Loading : LoadingState<Nothing>()
@@ -174,7 +178,7 @@ class FootballAPIViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    fun loadMatches() {
+    fun loadMatches(databaseViewModel: DatabaseViewModel? = null) {
         if (_matches.value is LoadingState.Success) return
         _matches.value = LoadingState.Loading
         viewModelScope.launch {
@@ -182,6 +186,32 @@ class FootballAPIViewModel @Inject constructor() : ViewModel() {
                 val matchesResponse = FootballAPI.retrofitService.getCompetitionMatches(currentCompetition.value!!.code, currentSeason.value);
                 if (matchesResponse.isSuccessful) {
                     val matches = matchesResponse.body()!!.matches;
+
+                    if (databaseViewModel != null && databaseViewModel.user.value != null) {
+                        matches.forEach { it ->
+                            val caDoCount = databaseViewModel.caDoDAO.countCaDoByMaTD(it.id);
+                            if (caDoCount > 200)
+                                return@forEach;
+                            databaseViewModel.viewModelScope.launch {
+                                for (i in 0..Random.Default.nextInt(10,50)) {
+                                    val choose = Random.Default.nextInt(3);
+                                    var teamID = when(choose) {
+                                        0 -> it.homeTeam.id
+                                        1 -> it.awayTeam.id
+                                        else -> null
+                                    }
+                                    databaseViewModel.caDoDAO.upsertCaDo(
+                                        CaDo(
+                                            userId = 1,
+                                            maTD = it.id,
+                                            soTien = Random.Default.nextInt(1..999) * 100_000,
+                                            doiCuoc = teamID
+                                        ),
+                                    );
+                                }
+                            }
+                        }
+                    }
                     _matches.value = LoadingState.Success(matches)
                 } else {
                     _matches.value = LoadingState.Error(matchesResponse.message())

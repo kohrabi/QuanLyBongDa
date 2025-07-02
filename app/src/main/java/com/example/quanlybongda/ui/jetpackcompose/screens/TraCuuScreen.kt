@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -82,7 +84,11 @@ fun TraCuuScreen(
     var cauThuYeuThich by remember { mutableStateOf<Set<Int>>(emptySet()) }
 
     LaunchedEffect(Unit) {
+        apiViewModel.loadTeams();
         cauThuYeuThich = user!!.cauThuYeuThich;
+    }
+
+    LaunchedEffect(teams) {
         if (teams is LoadingState.Success) {
             players = (teams as LoadingState.Success<List<Team>>).data.flatMap { it.squad };
             cauThus = players;
@@ -123,41 +129,54 @@ fun TraCuuScreen(
         containerColor = DarkColorScheme.background,
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
     ) { innerPadding ->
-        // Danh sách cầu thủ
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth()
-                .background(DarkColorScheme.background)
-                .padding(top = 12.dp)
-                .padding(horizontal = 16.dp),
-            contentPadding = innerPadding,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(cauThus) { cauThu ->
-                val isFavorite = cauThuYeuThich.contains(cauThu.id)
-                PlayerCard(
-                    team = null,
-                    player = cauThu,
-                    isFavorite = isFavorite,
-                    onFavoriteClick = {
-                        if (isFavorite) {
-                            viewModel.removeCauThuYeuThich(cauThu.id)
-                            cauThuYeuThich = cauThuYeuThich - cauThu.id
-                        } else {
-                            viewModel.addCauThuYeuThich(cauThu.id)
-                            cauThuYeuThich = cauThuYeuThich + cauThu.id
-                        }
-                    },
+        when (teams) {
+            is LoadingState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = Purple80,
+                        modifier = Modifier.size(48.dp)
+                    )
+                }
+            }
+            is LoadingState.Error -> {
+                ErrorComponent(
+                    message = "Dữ liệu không tồn tại",
+                    onRetry = { },
+                    modifier = Modifier.padding(innerPadding)
                 )
             }
+            is LoadingState.Success -> {
+                // Danh sách cầu thủ
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth()
+                        .background(DarkColorScheme.background)
+                        .padding(top = 12.dp)
+                        .padding(horizontal = 16.dp),
+                    contentPadding = innerPadding,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(cauThus) { cauThu ->
+                        val isFavorite = cauThuYeuThich.contains(cauThu.id)
+                        PlayerCard(
+                            team = null,
+                            player = cauThu,
+                            isFavorite = isFavorite,
+                            onFavoriteClick = {
+                                if (isFavorite) {
+                                    viewModel.removeCauThuYeuThich(cauThu.id)
+                                    cauThuYeuThich = cauThuYeuThich - cauThu.id
+                                } else {
+                                    viewModel.addCauThuYeuThich(cauThu.id)
+                                    cauThuYeuThich = cauThuYeuThich + cauThu.id
+                                }
+                            },
+                        )
+                    }
+                }
+            }
         }
-    }
-}
-
-// Preview function for Android Studio
-@Preview(showBackground = true, widthDp = 360, heightDp = 720, backgroundColor = 0xFF1C1D2B)
-@Composable
-fun PreviewTraCuu() {
-    QuanLyBongDaTheme {
-        TraCuuScreen(rememberNavController())
     }
 }

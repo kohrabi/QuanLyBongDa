@@ -37,7 +37,7 @@ data class Match(
     val homeTeam: MatchTeam,
     val awayTeam: MatchTeam,
     val score: Score,
-    val goals: List<Goal>,
+    val goals: List<Goal>?,
     val penalties: List<Penalty>?,
     val bookings: List<Booking>,
     val substitutions: List<Substitution>,

@@ -18,6 +18,5 @@ data class CaDo(
     val userId: Int,
     val maTD: Int,
     val soTien: Int = 0,
-    val tiSoDoiMot: Int = 0,
-    val tiSoDoiHai: Int = 0,
+    val doiCuoc: Int?,
 )

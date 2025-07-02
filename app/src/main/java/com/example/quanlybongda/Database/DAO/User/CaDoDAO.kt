@@ -16,6 +16,26 @@ interface CaDoDAO {
     """)
     suspend fun selectCaDo(userId: Int): List<CaDo>;
 
+    @Query("""
+        SELECT * FROM CaDo
+        WHERE maTD=:maTD
+    """)
+    suspend fun selectCaDoByMaTD(maTD: Int): List<CaDo>;
+
+    @Query("""
+        SELECT * FROM CaDo
+        WHERE maTD=:maTD AND doiCuoc=:doiCuoc
+    """)
+    suspend fun selectCaDoByMaTDDoiCuoc(maTD: Int, doiCuoc: Int?): List<CaDo>;
+
+    @Query("""
+        SELECT count(*) FROM CaDo
+        WHERE maTD=:maTD
+        GROUP BY maTD
+        LIMIT 1
+    """)
+    suspend fun countCaDoByMaTD(maTD: Int) : Int;
+
     @Delete
     suspend fun deleteCaDo(caDo: CaDo);
 

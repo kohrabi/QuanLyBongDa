@@ -1,6 +1,6 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
-import android.util.Log
+import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -8,10 +8,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,13 +24,10 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults
@@ -41,12 +38,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
@@ -58,16 +54,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.example.quanlybongda.Database.DatabaseViewModel
-import com.example.quanlybongda.Database.DateConverter
-import com.example.quanlybongda.Database.Schema.BanThang
-import com.example.quanlybongda.Database.Schema.LichThiDau
-import com.example.quanlybongda.Services.Converters.LocalDateConverter
-import com.example.quanlybongda.Services.Data.Goal
+import com.example.quanlybongda.Database.Schema.User.CaDo
 import com.example.quanlybongda.Services.Data.GoalShort
 import com.example.quanlybongda.Services.Data.Match
 import com.example.quanlybongda.Services.Data.MatchTeam
@@ -82,10 +75,14 @@ import com.example.quanlybongda.Services.YoutubeAPI
 import com.example.quanlybongda.Services.gson
 import com.example.quanlybongda.ui.theme.DarkColorScheme
 import com.example.quanlybongda.ui.theme.Purple80
+import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import kotlin.math.roundToInt
 
+val homeColor = Color(0xFF0D904B)
+val drawColor = Color(0xFF35495E)
+val awayColor = Color(0xFFD13030)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -106,16 +103,51 @@ fun XemTranDauScreen(
     var videoId : LoadingState<String> by remember { mutableStateOf(LoadingState.Loading) }
     var youtubeVideos by remember { mutableStateOf<List<YouTubeVideoItem>>(listOf())}
     var videoCount by remember { mutableStateOf(0) }
+    val user by viewModel.user.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
+
     var odd by remember { mutableStateOf<Odds?>(null)}
+    var showBettingDialog by remember { mutableStateOf(false) }
+    var bettingOptions by remember { mutableStateOf(listOf<BettingOption>(
+        BettingOption("Home Win", 0.0, homeColor),
+        BettingOption("Draw", 0.0, drawColor),
+        BettingOption("Away Win", 0.0, awayColor)
+    )) }
+    var bettingOption by remember { mutableStateOf<BettingOption>(bettingOptions[0]) }
+
+    var caDos : MutableList<CaDo> by remember { mutableStateOf<MutableList<CaDo>>(mutableListOf()) }
+
+    val setCaDo : () -> Unit = {
+        viewModel.viewModelScope.launch {
+            caDos = viewModel.caDoDAO.selectCaDoByMaTD(maTD).toMutableList();
+            val caDoHomeTeam = caDos.filter { it.doiCuoc == currentMatch?.homeTeam?.id }.sumOf { it.soTien };
+            val caDoAwayTeam = caDos.filter { it.doiCuoc == currentMatch?.awayTeam?.id }.sumOf { it.soTien };
+            val caDoDraw = caDos.sumOf { it.soTien };
+
+            val tong = caDoHomeTeam + caDoAwayTeam + caDoDraw;
+            bettingOptions[0].percentage = caDoHomeTeam.toDouble() / tong.toDouble();
+            bettingOptions[0].percentage = (bettingOptions[0].percentage * 1000.0).roundToInt().toDouble() / 1000.0;
+            bettingOptions[0].teamId = currentMatch?.homeTeam?.id ?: 0;
+
+            bettingOptions[1].percentage = caDoDraw.toDouble() / tong.toDouble();
+            bettingOptions[1].percentage = (bettingOptions[1].percentage * 1000.0).roundToInt().toDouble() / 1000.0;
+            bettingOptions[1].teamId = null; // Draw does not have a team ID
+
+            bettingOptions[2].percentage = 1.0 - (bettingOptions[0].percentage + bettingOptions[1].percentage);
+            bettingOptions[2].percentage = (bettingOptions[2].percentage * 1000.0).roundToInt().toDouble() / 1000.0;
+            bettingOptions[2].teamId = currentMatch?.awayTeam?.id ?: 0;
+            bettingOptions = bettingOptions.toMutableList();
+        }
+    }
 
     LaunchedEffect(lichThiDaus) {
         if (lichThiDaus is LoadingState.Success) {
             val matches = (lichThiDaus as LoadingState.Success<List<Match>>).data
             currentMatch = matches.firstOrNull { it.id == maTD };
-            if (currentMatch == null) {
-                snackbarHostState.showSnackbar("Trận đấu không tồn tại")
-                return@LaunchedEffect
-            }
+        }
+        if (currentMatch == null) {
+            snackbarHostState.showSnackbar("Trận đấu không tồn tại")
+            return@LaunchedEffect
         }
 
         val videos = YoutubeAPI.retrofitService.searchVideos(
@@ -130,6 +162,7 @@ fun XemTranDauScreen(
         youtubeVideos.get(videoCount).let {
             videoId = LoadingState.Success(it.id.videoId)
         }
+        setCaDo();
 
         val prompt = GenerativeModel.prompt
             .replace("{homeTeam}", currentMatch?.homeTeam?.name ?: "")
@@ -140,23 +173,11 @@ fun XemTranDauScreen(
 
         response.text?.let {
             val json = gson.fromJson(it, OddResponse::class.java);
-            val maxWin = maxOf(json.homeTeamWinPercentage,json.awayTeamWinPercentage).roundToInt();
-            val minWin = minOf(json.homeTeamWinPercentage,json.awayTeamWinPercentage).roundToInt();
-            var oddResult = Odds(
-                homeWin = 0.0,
-                awayWin = 0.0,
-                draw = 0.0
+            odd = Odds(
+                homeWin = json.homeTeamWinPercentage.roundToInt().toDouble(),
+                awayWin = json.awayTeamWinPercentage.roundToInt().toDouble(),
+                draw = json.drawPercentage.roundToInt().toDouble()
             );
-            if ((currentMatch?.score?.fullTime?.home ?: 0) > (currentMatch?.score?.fullTime?.away ?: 0)) {
-                oddResult.homeWin = maxWin.toDouble();
-                oddResult.awayWin = minWin.toDouble();
-            }
-            else {
-                oddResult.homeWin = minWin.toDouble();
-                oddResult.awayWin = maxWin.toDouble();
-            }
-            oddResult.draw = json.drawPercentage.toDouble();
-            odd = oddResult;
         }
     }
 
@@ -179,7 +200,7 @@ fun XemTranDauScreen(
                 canScorePlayersAway = awayPlayers.filter { it.position != "Goalkeeper" };
 
             val resultBT = mutableListOf<GoalShort>()
-            for (i in 0..homeScore) {
+            for (i in 0..<homeScore) {
                 val player = canScorePlayersHome.get(i % canScorePlayersHome.size);
                 resultBT.add(
                     GoalShort(
@@ -191,7 +212,7 @@ fun XemTranDauScreen(
                 )
             }
 
-            for (i in 0..awayScore) {
+            for (i in 0..<awayScore) {
                 val player = canScorePlayersAway.get(i % canScorePlayersAway.size);
                 resultBT.add(
                     GoalShort(
@@ -208,7 +229,7 @@ fun XemTranDauScreen(
 
     LaunchedEffect(Unit) {
         apiViewModel.loadTeams();
-        apiViewModel.loadMatches();
+        apiViewModel.loadMatches(viewModel);
     }
 
     Scaffold(
@@ -320,6 +341,82 @@ fun XemTranDauScreen(
 
                     item {
                         Spacer(modifier = Modifier.height(30.dp)) // << SỬA: Tăng khoảng cách
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(128.dp)
+                                .padding(vertical = 16.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable {
+                                    coroutineScope.launch {
+                                        if (currentMatch == null) {
+                                            snackbarHostState.showSnackbar("Trận đấu không hợp lệ");
+                                            return@launch;
+                                        }
+                                        if (currentMatch!!.status == "FINISHED" )
+                                            snackbarHostState.showSnackbar("Trận đấu đã kết thúc, không thể đặt cược");
+                                        else if (currentMatch!!.status == "SUSPENDED" || currentMatch!!.status == "CANCELED")
+                                            snackbarHostState.showSnackbar("Trận đấu đã bị hủy, không thể đặt cược");
+                                        else if (currentMatch!!.status == "IN_PLAY" || currentMatch!!.status == "PAUSED")
+                                            snackbarHostState.showSnackbar("Trận đấu đang diễn ra, không thể đặt cược");
+                                        else
+                                            showBettingDialog = true;
+                                    }
+                                },
+                        ) {
+                            // Home Team
+                            val homeWin = bettingOptions[0].percentage.toFloat();
+                            val awayWin = bettingOptions[2].percentage.toFloat();
+                            val draw = 1.0f - (homeWin + awayWin);
+                            if (homeWin > 0.01f) {
+                                Box(
+                                    modifier = Modifier
+                                        .weight(homeWin)
+                                        .fillMaxHeight()
+                                        .background(homeColor),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Text(
+                                        text = "${currentMatch?.homeTeam?.tla}",
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                            // Tie
+                            if (draw > 0.01f) {
+                                Box(
+                                    modifier = Modifier
+                                        .weight(draw)
+                                        .fillMaxHeight()
+                                        .background(drawColor),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Text(
+                                        text = "Draw",
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                            // Away Team
+                            if (awayWin > 0.01f) {
+                                Box(
+                                    modifier = Modifier
+                                        .weight(awayWin)
+                                        .fillMaxHeight()
+                                        .background(awayColor),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Text(
+                                        text = "${currentMatch?.awayTeam?.tla}",
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(30.dp)) // << SỬA: Tăng khoảng cách
                         StatisticRowHeader();
                     }
                     items (banThangs) { it ->
@@ -331,13 +428,37 @@ fun XemTranDauScreen(
                             modifier)
                     }
 
-                    item {
-
-                    }
                 }
             }
         }
     }
+
+    BettingDialog(
+        showDialog = showBettingDialog,
+        onDismiss = { showBettingDialog = false },
+        selectedOption = bettingOption,
+        allOptions = bettingOptions,
+        onOptionSelected = {},
+        onPlaceBet = { money, option ->
+            viewModel.viewModelScope.launch {
+                if (currentMatch == null || user == null) {
+                    snackbarHostState.showSnackbar("Trận đấu hoặc người dùng không hợp lệ");
+                    return@launch;
+                }
+                val caDo = CaDo(
+                    userId = user!!.id,
+                    maTD = currentMatch!!.id,
+                    doiCuoc = option.teamId,
+                    soTien = money.toInt()
+                );
+                viewModel.caDoDAO.upsertCaDo(caDo);
+                caDos.add(caDo);
+                setCaDo();
+                snackbarHostState.showSnackbar("Đặt cược thành công: ${option.name} - ${money} VNĐ");
+            }
+            showBettingDialog = false;
+        },
+    )
 }
 
 
@@ -473,46 +594,12 @@ fun MatchResult(
                 }
             }
 
-                // Odds section
+            // Odds section
             if (showOdd) {
-                Spacer(modifier = Modifier.height(16.dp))
-                HorizontalDivider(
-                    thickness = 1.dp,
-                    color = Color.White.copy(alpha = 0.2f)
+                OddsSection(
+                    match = match,
+                    odd = odd,
                 )
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Text(
-                    text = "Match Odds",
-                    color = Color.White.copy(alpha = 0.9f),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    OddsItem(
-                        label = "Home Win",
-                        value = odd?.homeWin,
-                        teamName = match.homeTeam.name
-                    )
-                    OddsItem(
-                        label = "Draw",
-                        value = odd?.draw,
-                        teamName = null
-                    )
-                    OddsItem(
-                        label = "Away Win",
-                        value = odd?.awayWin,
-                        teamName = match.awayTeam.name
-                    )
-                }
             }
         }
     }
@@ -532,7 +619,7 @@ private fun TeamDisplay(
             model = team.crest,
             contentDescription = "${team.name} logo",
             modifier = Modifier.size(56.dp),
-            error = painterResource(id = android.R.drawable.ic_menu_help)
+            error = painterResource(id = R.drawable.ic_menu_help)
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(

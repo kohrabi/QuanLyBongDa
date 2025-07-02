@@ -128,7 +128,7 @@ fun LapLichScreen(
     var isEditable by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        apiViewModel.loadMatches()
+        apiViewModel.loadMatches(viewModel)
     }
 
     Scaffold(
@@ -188,7 +188,7 @@ fun LapLichScreen(
                             MatchResult(
                                 result[0],
                                 onClick = {
-//                                navController.navigate("banThang/${lichThiDau.id}")
+                                    navController.navigate("lapLich/${result[0].id}")
                                 }
                             )
                         }
@@ -207,7 +207,6 @@ fun LapLichScreen(
                             lichThiDau,
                             isFavorite = isFavorite,
                             onClick = {
-
                                 navController.navigate("lapLich/${lichThiDau.id}")
                             }
                         )

@@ -66,7 +66,7 @@ import com.example.quanlybongda.Database.Schema.User.*
         ThePhatBackup::class,
         TrongTaiBackup::class,
 
-    ], version = 1)
+    ], version = 2)
 @TypeConverters(DateConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract val userDAO: UserDAO;
