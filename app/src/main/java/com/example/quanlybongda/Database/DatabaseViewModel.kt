@@ -300,6 +300,10 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
 
         _user.value = user;
         _session.value = session;
+
+        user.doiBongYeuThich = yeuThichDAO.selectDoiBongYeuThich(user.id).toSet();
+        user.cauThuYeuThich = yeuThichDAO.selectCauThuYeuThich(user.id).toSet();
+
         return SessionValidationResult(user, session);
     }
 
@@ -397,8 +401,6 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
         createSession(sessionToken, user.id);
         validateSessionToken(sessionToken);
 
-        user.doiBongYeuThich = yeuThichDAO.selectDoiBongYeuThich(user.id).toSet();
-        user.cauThuYeuThich = yeuThichDAO.selectCauThuYeuThich(user.id).toSet();
 
         return sessionToken;
     }

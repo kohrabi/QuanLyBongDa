@@ -1,6 +1,9 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
 import android.widget.Toast
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -90,6 +93,7 @@ import com.example.quanlybongda.ui.theme.darkTextMuted
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
 
@@ -159,15 +163,11 @@ fun LapLichScreen(
             }
 
             is LoadingState.Error -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Lỗi tải dữ liệu: ${(lichThiDaus as LoadingState.Error).message}",
-                        color = Color.Red
-                    )
-                }
+                ErrorComponent(
+                    message = "Dữ liệu không tồn tại",
+                    onRetry = {},
+                    modifier = Modifier.fillMaxSize().padding(innerPadding)
+                )
             }
             is LoadingState.Success -> {
                 val result = (lichThiDaus as LoadingState.Success<List<Match>>).data
@@ -202,24 +202,14 @@ fun LapLichScreen(
                     itemsIndexed(result) { index, lichThiDau ->
                         if (index == 0)
                             return@itemsIndexed;
+                        val isFavorite = user?.doiBongYeuThich?.any { it == lichThiDau.homeTeam.id || it == lichThiDau.awayTeam.id } ?: false;
                         MatchInfoRowNoLogos(
                             lichThiDau,
+                            isFavorite = isFavorite,
                             onClick = {
-//                                navController.navigate("banThang/${lichThiDau.id}")
-                            }
-                        )
 
-                        val isFavorite = user?.doiBongYeuThich?.any { it == lichThiDau.id } ?: false;
-                        SwipeContainer(
-                            item = lichThiDau,
-                            content = {
-                                MatchInfoRowNoLogos(
-                                    match = lichThiDau,
-                                    isFavorite = isFavorite,
-                                    onClick = {}
-                                )
-                            },
-                            backgroundModifier = Modifier.clip(RoundedCornerShape(16.dp))
+                                navController.navigate("lapLich/${lichThiDau.id}")
+                            }
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                     };
@@ -351,7 +341,7 @@ fun FeaturedMatch(
 
                     // Date/time
                     Text(
-                        text = (match.utcDate).format(java.time.format.DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)),
+                        text = (match.utcDate).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)),
                         color = Color.White.copy(alpha = 0.7f),
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center
@@ -475,28 +465,28 @@ fun MatchInfoRowNoLogos(
     onClick : () -> Unit
 ) {
     val cardBorderModifier = if (isFavorite) {
-        // Add yellow glow and outline when team is favorited
-        Modifier.border(
-            width = 2.dp,
-            color = Color.Yellow,
-            shape = RoundedCornerShape(16.dp)
-        ).shadow(
-            elevation = 8.dp,
-            shape = RoundedCornerShape(16.dp),
-            ambientColor = Color.Yellow,
-            spotColor = Color.Yellow
-        )
-    } else {
         Modifier
+            .border(
+                width = 2.dp,
+                color = Color(0xFFDC456F),
+                shape = RoundedCornerShape(16.dp)
+            ).shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = Color(0xFFDC456F),
+                spotColor = Color(0xFFDC456F)
+            )
     }
+    else Modifier
+
+
     val context = LocalContext.current
     Box(
-        modifier = Modifier
+        modifier = cardBorderModifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(darkCardBackground)
             .clickable { onClick() }
-            .then(cardBorderModifier)
     ) {
 
         // Status gradient circle at the bottom
@@ -607,7 +597,7 @@ fun MatchInfoRowNoLogos(
 
                     // Date/time
                     Text(
-                        text = (match.utcDate).format(java.time.format.DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)),
+                        text = (match.utcDate).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)),
                         color = Color.White.copy(alpha = 0.7f),
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center

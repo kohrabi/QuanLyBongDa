@@ -118,15 +118,12 @@ fun BaoCaoScreen(
                 }
 
                 is LoadingState.Error -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Lỗi tải dữ liệu: ${(standings as LoadingState.Error).message}",
-                            color = Color.Red
-                        )
-                    }
+
+                    ErrorComponent(
+                        message = "Dữ liệu không tồn tại",
+                        onRetry = {},
+                        modifier = Modifier.fillMaxSize().padding(innerPadding)
+                    )
                 }
                 is LoadingState.Success -> {
                     val result = (standings as LoadingState.Success<List<Standing>>).data[0].table;

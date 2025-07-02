@@ -141,32 +141,23 @@ fun AppNavigation() {
             composable("settings") { SettingsScreen(navController, modifier, viewModel) }
 
             composable("baoCao") { BaoCaoScreen(navController, modifier, viewModel, apiViewModel) }
-//            composable("banThang/{maTD}", arguments = listOf(navArgument("maTD") { type = NavType.IntType})) { backStackEntry ->
-//                BanThangScreen(backStackEntry.arguments?.getInt("maTD") ?: 1, navController, modifier, viewModel, apiViewModel)
-//            }
             composable("hoSo") { KetQuaTranDauScreen(navController, modifier, viewModel) }
-            composable("traCuu") { TraCuuScreen(navController, modifier, viewModel) }
+            composable("traCuu") { TraCuuScreen(navController, modifier, viewModel, apiViewModel) }
             composable("lapLich") { LapLichScreen(navController, modifier, viewModel, apiViewModel) }
             composable("muaGiai") { MuaGiaiScreen(navController, modifier, viewModel, apiViewModel) }
             composable("doiBong") { DoiBongScreen(navController, modifier, viewModel, apiViewModel) }
             composable("cauThu/{maDoi}", arguments = listOf(navArgument("maDoi") { type = NavType.IntType})) { backStackEntry ->
                 CauThuScreen(backStackEntry.arguments?.getInt("maDoi") ?: 0, navController, modifier, viewModel, apiViewModel)
             }
-
-            composable("cauThuInput/{maDoi}", arguments = listOf(navArgument("maDoi") { type = NavType.IntType})) { backStackEntry ->
-
-                val savedStateHandle = backStackEntry.savedStateHandle;
-                val cauThu = CauThu(
-                    maCT = savedStateHandle.get("maCT") ?: 0,
-                    tenCT = savedStateHandle.get("tenCT") ?: "",
-                    maLCT = savedStateHandle.get("maLCT") ?: 0,
-                    maDoi = savedStateHandle.get("maDoi") ?: 0,
-                    soAo = savedStateHandle.get("soAo") ?: 0,
-                    ghiChu = savedStateHandle.get("ghiChu") ?: "",
-                    ngaySinh = savedStateHandle.get("ngaySinh") ?: LocalDate.now(),
-                    imageURL = savedStateHandle.get("imageURL") ?: "",
+            composable("lapLich/{maTD}", arguments = listOf(navArgument("maTD") { type = NavType.IntType })) { backStackEntry ->
+                val maTD = backStackEntry.arguments?.getInt("maTD") ?: 0
+                XemTranDauScreen(
+                    maTD = maTD,
+                    navController = navController,
+                    modifier = modifier,
+                    viewModel = viewModel,
+                    apiViewModel = apiViewModel
                 )
-                CauThuInputScreen(cauThu, backStackEntry.arguments?.getInt("maDoi") ?: 0, navController, modifier, viewModel)
             }
 
             composable("userInput/{userID}", arguments = listOf(navArgument("userID") { type = NavType.IntType})) {backStackEntry ->
@@ -187,78 +178,6 @@ fun AppNavigation() {
                 );
 
             }
-//            composable("cauThuInput/{maDoi}", arguments = listOf(navArgument("maDoi") { type = NavType.IntType})) { backStackEntry ->
-//
-//                val savedStateHandle = backStackEntry.savedStateHandle;
-//                val cauThu = CauThu(
-//                    maCT = savedStateHandle.get("maCT") ?: 0,
-//                    tenCT = savedStateHandle.get("tenCT") ?: "",
-//                    maLCT = savedStateHandle.get("maLCT") ?: 0,
-//                    maDoi = savedStateHandle.get("maDoi") ?: 0,
-//                    soAo = savedStateHandle.get("soAo") ?: 0,
-//                    ghiChu = savedStateHandle.get("ghiChu") ?: "",
-//                    ngaySinh = savedStateHandle.get("ngaySinh") ?: LocalDate.now(),
-//                    imageURL = savedStateHandle.get("imageURL") ?: "",
-//                )
-//                CauThuInputScreen(cauThu, backStackEntry.arguments?.getInt("maDoi") ?: 0, navController, modifier, viewModel)
-//            }
-//            composable("doiBongInput") { backStackEntry ->
-//                val savedStateHandle = backStackEntry.savedStateHandle;
-//                val doiBong = DoiBong(
-//                    maDoi = savedStateHandle.get("maDoi") ?: 0,
-//                    tenDoi = savedStateHandle.get("tenDoi") ?: "",
-//                    maSan = savedStateHandle.get("maSan") ?: 0,
-//                    maMG = savedStateHandle.get("maMG") ?: 0,
-//                    imageURL = savedStateHandle.get("imageURL") ?: "",
-//                )
-//                DoiBongInputScreen(doiBong, navController, modifier, viewModel)
-//            }
-//            composable("banThangInput/{maTD}", arguments = listOf(navArgument("maTD") { type = NavType.IntType})) { backStackEntry ->
-//                if (backStackEntry.arguments == null) {
-//                    navController.popBackStack();
-//                    return@composable;
-//                }
-//                BanThangInputScreen(backStackEntry.arguments!!.getInt("maTD"), navController, modifier, viewModel)
-//            }
-//            composable("lichThiDauInput") { backStackEntry ->
-//
-//                val savedStateHandle = backStackEntry.savedStateHandle;
-//                val lichThiDau = LichThiDau(
-//                    savedStateHandle.get("maTD") ?: 0,
-//                    savedStateHandle.get("maMG") ?: 0,
-//                    savedStateHandle.get("maVTD") ?: 0,
-//                    savedStateHandle.get("maSan") ?: 0,
-//                    savedStateHandle.get("doiMot") ?: 0,
-//                    savedStateHandle.get("doiHai") ?: 0,
-//                    savedStateHandle.get("doiThang") ?: 0,
-//                    savedStateHandle.get("ngayGioDuKien") ?: LocalDateTime.now(),
-//                    savedStateHandle.get("ngayGioThucTe") ?: LocalDateTime.now(),
-//                    savedStateHandle.get("thoiGianDaThiDau") ?: 0.0f,
-//                    savedStateHandle.get("maTT") ?: 0,
-//                )
-//                LichThiDauInputScreen(
-//                    lichThiDau = lichThiDau,
-//                    navController = navController,
-//                    modifier = modifier,
-//                    viewModel = viewModel
-//                )
-//            }
-//            composable("muaGiaiInput") { backStackEntry ->
-//                val savedStateHandle = backStackEntry.savedStateHandle;
-//                val muaGiai = MuaGiai(
-//                    savedStateHandle.get("maMG") ?: 0,
-//                    savedStateHandle.get("tenMG") ?: "",
-//                    savedStateHandle.get("ngayDienRa") ?: LocalDate.now(),
-//                    savedStateHandle.get("ngayKetThuc") ?: LocalDate.now(),
-//                    imageURL = savedStateHandle.get("imageURL") ?: "",
-//                );
-//                MuaGiaiInputScreen(
-//                    muaGiai = muaGiai,
-//                    navController = navController,
-//                    modifier = modifier,
-//                    viewModel = viewModel
-//                )
-//            }
         }
     }
 }

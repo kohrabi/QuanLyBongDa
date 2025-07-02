@@ -1,6 +1,8 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
-import android.widget.Toast
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,12 +12,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -23,19 +23,15 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.HeartBroken
-import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -46,7 +42,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
@@ -55,27 +50,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.quanlybongda.Database.DatabaseViewModel
-import com.example.quanlybongda.Database.Schema.DoiBong
-import com.example.quanlybongda.Database.Schema.MuaGiai
-import com.example.quanlybongda.Database.Schema.User.YeuThichDoiBong
 import com.example.quanlybongda.Services.Data.Team
-import com.example.quanlybongda.Services.FootballAPI
 import com.example.quanlybongda.Services.FootballAPIViewModel
 import com.example.quanlybongda.Services.LoadingState
-import com.example.quanlybongda.Services.gson
-import com.example.quanlybongda.homeRoute
-import com.example.quanlybongda.navigatePopUpTo
 import com.example.quanlybongda.ui.theme.DarkColorScheme
 import com.example.quanlybongda.ui.theme.Purple80
 import com.example.quanlybongda.ui.theme.QuanLyBongDaTheme
 import com.example.quanlybongda.ui.theme.darkCardBackground
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 // Main Composable for the Football Team Screen
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,25 +75,32 @@ fun DoiBongScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val currentMuaGiai by DatabaseViewModel.currentMuaGiai.collectAsState()
     val doiBongs by apiViewModel.teams.collectAsState()
+
     val snackbarHostState = remember { SnackbarHostState() }
     var selectedValue by remember { mutableStateOf<Team?>(null) }
     val user by viewModel.user.collectAsState()
     var isEditable by remember { mutableStateOf(false) }
 
+    var doiBongYeuThich by remember { mutableStateOf<Set<Int>>(emptySet()) }
+
     LaunchedEffect(Unit) {
         apiViewModel.loadTeams()
-    }
-
-    LaunchedEffect(doiBongs) {
-        if (doiBongs is LoadingState.Success && user != null) {
-            val teams = (doiBongs as LoadingState.Success<List<Team>>).data
-            // Check if the user has favorite teams and update their state
-            teams.forEach { team ->
-                team.isFavorite = user?.doiBongYeuThich?.any { it == team.id } ?: false;
-            }
+        if (user != null) {
+            doiBongYeuThich = user?.doiBongYeuThich?.toSet() ?: emptySet()
         }
     }
 
+//    LaunchedEffect(doiBongs) {
+//        if (doiBongs is LoadingState.Success && user != null) {
+//            val teams = (doiBongs as LoadingState.Success<List<Team>>).data
+//            // Check if the user has favorite teams and update their state
+//            teams.forEach { team ->
+//                team.isFavorite = user?.doiBongYeuThich?.any { it == team.id } ?: false;
+//            }
+//            isEditable = true;
+//            apiViewModel.reloadTeams();
+//        }
+//    }
 
     // Main screen layout
     Scaffold(
@@ -119,7 +111,7 @@ fun DoiBongScreen(
         topBar = {
             AppTopBar(
                 title = "Đội bóng",
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
             )
         },
         floatingActionButton = {
@@ -144,15 +136,12 @@ fun DoiBongScreen(
             }
 
             is LoadingState.Error -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Lỗi tải dữ liệu: ${(doiBongs as LoadingState.Error).message}",
-                        color = Color.Red
-                    )
-                }
+
+                ErrorComponent(
+                    message = "Dữ liệu không tồn tại",
+                    onRetry = {},
+                    modifier = Modifier.fillMaxSize().padding(innerPadding)
+                )
             }
             is LoadingState.Success -> {
                 LazyColumn(
@@ -166,30 +155,23 @@ fun DoiBongScreen(
                 ) {
                     val result = (doiBongs as LoadingState.Success<List<Team>>).data;
                     items(result) { doiBong ->
-                        SwipeContainer(
-                            item = doiBong,
-                            content = {
-                                TeamCard(
-                                    team = doiBong,
-                                    isFavorite = doiBong.isFavorite,
-                                    onClick = {
-                                        navController.navigate("cauThu/${doiBong.id}")
-                                    })
+                        TeamCard(
+                            team = doiBong,
+                            isFavorite = doiBongYeuThich.contains(doiBong.id),
+                            onClick = {
+                                navController.navigate("cauThu/${doiBong.id}")
                             },
-                            rightIcon = Icons.Default.Star,
-                            rightSwipe = if (!doiBong.isFavorite) ({
-                                viewModel.addDoiBongYeuThich(doiBong.id);
-                                doiBong.isFavorite = true
-                            }) else null,
-                            rightColor = Color(0xFF74C27A),
-                            leftIcon = Icons.Default.HeartBroken,
-                            leftSwipe = if (!doiBong.isFavorite) ({
-                                viewModel.removeDoiBongYeuThich(doiBong.id);
-                                doiBong.isFavorite = false
-                            }) else null,
-                            leftColor = Color(0xFFDC456F),
-                            backgroundModifier = Modifier.clip(RoundedCornerShape(16.dp))
-                        )
+                            onFavoriteClick = {
+                                if (!doiBongYeuThich.contains(doiBong.id)) {
+                                    viewModel.addDoiBongYeuThich(doiBong.id)
+                                    doiBongYeuThich = doiBongYeuThich + doiBong.id;
+//                                    doiBong.isFavorite = true;
+                                } else {
+                                    viewModel.removeDoiBongYeuThich(doiBong.id)
+                                    doiBongYeuThich = doiBongYeuThich - doiBong.id;
+//                                    doiBong.isFavorite = false;
+                                }
+                        })
                     }
                 }
             }
@@ -199,22 +181,40 @@ fun DoiBongScreen(
 
 // Composable for a single Team Card
 @Composable
-fun TeamCard(team: Team, isFavorite : Boolean, onClick : () -> Unit) {
-    val cardBorderModifier = if (isFavorite) {
-        // Add yellow glow and outline when team is favorited
-        Modifier.border(
-            width = 2.dp,
-            color = Color.Yellow,
-            shape = RoundedCornerShape(16.dp)
-        ).shadow(
-            elevation = 8.dp,
-            shape = RoundedCornerShape(16.dp),
-            ambientColor = Color.Yellow,
-            spotColor = Color.Yellow
-        )
-    } else {
+fun TeamCard(team: Team, isFavorite : Boolean, onFavoriteClick: () -> Unit, onClick : () -> Unit) {
+
+    val animateBorder by animateDpAsState(
+        targetValue = if (isFavorite) 2.dp else 0.dp,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "animateBorder"
+    )
+
+    val animateShadow by animateDpAsState(
+        targetValue = if (isFavorite) 8.dp else 0.dp,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "animateBorder"
+    )
+
+    val cardBorderModifier = if (animateBorder.value > 0.1f) {
         Modifier
+            .border(
+                width = animateBorder,
+                color = Color(0xFFDC456F),
+                shape = RoundedCornerShape(16.dp)
+            ).shadow(
+                elevation = animateShadow,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = Color(0xFFDC456F),
+                spotColor = Color(0xFFDC456F)
+            )
     }
+    else Modifier
 
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -260,15 +260,11 @@ fun TeamCard(team: Team, isFavorite : Boolean, onClick : () -> Unit) {
                 )
             }
 
-            // Add star icon for favorited teams
-            if (isFavorite) {
-                Icon(
-                    imageVector = Icons.Filled.Star,
-                    contentDescription = "Favorited",
-                    tint = Color.Yellow,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
+            AnimatedHeartButton(
+                isLiked = isFavorite,
+                onToggle = onFavoriteClick,
+                modifier = Modifier.padding(8.dp)
+            )
         }
     }
 }

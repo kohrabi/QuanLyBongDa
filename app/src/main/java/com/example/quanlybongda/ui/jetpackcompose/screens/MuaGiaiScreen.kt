@@ -2,6 +2,13 @@
 package com.example.quanlybongda.ui.jetpackcompose.screens
 
 import android.widget.Toast
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.EaseOutExpo
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -117,15 +124,12 @@ fun MuaGiaiScreen(
             }
 
             is LoadingState.Error -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Lỗi tải dữ liệu: ${(competitions as LoadingState.Error).message}",
-                        color = Color.Red
-                    )
-                }
+
+                ErrorComponent(
+                    message = "Dữ liệu không tồn tại",
+                    onRetry = {},
+                    modifier = Modifier.fillMaxSize().padding(paddingValues)
+                )
             }
 
             is LoadingState.Success -> {
@@ -188,6 +192,15 @@ fun SeasonCard(
     isSelected: Boolean,
     onSeasonSelect: () -> Unit
 ) {
+    val animateBorder by animateDpAsState(
+        targetValue = if (isSelected) 6.dp else 0.dp,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioHighBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "Border Animation"
+    )
+
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
@@ -197,11 +210,12 @@ fun SeasonCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onSeasonSelect() }
-            .then(
-                if (isSelected) Modifier.border(6.dp, Purple80, RoundedCornerShape(16.dp))
-                else Modifier.border(6.dp, Color.Transparent, RoundedCornerShape(16.dp))
+            .border(
+                width = animateBorder,
+                color = if (isSelected) Purple80 else Color.Transparent,
+                shape = RoundedCornerShape(16.dp)
             )
-//            .padding(4.dp)
+            .padding(4.dp)
     ) {
         Row(
             modifier = Modifier.padding(16.dp)

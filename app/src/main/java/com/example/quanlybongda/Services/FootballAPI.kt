@@ -35,33 +35,27 @@ private val authInterceptor = Interceptor { chain ->
     chain.proceed(request)
 }
 
-private val logInterceptor = HttpLoggingInterceptor().apply {
+val logInterceptor = HttpLoggingInterceptor().apply {
     level = HttpLoggingInterceptor.Level.BODY
 }
 
 private val requestRetryInterceptor = Interceptor { chain ->
     val request = chain.proceed(chain.request());
     val headers = request.headers;
-    val requestCounterReset = headers.find { it.first == "x-requestcounter-reset" };
     val requestAvailable = headers.find { it.first == "x-requests-available-minute" };
-    if (requestAvailable != null) {
-        val availableCount = requestAvailable.second.toInt();
-        if (!request.isSuccessful && availableCount == 0 && requestCounterReset != null) {
-            val resetTime = requestCounterReset.second.toLong();
-            MainActivity.mainActivity.runOnUiThread(object : Runnable {
-                override fun run() {
-                    Toast.makeText(MainActivity.mainActivity,
-                        "Request limit reached. Waiting for $resetTime seconds to reset.", Toast.LENGTH_SHORT).show()
-                }
-            })
-
-            Log.wtf("FootballAPI", "Request limit reached. Waiting for $resetTime seconds to reset.");
-            Log.d("FootballAPI", request.toString());
-            Thread.sleep(resetTime * 1000);
-            request.close();
-            Log.d("FootballAPI", "Retrying request after waiting for $resetTime seconds.");
-            return@Interceptor chain.proceed(chain.request());
+    if (request.code == 429) {
+        val resetTime = requestAvailable?.second?.toLongOrNull() ?: 60L;
+        MainActivity.mainActivity.runOnUiThread{
+            Toast.makeText(MainActivity.mainActivity,
+                "Request limit reached. Waiting for $resetTime seconds to reset.", Toast.LENGTH_SHORT).show()
         }
+
+        Log.wtf("FootballAPI", "Request limit reached. Waiting for $resetTime seconds to reset.");
+        Log.d("FootballAPI", request.toString());
+        request.close();
+        Thread.sleep(resetTime * 1000);
+        Log.d("FootballAPI", "Retrying request after waiting for $resetTime seconds.");
+        return@Interceptor chain.proceed(chain.request().newBuilder().build());
     }
     return@Interceptor request;
 }

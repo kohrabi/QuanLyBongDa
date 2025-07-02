@@ -5,6 +5,7 @@ import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
 @Entity(
+    primaryKeys = ["userId", "maDoi"],
     foreignKeys = arrayOf(
         ForeignKey(
             entity = User::class,
@@ -15,12 +16,12 @@ import androidx.room.PrimaryKey
     )
 )
 data class YeuThichDoiBong(
-    @PrimaryKey
     val userId: Int,
     val maDoi: Int,
 )
 
 @Entity(
+    primaryKeys = ["userId", "maCT"],
     foreignKeys = arrayOf(
         ForeignKey(
             entity = User::class,
@@ -31,7 +32,6 @@ data class YeuThichDoiBong(
     )
 )
 data class YeuThichCauThu(
-    @PrimaryKey
     val userId: Int,
     val maCT: Int,
 )

@@ -23,7 +23,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -88,8 +87,8 @@ fun <T> SwipeToDeleteContainer(
             backgroundContent = {
                 DeleteBackground(
                     swipeToDismissBoxState = dismissState,
-                    leftIcon = Icons.Default.Edit,
-                    rightIcon = Icons.Default.Delete,
+                    startToEndIcon = Icons.Default.Edit,
+                    endToStartIcon = Icons.Default.Delete,
                     backgroundModifier = backgroundModifier
                 );
             },
@@ -106,56 +105,54 @@ fun <T> SwipeToDeleteContainer(
 @Composable
 fun <T> SwipeContainer(
     item: T,
-    leftSwipe: ((T) -> Unit)? = null,
-    rightSwipe: ((T) -> Unit)? = null,
+    onEndToStartSwipe: ((T) -> Unit)? = null,
+    onStartToEndSwipe: ((T) -> Unit)? = null,
+    onResetCompeted: (() -> Unit)? = null,
     content: @Composable (T) -> Unit,
     backgroundModifier: Modifier = Modifier,
-    leftIcon: ImageVector = Icons.Default.Restore,
-    rightIcon: ImageVector = Icons.Default.Delete,
-    leftColor: Color = Color(0xFF74C27A),
-    rightColor: Color = Color(0xFFDC456F)
+    startToEndIcon: ImageVector = Icons.Default.Restore,
+    endToStartIcon: ImageVector = Icons.Default.Delete,
+    startToEndColor: Color = Color(0xFF74C27A),
+    endToStartColor: Color = Color(0xFFDC456F)
 ) {
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
             if (value == SwipeToDismissBoxValue.EndToStart) {
-                if (rightSwipe != null) {
-                    rightSwipe(item);
+                if (onEndToStartSwipe != null) {
+                    onEndToStartSwipe(item);
                 }
             }
             else if (value == SwipeToDismissBoxValue.StartToEnd) {
-                if (leftSwipe != null) {
-                    leftSwipe(item);
+                if (onStartToEndSwipe != null) {
+                    onStartToEndSwipe(item);
                 }
             }
             return@rememberSwipeToDismissBoxState true;
         },
         positionalThreshold = { it * 0.9f }
     )
-    var isUpdating by remember() { mutableStateOf(false) }
 
     LaunchedEffect(dismissState.currentValue) {
         if (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
-            delay(500);
-            withFrameNanos {}
             dismissState.reset()
+            onResetCompeted?.invoke()
         }
     }
 
-    
     SwipeToDismissBox(
         state = dismissState,
         backgroundContent = {
             DeleteBackground(
                 swipeToDismissBoxState = dismissState,
-                leftIcon = leftIcon,
-                rightIcon = rightIcon,
+                startToEndIcon = startToEndIcon,
+                endToStartIcon = endToStartIcon,
                 backgroundModifier = backgroundModifier,
-                leftColor = leftColor,
-                rightColor = rightColor
+                startToEndColor = startToEndColor,
+                endToStartColor = endToStartColor
             );
         },
-        enableDismissFromEndToStart = leftSwipe != null,
-        enableDismissFromStartToEnd = rightSwipe != null,
+        enableDismissFromEndToStart = onEndToStartSwipe != null,
+        enableDismissFromStartToEnd = onStartToEndSwipe != null,
         modifier = Modifier.fillMaxSize()
     ) {
         content(item);
@@ -165,17 +162,17 @@ fun <T> SwipeContainer(
 @Composable
 fun DeleteBackground(
     swipeToDismissBoxState: SwipeToDismissBoxState,
-    leftIcon: ImageVector = Icons.Default.Restore,
-    rightIcon: ImageVector = Icons.Default.Delete,
+    startToEndIcon: ImageVector = Icons.Default.Restore,
+    endToStartIcon: ImageVector = Icons.Default.Delete,
     backgroundModifier: Modifier = Modifier,
-    leftColor: Color = Color(0xFF74C27A),
-    rightColor: Color = Color(0xFFDC456F)
+    startToEndColor: Color = Color(0xFF74C27A),
+    endToStartColor: Color = Color(0xFFDC456F)
 ) {
 
     // Color(0xFFDC456F), Color(0xFFB06AB3)
     val animatedColor by animateColorAsState(
-        if (swipeToDismissBoxState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) leftColor
-        else if (swipeToDismissBoxState.dismissDirection == SwipeToDismissBoxValue.EndToStart) rightColor
+        if (swipeToDismissBoxState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) startToEndColor
+        else if (swipeToDismissBoxState.dismissDirection == SwipeToDismissBoxValue.EndToStart) endToStartColor
         else Color.Transparent,
         label = "color"
     )
@@ -193,7 +190,7 @@ fun DeleteBackground(
                 Alignment.CenterEnd) {
         if (swipeToDismissBoxState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) {
             Icon(
-                imageVector = leftIcon,
+                imageVector = startToEndIcon,
                 contentDescription = null,
                 tint = Color.White,
                 modifier = Modifier.padding(8.dp)
@@ -201,82 +198,11 @@ fun DeleteBackground(
         }
         else if (swipeToDismissBoxState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
             Icon(
-                imageVector = rightIcon,
+                imageVector = endToStartIcon,
                 contentDescription = null,
                 tint = Color.White,
                 modifier = Modifier.padding(8.dp)
             )
         }
     }
-//
-//    Row(
-//        modifier = backgroundModifier
-//            .fillMaxSize(),
-//        horizontalArrangement = Arrangement.SpaceEvenly,
-//        verticalAlignment = Alignment.CenterVertically,
-//    ) {
-//        if (swipeToDismissBoxState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) {
-//            Box(
-//                modifier = Modifier
-//                    .background(Color.Green)
-//                    .fillMaxHeight()
-//                    .weight(1.0f),
-//                contentAlignment = Alignment.CenterStart
-//            ) {
-//                Icon(
-//                    imageVector = Icons.Default.Restore,
-//                    contentDescription = null,
-//                    tint = Color.White,
-//                    modifier = Modifier.padding(8.dp)
-//                )
-//            }
-//        }
-//        else if (swipeToDismissBoxState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
-//            Box(
-//                modifier = Modifier
-//                    .background(Color.Red)
-//                    .fillMaxHeight()
-//                    .weight(1.0f),
-//                contentAlignment = Alignment.CenterEnd
-//            ) {
-//                Icon(
-//                    imageVector = Icons.Default.Delete,
-//                    contentDescription = null,
-//                    tint = Color.White,
-//                    modifier = Modifier.padding(8.dp)
-//                )
-//            }
-//        }
-//        else {
-//            Box(
-//                modifier = Modifier
-//                    .background(Color.Green)
-//                    .fillMaxHeight()
-//                    .weight(1.0f),
-//                contentAlignment = Alignment.CenterStart
-//            ) {
-//                Icon(
-//                    imageVector = Icons.Default.Restore,
-//                    contentDescription = null,
-//                    tint = Color.White,
-//                    modifier = Modifier.padding(8.dp)
-//                )
-//            }
-//            Box(
-//                modifier = Modifier
-//                    .background(Color.Red)
-//                    .fillMaxHeight()
-//                    .weight(1.0f),
-//                contentAlignment = Alignment.CenterEnd
-//            ) {
-//                Icon(
-//                    imageVector = Icons.Default.Delete,
-//                    contentDescription = null,
-//                    tint = Color.White,
-//                    modifier = Modifier.padding(8.dp)
-//                )
-//            }
-//
-//        }
-//    }
 }

@@ -4,6 +4,7 @@ package com.example.quanlybongda.ui.jetpackcompose.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -63,6 +64,7 @@ fun AppTopBar(
     title: String,
     scrollBehavior : TopAppBarScrollBehavior,
     navigationIcon: @Composable () -> Unit = {},
+    actions: @Composable RowScope.() -> Unit = {},
 ) {
     CenterAlignedTopAppBar(
         title = {
@@ -80,6 +82,7 @@ fun AppTopBar(
             actionIconContentColor = Purple80,
         ),
         navigationIcon = navigationIcon,
+        actions = actions,
         scrollBehavior = scrollBehavior
     )
 }

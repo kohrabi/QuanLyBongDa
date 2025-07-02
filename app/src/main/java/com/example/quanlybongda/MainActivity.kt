@@ -30,13 +30,17 @@ class MainActivity : ComponentActivity() {
     companion object
     {
 
-        lateinit var mainActivity: Activity
+        private lateinit var _mainActivity: Activity
+
+        public val mainActivity: Activity
+            get() = _mainActivity;
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        mainActivity = this
+        _mainActivity = this
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(DarkColorScheme.surfaceContainer.toArgb())
         )

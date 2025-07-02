@@ -64,6 +64,7 @@ data class Player(
     val contract: Contract?,
 ) {
     var imageURL: String? = null;
+    var isFavorite: Boolean = false
 }
 
 data class Staff(
