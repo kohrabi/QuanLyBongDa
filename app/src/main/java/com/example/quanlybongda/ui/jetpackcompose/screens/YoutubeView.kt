@@ -18,6 +18,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTube
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
+import java.net.CookieManager
 
 @Composable
 fun YoutubeView(
@@ -33,46 +34,48 @@ fun YoutubeView(
         ytPlayer?.loadVideo(youtubeVideoId, 0f);
     }
 
-    Box() {
-        AndroidView(
-            modifier = Modifier,
-            factory = { context ->
-                YouTubePlayerView(context = context).apply {
-                    lifecycleOwner.lifecycle.addObserver(this);
-    //                enableBackgroundPlayback(true);
-
-                    addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
-                        override fun onReady(youTubePlayer: YouTubePlayer) {
-                            super.onReady(youTubePlayer);
-                            youTubePlayer.loadVideo(youtubeVideoId, 0f);
-                            ytPlayer = youTubePlayer;
-                        }
-
-                        override fun onVideoDuration(youTubePlayer: YouTubePlayer, duration: Float) {
-                            super.onVideoDuration(youTubePlayer, duration)
-                        }
-
-                        override fun onError(
-                            youTubePlayer: YouTubePlayer,
-                            error: PlayerConstants.PlayerError
-                        ) {
-                            super.onError(youTubePlayer, error)
-                            onError()
-                        }
-
-                        override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
-                            super.onCurrentSecond(youTubePlayer, second);
-                        }
-
-                        override fun onStateChange(
-                            youTubePlayer: YouTubePlayer,
-                            state: PlayerConstants.PlayerState
-                        ) {
-                            super.onStateChange(youTubePlayer, state);
-                        }
-                    });
-                }
-            }
-        )
+    LaunchedEffect(Unit) {
+        android.webkit.CookieManager.getInstance().removeAllCookies(null);
+        android.webkit.CookieManager.getInstance().flush();
     }
+
+    AndroidView(
+        modifier = Modifier,
+        factory = { context ->
+            YouTubePlayerView(context = context).apply {
+                lifecycleOwner.lifecycle.addObserver(this);
+//                enableBackgroundPlayback(true);
+                addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
+                    override fun onReady(youTubePlayer: YouTubePlayer) {
+                        super.onReady(youTubePlayer);
+                        youTubePlayer.loadVideo(youtubeVideoId, 0f);
+                        ytPlayer = youTubePlayer;
+                    }
+
+                    override fun onVideoDuration(youTubePlayer: YouTubePlayer, duration: Float) {
+                        super.onVideoDuration(youTubePlayer, duration)
+                    }
+
+                    override fun onError(
+                        youTubePlayer: YouTubePlayer,
+                        error: PlayerConstants.PlayerError
+                    ) {
+                        super.onError(youTubePlayer, error)
+                        onError()
+                    }
+
+                    override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
+                        super.onCurrentSecond(youTubePlayer, second);
+                    }
+
+                    override fun onStateChange(
+                        youTubePlayer: YouTubePlayer,
+                        state: PlayerConstants.PlayerState
+                    ) {
+                        super.onStateChange(youTubePlayer, state);
+                    }
+                });
+            }
+        }
+    )
 }

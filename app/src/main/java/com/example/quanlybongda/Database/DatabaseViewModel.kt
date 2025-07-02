@@ -44,6 +44,7 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
     public val thePhatDAO : ThePhatDAO;
     public val banThangDAO : BanThangDAO;
     public val yeuThichDAO: YeuThichDAO;
+    public val caDoDAO: CaDoDAO;
 
     public val userDAO : UserDAO;
     public val userRoleDAO : UserRoleDAO;
@@ -63,6 +64,7 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
         userGroupDAO = appDatabase.userGroupDAO;
         yeuThichDAO = appDatabase.yeuThichDAO;
         userDAO = appDatabase.userDAO;
+        caDoDAO = appDatabase.caDoDAO;
     }
 
     suspend fun selectKetQuaThiDau(maTD: Int): KetQuaTranDau? {

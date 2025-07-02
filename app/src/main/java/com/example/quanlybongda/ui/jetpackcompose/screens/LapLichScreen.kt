@@ -185,7 +185,7 @@ fun LapLichScreen(
                         Spacer(modifier = Modifier.height(30.dp)) // << SỬA: Tăng khoảng cách
 
                         if (result.isNotEmpty()) {
-                            FeaturedMatch(
+                            MatchResult(
                                 result[0],
                                 onClick = {
 //                                navController.navigate("banThang/${lichThiDau.id}")
@@ -265,20 +265,6 @@ fun FeaturedMatch(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Area flag
-                match.area.flag?.let { flagUrl ->
-                    AsyncImage(
-                        model = ImageRequest.Builder(context)
-                            .data(flagUrl)
-                            .decoderFactory(SvgDecoder.Factory())
-                            .build(),
-                        contentDescription = "Country flag",
-                        modifier = Modifier
-                            .size(20.dp)
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
 
                 // Venue information
                 if (match.venue != null) {
@@ -335,6 +321,22 @@ fun FeaturedMatch(
                     modifier = Modifier.padding(horizontal = 8.dp)
                 ) {
                     // Status indicator
+                    match.area.flag?.let { flagUrl ->
+                        AsyncImage(
+                            model = ImageRequest.Builder(context)
+                                .data(flagUrl)
+                                .decoderFactory(SvgDecoder.Factory())
+                                .build(),
+                            contentDescription = "Country flag",
+                            modifier = Modifier
+                                .size(20.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     StatusIndicator(status = match.status)
 
                     Spacer(modifier = Modifier.height(8.dp))

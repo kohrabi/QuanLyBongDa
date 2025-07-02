@@ -5,6 +5,7 @@ plugins {
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("com.google.gms.google-services")
 
     id("kotlin-kapt")
 }
@@ -53,6 +54,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:3.0.0")
 
     implementation(libs.androidx.room.runtime)
+    implementation(libs.firebase.ai)
 
     // If this project uses any Kotlin source, use Kotlin Symbol Processing (KSP)
     // See Add the KSP plugin to your project
@@ -93,6 +95,11 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.2")
+    implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
+    implementation("com.google.firebase:firebase-vertexai")
+
+    implementation(libs.vico.compose)
+    implementation(libs.vico.compose.m3)
 
 
     testImplementation(libs.junit)

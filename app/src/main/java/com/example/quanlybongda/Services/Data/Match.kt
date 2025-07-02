@@ -111,6 +111,13 @@ data class ScoreDetail(
     val away: Int?
 )
 
+data class GoalShort(
+    val minute: Int,
+    val playerName: String,
+    val teamCode: String,
+    val action: String,
+)
+
 data class Goal(
     val minute: Int,
     val injuryTime: Int?,
@@ -152,9 +159,9 @@ data class PersonReference(
 )
 
 data class Odds(
-    val homeWin: Double?,
-    val draw: Double?,
-    val awayWin: Double?
+    var homeWin: Double?,
+    var draw: Double?,
+    var awayWin: Double?
 )
 
 data class Referee(
