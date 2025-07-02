@@ -2,6 +2,7 @@ package com.example.quanlybongda.ui.jetpackcompose.screens
 
 import android.R
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -107,6 +108,7 @@ fun XemTranDauScreen(
     val coroutineScope = rememberCoroutineScope()
 
     var odd by remember { mutableStateOf<Odds?>(null)}
+    var currentBet by remember { mutableStateOf<CaDo?>(null) }
     var showBettingDialog by remember { mutableStateOf(false) }
     var bettingOptions by remember { mutableStateOf(listOf<BettingOption>(
         BettingOption("Home Win", 0.0, homeColor),
@@ -164,20 +166,36 @@ fun XemTranDauScreen(
         }
         setCaDo();
 
-        val prompt = GenerativeModel.prompt
-            .replace("{homeTeam}", currentMatch?.homeTeam?.name ?: "")
-            .replace("{awayTeam}", currentMatch?.awayTeam?.name ?: "")
-            .replace("{competition}", currentMatch?.competition?.name ?: "")
-            .replace("{season}", currentMatch?.utcDate?.year.toString())
-        val response = GenerativeModel.model.generateContent(prompt);
 
-        response.text?.let {
-            val json = gson.fromJson(it, OddResponse::class.java);
-            odd = Odds(
-                homeWin = json.homeTeamWinPercentage.roundToInt().toDouble(),
-                awayWin = json.awayTeamWinPercentage.roundToInt().toDouble(),
-                draw = json.drawPercentage.roundToInt().toDouble()
-            );
+        try {
+
+            val prompt = GenerativeModel.prompt
+                .replace("{homeTeam}", currentMatch?.homeTeam?.name ?: "")
+                .replace("{awayTeam}", currentMatch?.awayTeam?.name ?: "")
+                .replace("{competition}", currentMatch?.competition?.name ?: "")
+                .replace("{season}", currentMatch?.utcDate?.year.toString())
+            val response = GenerativeModel.model.generateContent(prompt);
+            response.text?.let {
+                val json = gson.fromJson(it, OddResponse::class.java);
+                odd = Odds(
+                    homeWin = json.homeTeamWinPercentage.roundToInt().toDouble(),
+                    awayWin = json.awayTeamWinPercentage.roundToInt().toDouble(),
+                    draw = json.drawPercentage.roundToInt().toDouble()
+                );
+            }
+        }
+        catch (e: Exception) {
+            odd = null;
+            snackbarHostState.showSnackbar("Không thể lấy tỷ lệ cược từ mô hình AI: ${e.message}");
+        }
+
+        viewModel.viewModelScope.launch {
+            user?.let { it
+                currentBet = viewModel.caDoDAO.selectCaDoByUserIDMaTD(
+                    userId = it.id,
+                    maTD = maTD,
+                );
+            }
         }
     }
 
@@ -230,6 +248,7 @@ fun XemTranDauScreen(
     LaunchedEffect(Unit) {
         apiViewModel.loadTeams();
         apiViewModel.loadMatches(viewModel);
+
     }
 
     Scaffold(
@@ -417,6 +436,47 @@ fun XemTranDauScreen(
                             }
                         }
                         Spacer(modifier = Modifier.height(30.dp)) // << SỬA: Tăng khoảng cách
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color(0xFF1A2234)
+                            ),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            when {
+                                currentBet != null && currentMatch != null -> {
+                                    BetHistoryItem(
+                                        bet = UserBetWithMatchDetails(
+                                            match = currentMatch!!,
+                                            betAmount = currentBet?.soTien ?: 0,
+                                            betTeam = when (currentBet?.doiCuoc) {
+                                                currentMatch?.homeTeam?.id -> BettingTeam.HOME
+                                                currentMatch?.awayTeam?.id -> BettingTeam.DRAW
+                                                else -> BettingTeam.AWAY
+                                            },
+                                        ),
+                                        onClick = {}
+                                    )
+                                }
+                                else -> {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(100.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "No betting history found",
+                                            color = Color.White.copy(alpha = 0.6f),
+                                            fontSize = 16.sp
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(30.dp)) // << SỬA: Tăng khoảng cách
+
                         StatisticRowHeader();
                     }
                     items (banThangs) { it ->
@@ -435,14 +495,21 @@ fun XemTranDauScreen(
 
     BettingDialog(
         showDialog = showBettingDialog,
+        balance = user?.soDu ?: 0,
         onDismiss = { showBettingDialog = false },
         selectedOption = bettingOption,
         allOptions = bettingOptions,
-        onOptionSelected = {},
+        onOptionSelected = {
+            bettingOption = it;
+        },
         onPlaceBet = { money, option ->
             viewModel.viewModelScope.launch {
                 if (currentMatch == null || user == null) {
                     snackbarHostState.showSnackbar("Trận đấu hoặc người dùng không hợp lệ");
+                    return@launch;
+                }
+                if (user!!.soDu < money) {
+                    snackbarHostState.showSnackbar("Số dư không đủ để đặt cược");
                     return@launch;
                 }
                 val caDo = CaDo(
@@ -451,8 +518,9 @@ fun XemTranDauScreen(
                     doiCuoc = option.teamId,
                     soTien = money.toInt()
                 );
-                viewModel.caDoDAO.upsertCaDo(caDo);
+                viewModel.bet(caDo);
                 caDos.add(caDo);
+                currentBet = caDo;
                 setCaDo();
                 snackbarHostState.showSnackbar("Đặt cược thành công: ${option.name} - ${money} VNĐ");
             }

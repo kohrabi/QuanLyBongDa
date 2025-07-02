@@ -5,8 +5,6 @@ import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
 import com.example.quanlybongda.Database.Schema.User.CaDo
-import com.example.quanlybongda.Database.Schema.User.YeuThichCauThu
-import com.example.quanlybongda.Database.Schema.User.YeuThichDoiBong
 
 @Dao
 interface CaDoDAO {
@@ -14,7 +12,14 @@ interface CaDoDAO {
         SELECT * FROM CaDo
         WHERE userId=:userId
     """)
-    suspend fun selectCaDo(userId: Int): List<CaDo>;
+    suspend fun selectCaDoByUserID(userId: Int): List<CaDo>;
+
+    @Query("""
+        SELECT * FROM CaDo
+        WHERE userId=:userId AND maTD=:maTD
+        LIMIT 1
+    """)
+    suspend fun selectCaDoByUserIDMaTD(userId: Int, maTD: Int): CaDo?;
 
     @Query("""
         SELECT * FROM CaDo
@@ -32,9 +37,8 @@ interface CaDoDAO {
         SELECT count(*) FROM CaDo
         WHERE maTD=:maTD
         GROUP BY maTD
-        LIMIT 1
     """)
-    suspend fun countCaDoByMaTD(maTD: Int) : Int;
+    suspend fun countCaDoByMaTD(maTD: Int) : Int?;
 
     @Delete
     suspend fun deleteCaDo(caDo: CaDo);

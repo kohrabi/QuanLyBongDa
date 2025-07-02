@@ -189,7 +189,7 @@ class FootballAPIViewModel @Inject constructor() : ViewModel() {
 
                     if (databaseViewModel != null && databaseViewModel.user.value != null) {
                         matches.forEach { it ->
-                            val caDoCount = databaseViewModel.caDoDAO.countCaDoByMaTD(it.id);
+                            val caDoCount = databaseViewModel.caDoDAO.countCaDoByMaTD(it.id) ?: 0;
                             if (caDoCount > 200)
                                 return@forEach;
                             databaseViewModel.viewModelScope.launch {

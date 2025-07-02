@@ -46,12 +46,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.quanlybongda.Services.Data.Match
 import com.example.quanlybongda.Services.Data.Odds
+import kotlin.math.min
 
 
 @Composable
 fun BettingDialog(
     showDialog: Boolean,
     onDismiss: () -> Unit,
+    balance: Int,
     selectedOption: BettingOption,
     allOptions: List<BettingOption>,
     onOptionSelected: (BettingOption) -> Unit,
@@ -134,7 +136,7 @@ fun BettingDialog(
                         onValueChange = {
                             // Only accept digits and ensure min value of 100,000 VND
                             if (it.isEmpty() || it.matches(Regex("^\\d+$"))) {
-                                betAmount.value = it
+                                betAmount.value = min((it.toIntOrNull() ?: 0), balance).toString()
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -161,6 +163,13 @@ fun BettingDialog(
                         },
                         isError = betAmount.value.isNotEmpty() &&
                                 (betAmount.value.toIntOrNull() ?: 0) < 100_000
+                    )
+
+                    Text(
+                        text = "Your balance: ₫${balance}",
+                        color = Color.White,
+                        modifier = Modifier.padding(top = 8.dp),
+                        fontSize = 12.sp
                     )
                 }
             },
@@ -364,7 +373,7 @@ fun OddsSection(
             options.forEach { it ->
                 OddsItem(
                     label = it.name,
-                    value = odd?.homeWin,
+                    value = it.percentage,
                     teamName = match.homeTeam.name,
                     color = it.color,
                     onClick = {}

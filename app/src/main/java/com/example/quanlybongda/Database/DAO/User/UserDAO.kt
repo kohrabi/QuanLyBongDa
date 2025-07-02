@@ -32,6 +32,14 @@ interface UserDAO {
     )
     suspend fun selectUserSession(sessionId: String) : List<SessionValidationResult>;
 
+    @Query("""
+        UPDATE User
+        SET soDu = :soDu
+        WHERE id = :userId
+    """
+    )
+    suspend fun updateUserBalance(userId: Int, soDu: Int);
+
     @Query("""UPDATE Session SET expiresAt=:expiresAt WHERE sessionId=:sessionId """)
     suspend fun updateSessionExpiration(sessionId: String, expiresAt : LocalDateTime);
 

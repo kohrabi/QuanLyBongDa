@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -29,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -46,7 +48,6 @@ import com.example.quanlybongda.Services.FootballAPIViewModel
 import com.example.quanlybongda.Services.LoadingState
 import com.example.quanlybongda.ui.theme.Purple80
 import java.text.NumberFormat
-import java.text.SimpleDateFormat
 import java.util.Locale
 
 @Composable
@@ -57,6 +58,8 @@ fun BettingHistoryComponent(
 ) {
     val user by viewModel.user.collectAsState()
     val matches by apiViewModel.matches.collectAsState()
+    val competition by apiViewModel.currentCompetition.collectAsState()
+    val season by apiViewModel.currentSeason.collectAsState()
     var userBets by remember { mutableStateOf<List<UserBetWithMatchDetails>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
 
@@ -65,47 +68,47 @@ fun BettingHistoryComponent(
             val matchesData = (matches as LoadingState.Success<List<Match>>).data
 
             // Fetch user's betting history
-            val userCaDos = viewModel.caDoDAO.selectCaDo(user!!.id)
+            val userCaDos = viewModel.caDoDAO.selectCaDoByUserID(user!!.id)
 
-//            // Map CaDo objects to UserBetWithMatchDetails
-//            userBets = userCaDos.mapNotNull { caDo ->
-//                val match = matchesData.find { it.id == caDo.maTD }
-//                match?.let {
-//                    val homeTeam = it.homeTeam
-//                    val awayTeam = it.awayTeam
-//
-//                    // Determine which team the user bet on
-//                    val betTeam = when (caDo.doiCuoc) {
-//                        homeTeam.id -> BettingTeam.HOME
-//                        awayTeam.id -> BettingTeam.AWAY
-//                        else -> BettingTeam.DRAW
-//                    }
-//
-//                    // Determine outcome based on match results
-//                    val outcome = if (it.status == "FINISHED") {
-//                        val homeScore = it.score.fullTime.home
-//                        val awayScore = it.score.fullTime.away
-//
-//                        when {
-//                            homeScore > awayScore && betTeam == BettingTeam.HOME -> BetOutcome.WIN
-//                            homeScore < awayScore && betTeam == BettingTeam.AWAY -> BetOutcome.WIN
-//                            homeScore == awayScore && betTeam == BettingTeam.DRAW -> BetOutcome.WIN
-//                            else -> BetOutcome.LOSE
-//                        }
-//                    } else {
-//                        BetOutcome.PENDING
-//                    }
-//
-//                    UserBetWithMatchDetails(
-////                        betId = caDo,
-//                        match = it,
-//                        betAmount = caDo.soTien,
-//                        betTeam = betTeam,
-////                        outcome = outcome,
-////                        betDate = caDo.timestamp ?: System.currentTimeMillis()
-//                    )
-//                }
-//            }.sortedByDescending { it.betDate }
+            // Map CaDo objects to UserBetWithMatchDetails
+            userBets = userCaDos.mapNotNull { caDo ->
+                val match = matchesData.find { it.id == caDo.maTD }
+                match?.let {
+                    val homeTeam = it.homeTeam
+                    val awayTeam = it.awayTeam
+
+                    // Determine which team the user bet on
+                    val betTeam = when (caDo.doiCuoc) {
+                        homeTeam.id -> BettingTeam.HOME
+                        awayTeam.id -> BettingTeam.AWAY
+                        else -> BettingTeam.DRAW
+                    }
+
+                    // Determine outcome based on match results
+                    val outcome = if (it.status == "FINISHED") {
+                        val homeScore = it.score.fullTime.home ?: 0
+                        val awayScore = it.score.fullTime.away ?: 0
+
+                        when {
+                            homeScore > awayScore && betTeam == BettingTeam.HOME -> BetOutcome.WIN
+                            homeScore < awayScore && betTeam == BettingTeam.AWAY -> BetOutcome.WIN
+                            homeScore == awayScore && betTeam == BettingTeam.DRAW -> BetOutcome.WIN
+                            else -> BetOutcome.LOSE
+                        }
+                    } else {
+                        BetOutcome.PENDING
+                    }
+
+                    UserBetWithMatchDetails(
+//                        betId = caDo,
+                        match = it,
+                        betAmount = caDo.soTien,
+                        betTeam = betTeam,
+//                        outcome = outcome,
+//                        betDate = caDo.timestamp ?: System.currentTimeMillis()
+                    )
+                }
+            }
 
             isLoading = false
         }
@@ -113,8 +116,7 @@ fun BettingHistoryComponent(
 
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+            .fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFF1A2234)
         ),
@@ -127,7 +129,7 @@ fun BettingHistoryComponent(
         ) {
             // Header
             Text(
-                text = "Betting History",
+                text = "Betting History for ${competition?.name ?: "Competition not selected"} - ${season}",
                 color = Color.White,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
@@ -157,7 +159,7 @@ fun BettingHistoryComponent(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "No betting history found",
+                            text = "No betting history found for this season",
                             color = Color.White.copy(alpha = 0.6f),
                             fontSize = 16.sp
                         )
@@ -167,12 +169,15 @@ fun BettingHistoryComponent(
                     LazyColumn(
                         modifier = Modifier.height(350.dp)
                     ) {
-//                        items(userBets) { bet ->
-//                            BetHistoryItem(bet = bet) {
-//                                // Navigate to match details
-//                                navController.navigate("xemTranDau/${bet.maTD.id}")
-//                            }
-//                        }
+                        items(userBets) { bet ->
+                            BetHistoryItem(bet = bet) {
+                                // Navigate to match details
+                                navController.navigate("lapLich/${bet.match.id}") {
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -185,10 +190,55 @@ fun BetHistoryItem(
     bet: UserBetWithMatchDetails,
     onClick: () -> Unit
 ) {
+
+    var outcomeColor = Color.Transparent;
+    var outcomeText = "";
+    if (bet.match.status != "FINISHED" || bet.match.score.winner == null) {
+        outcomeColor = Color(0xFFE2B257);
+        outcomeText = "Pending";
+    }
+    else if (bet.match.status == "FINISHED") {
+        when (bet.betTeam) {
+            BettingTeam.HOME -> {
+                if (bet.match.score.winner == "HOME_TEAM") {
+                    outcomeColor = Color(0xFF0D904B)
+                    outcomeText = "Won"
+                } else {
+                    outcomeColor = Color(0xFFD13030)
+                    outcomeText = "Lost"
+                }
+            }
+            BettingTeam.AWAY -> {
+                if (bet.match.score.winner == "AWAY_TEAM") {
+                    outcomeColor = Color(0xFF0D904B)
+                    outcomeText = "Won"
+                } else {
+                    outcomeColor = Color(0xFFD13030)
+                    outcomeText = "Lost"
+                }
+            }
+            BettingTeam.DRAW -> {
+                if (bet.match.score.winner == "DRAW") {
+                    outcomeColor = Color(0xFF0D904B)
+                    outcomeText = "Won"
+                } else {
+                    outcomeColor = Color(0xFFD13030)
+                    outcomeText = "Lost"
+                }
+            }
+        }
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
+            .shadow(
+                elevation = 16.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = outcomeColor,
+                spotColor = outcomeColor
+            )
             .clickable { onClick() },
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFF2A3548)
@@ -313,24 +363,12 @@ fun BetHistoryItem(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-//                val outcomeColor = when (bet.outcome) {
-//                    BetOutcome.WIN -> Color(0xFF0D904B)
-//                    BetOutcome.LOSE -> Color(0xFFD13030)
-//                    BetOutcome.PENDING -> Color(0xFFE2B257)
-//                }
-//
-//                val outcomeText = when (bet.outcome) {
-//                    BetOutcome.WIN -> "Won"
-//                    BetOutcome.LOSE -> "Lost"
-//                    BetOutcome.PENDING -> "Pending"
-//                }
-//
-//                Text(
-//                    text = outcomeText,
-//                    color = outcomeColor,
-//                    fontSize = 14.sp,
-//                    fontWeight = FontWeight.Bold
-//                )
+                Text(
+                    text = outcomeText,
+                    color = outcomeColor,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }

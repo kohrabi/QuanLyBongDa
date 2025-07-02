@@ -31,7 +31,7 @@ data class User(
     val passwordHash : String,
     val username : String,
     @ColumnInfo(defaultValue = "0")
-    val soDu: Int = 0,
+    var soDu: Int = 0,
     @ColumnInfo(defaultValue = "1")
     val groupId : Int = 1,
 ) {

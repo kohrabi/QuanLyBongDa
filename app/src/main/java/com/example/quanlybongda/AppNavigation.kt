@@ -138,7 +138,7 @@ fun AppNavigation() {
             val modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding());
             composable("login") { LoginScreen(navController, modifier, viewModel) }
             composable("signUp") { SignUpScreen(navController, modifier, viewModel) }
-            composable("settings") { SettingsScreen(navController, modifier, viewModel) }
+            composable("settings") { SettingsScreen(navController, modifier, viewModel, apiViewModel) }
 
             composable("baoCao") { BaoCaoScreen(navController, modifier, viewModel, apiViewModel) }
             composable("hoSo") { KetQuaTranDauScreen(navController, modifier, viewModel) }

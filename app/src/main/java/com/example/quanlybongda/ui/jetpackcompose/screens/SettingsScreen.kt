@@ -140,6 +140,11 @@ fun SettingsScreen(
     val user by viewModel.user.collectAsState()
     val session by viewModel.session.collectAsState()
 
+    LaunchedEffect(Unit) {
+        apiViewModel.loadTeams()
+        apiViewModel.loadMatches()
+    }
+
     Scaffold(
         containerColor = DarkColorScheme.background,
         topBar = {
@@ -177,13 +182,15 @@ fun SettingsScreen(
                     color = PurpleBlue,
                 )
             }
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                BettingHistoryComponent(
+                    navController = navController,
+                    viewModel = viewModel,
+                    apiViewModel = apiViewModel,
+                )
+            }
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        BettingHistoryComponent(
-            navController = navController,
-            viewModel = viewModel,
-            apiViewModel = apiViewModel,
-        )
     }
 }
 

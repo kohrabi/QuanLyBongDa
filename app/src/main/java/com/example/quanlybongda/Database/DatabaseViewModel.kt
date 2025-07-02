@@ -88,6 +88,25 @@ class DatabaseViewModel @Inject constructor(application : Application) : ViewMod
         )
     }
 
+    fun bet(caDo: CaDo) {
+        viewModelScope.launch {
+            if (_user.value == null) {
+                Log.e("TAG", "Khong co user dang nhap");
+                return@launch;
+            }
+            if (caDo.soTien <= 0) {
+                Log.e("TAG", "So tien ca do phai lon hon 0");
+                return@launch;
+            }
+            caDoDAO.upsertCaDo(caDo);
+            _user.value?.let {
+                it.soDu -= (caDo.soTien);
+                userDAO.updateUserBalance(it.id, it.soDu);
+
+            }
+        }
+    }
+
     fun selectMuaGiai(muaGiai: MuaGiai) {
         _currentMuaGiai.value = muaGiai;
     }
