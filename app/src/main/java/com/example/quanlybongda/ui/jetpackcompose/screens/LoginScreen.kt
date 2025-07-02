@@ -172,12 +172,12 @@ fun LoginScreen(
                         Checkbox(checked = true, onCheckedChange = {}, colors = CheckboxDefaults.colors(Color.White))
                         Text("Remember Me", color = Color.White, fontSize = 14.sp)
                     }
-                    Text(
-                        text = "Forget Password?",
-                        color = Color(0xFFB06AB3),
-                        fontSize = 14.sp,
-                        modifier = Modifier.clickable {}
-                    )
+//                    Text(
+//                        text = "Forget Password?",
+//                        color = Color(0xFFB06AB3),
+//                        fontSize = 14.sp,
+//                        modifier = Modifier.clickable {}
+//                    )
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))

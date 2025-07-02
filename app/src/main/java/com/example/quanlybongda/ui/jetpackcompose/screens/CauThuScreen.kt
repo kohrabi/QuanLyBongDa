@@ -75,7 +75,9 @@ import coil.compose.AsyncImage
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.example.quanlybongda.Database.DatabaseViewModel
+import com.example.quanlybongda.Database.Schema.CauThu
 import com.example.quanlybongda.R
+import com.example.quanlybongda.Services.Data.Match
 import com.example.quanlybongda.Services.Data.Player
 import com.example.quanlybongda.Services.Data.Team
 import com.example.quanlybongda.Services.FootballAPIViewModel
@@ -109,12 +111,17 @@ fun CauThuScreen(
     var currentTeam by remember { mutableStateOf<Team?>(null) }
     var lockScroll by remember { mutableStateOf(false) }
     var cauThuYeuThich by remember { mutableStateOf<Set<Int>>(emptySet()) }
+    var cauThus by remember { mutableStateOf<List<Player>>(emptyList()) }
 
     LaunchedEffect(Unit) {
         when (teams) {
             is LoadingState.Success -> {
                 val result = (teams as LoadingState.Success<List<Team>>).data;
                 currentTeam = result.find { it.id == maDoi }!!;
+                cauThus = currentTeam!!.squad
+                    .sortedWith(compareBy<Player> { if (user!!.cauThuYeuThich.contains(it.id)) 0 else 1 }
+                    .thenBy { it.id }
+                )
             }
             else -> {}
         }
@@ -166,7 +173,7 @@ fun CauThuScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
-            items(currentTeam!!.squad) { cauThu ->
+            items(cauThus) { cauThu ->
                 val isFavorite = cauThuYeuThich.contains(cauThu.id)
                 PlayerCard(
                     team = currentTeam,

@@ -65,6 +65,7 @@ data class Player(
 ) {
     var imageURL: String? = null;
     var isFavorite: Boolean = false
+    var team: Team? = null
 }
 
 data class Staff(

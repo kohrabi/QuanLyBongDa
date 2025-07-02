@@ -76,7 +76,8 @@ class FootballAPIViewModel @Inject constructor() : ViewModel() {
                     throw RuntimeException("There was an error fetching competitions data. Please try again later.");
                 }
                 if (competitionsResponse.isSuccessful) {
-                    val competitions = competitionsResponse.body()!!.competitions.toMutableList();
+                    var competitions = competitionsResponse.body()!!.competitions.toMutableList();
+                    competitions = competitions.filter { it.currentSeason.startDate < LocalDate.now() }.sortedByDescending { it.currentSeason.startDate.year }.toMutableList();
                     _competitions.value = LoadingState.Success(competitions)
 //                    loadCompetitionCurrentSeason();
 

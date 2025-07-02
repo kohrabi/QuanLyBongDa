@@ -126,9 +126,23 @@ fun LapLichScreen(
     var selectedValue by remember { mutableStateOf<LichThiDau?>(null) }
     val user by viewModel.user.collectAsState()
     var isEditable by remember { mutableStateOf(false) }
+    var lichThiDauSorted by remember { mutableStateOf<List<Match>>(listOf()) }
 
     LaunchedEffect(Unit) {
         apiViewModel.loadMatches(viewModel)
+    }
+
+    LaunchedEffect(lichThiDaus) {
+        if (lichThiDaus is LoadingState.Success && user != null) {
+            val matches = (lichThiDaus as LoadingState.Success<List<Match>>).data
+            lichThiDauSorted = matches.sortedWith(
+                compareBy<Match> { match ->
+                    if (user!!.doiBongYeuThich.contains(match.homeTeam.id) ||
+                        user!!.doiBongYeuThich.contains(match.awayTeam.id)) 0 else 1
+                }.thenBy {
+                    it.utcDate
+                })
+        }
     }
 
     Scaffold(
@@ -170,7 +184,6 @@ fun LapLichScreen(
                 )
             }
             is LoadingState.Success -> {
-                val result = (lichThiDaus as LoadingState.Success<List<Match>>).data
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -184,11 +197,11 @@ fun LapLichScreen(
                         // Tăng khoảng cách giữa TopAppBar và FeaturedMatchCardUpdated
                         Spacer(modifier = Modifier.height(30.dp)) // << SỬA: Tăng khoảng cách
 
-                        if (result.isNotEmpty()) {
+                        if (lichThiDauSorted.isNotEmpty()) {
                             MatchResult(
-                                result[0],
+                                lichThiDauSorted[0],
                                 onClick = {
-                                    navController.navigate("lapLich/${result[0].id}")
+                                    navController.navigate("lapLich/${lichThiDauSorted[0].id}")
                                 }
                             )
                         }
@@ -199,10 +212,11 @@ fun LapLichScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                     }
 
-                    itemsIndexed(result) { index, lichThiDau ->
+                    itemsIndexed(lichThiDauSorted) { index, lichThiDau ->
                         if (index == 0)
                             return@itemsIndexed;
-                        val isFavorite = user?.doiBongYeuThich?.any { it == lichThiDau.homeTeam.id || it == lichThiDau.awayTeam.id } ?: false;
+                        val isFavorite = (user!!.doiBongYeuThich.contains(lichThiDau.homeTeam.id) ||
+                                user!!.doiBongYeuThich.contains(lichThiDau.awayTeam.id));
                         MatchInfoRowNoLogos(
                             lichThiDau,
                             isFavorite = isFavorite,

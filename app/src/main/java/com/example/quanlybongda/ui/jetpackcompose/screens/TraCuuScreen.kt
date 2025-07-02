@@ -90,8 +90,11 @@ fun TraCuuScreen(
 
     LaunchedEffect(teams) {
         if (teams is LoadingState.Success) {
-            players = (teams as LoadingState.Success<List<Team>>).data.flatMap { it.squad };
-            cauThus = players;
+            players = (teams as LoadingState.Success<List<Team>>).data.flatMap { team -> team.squad.map { it.team = team; it; } };
+            cauThus = players
+                .sortedWith(compareBy<Player> { if (user!!.cauThuYeuThich.contains(it.id)) 0 else 1 }
+                    .thenBy { it.id }
+                );
         }
     }
 
@@ -101,9 +104,11 @@ fun TraCuuScreen(
         isSearching = true;
         apiViewModel.viewModelScope.launch {
             delay(500);
-            cauThus = players.filter {
-                it.name.contains(searchArgument, ignoreCase = true)
-            }
+            cauThus = players
+                .filter { it.name.contains(searchArgument, ignoreCase = true) }
+                .sortedWith(compareBy<Player> { if (user!!.cauThuYeuThich.contains(it.id)) 0 else 1 }
+                    .thenBy { it.id }
+                );
             isSearching = false;
         }
     }
@@ -161,7 +166,7 @@ fun TraCuuScreen(
                     items(cauThus) { cauThu ->
                         val isFavorite = cauThuYeuThich.contains(cauThu.id)
                         PlayerCard(
-                            team = null,
+                            team = cauThu.team,
                             player = cauThu,
                             isFavorite = isFavorite,
                             onFavoriteClick = {

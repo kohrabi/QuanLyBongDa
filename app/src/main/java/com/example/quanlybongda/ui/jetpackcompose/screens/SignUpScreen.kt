@@ -167,18 +167,18 @@ fun SignUpScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Forget Password?",
-                        color = Color(0xFFB06AB3),
-                        fontSize = 14.sp,
-                        modifier = Modifier.clickable {}
-                    )
-                }
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically,
+//                    horizontalArrangement = Arrangement.SpaceBetween,
+//                    modifier = Modifier.fillMaxWidth()
+//                ) {
+//                    Text(
+//                        text = "Forget Password?",
+//                        color = Color(0xFFB06AB3),
+//                        fontSize = 14.sp,
+//                        modifier = Modifier.clickable {}
+//                    )
+//                }
 
                 Spacer(modifier = Modifier.height(24.dp))
 

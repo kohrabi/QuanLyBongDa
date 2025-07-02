@@ -217,6 +217,7 @@ fun XemTranDauScreen(
             if (canScorePlayersAway.isEmpty() || (awayScore != 0 && canScorePlayersAway.size < awayScore / 2))
                 canScorePlayersAway = awayPlayers.filter { it.position != "Goalkeeper" };
 
+
             val resultBT = mutableListOf<GoalShort>()
             for (i in 0..<homeScore) {
                 val player = canScorePlayersHome.get(i % canScorePlayersHome.size);
@@ -241,7 +242,8 @@ fun XemTranDauScreen(
                     )
                 )
             }
-            banThangs = resultBT;
+
+            banThangs = resultBT.sortedBy { it.minute };
         }
     }
 
