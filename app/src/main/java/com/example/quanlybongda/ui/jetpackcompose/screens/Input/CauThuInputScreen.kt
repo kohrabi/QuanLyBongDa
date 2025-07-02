@@ -58,18 +58,13 @@ import com.example.quanlybongda.ui.jetpackcompose.screens.InputDropDownMenu
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputIntField
 import com.example.quanlybongda.ui.jetpackcompose.screens.InputTextField
 import com.example.quanlybongda.ui.jetpackcompose.screens.OptionValue
-import com.example.quanlybongda.ui.jetpackcompose.screens.convertLocalDateTimeToMillis
 import com.example.quanlybongda.ui.jetpackcompose.screens.convertLocalDateToMillis
 import com.example.quanlybongda.ui.jetpackcompose.screens.convertMillisToLocalDate
-import com.example.quanlybongda.ui.jetpackcompose.screens.convertMillisToLocalDateTime
 import com.example.quanlybongda.ui.theme.DarkColorScheme
 import com.example.quanlybongda.ui.theme.Purple80
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.LocalDateTime
-
-// import androidx.compose.ui.geometry.Offset // Cần nếu dùng Offset trong Brush
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,7 +76,7 @@ fun CauThuInputScreen(
     viewModel: DatabaseViewModel = hiltViewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-    val context = LocalContext.current;
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
     var submitted by remember { mutableStateOf(false) }
@@ -96,20 +91,45 @@ fun CauThuInputScreen(
     var soAo by remember { mutableStateOf<Int?>(cauThu.soAo) }
     var tuoiMin by remember { mutableStateOf(0L) }
     var tuoiMax by remember { mutableStateOf(90L) }
+
+    // ✅ ĐÂY LÀ KHỐI LOGIC LƯU ĐÃ ĐƯỢC SỬA LẠI
     val onClick = {
-        clicked = true;
+        clicked = true
         coroutineScope.launch {
-            if (submitted)
-                return@launch;
-            if (loaiCT.value == null ||
-                soAo == null)
-                return@launch;
-            val ngaySinhMin = LocalDate.now().minusYears(tuoiMax);
-            val ngaySinhMax = LocalDate.now().minusYears(tuoiMin);
-            if (ngaySinh.isBefore(ngaySinhMin) || ngaySinh.isAfter(ngaySinhMax)) {
-                Toast.makeText(context, "Ngày sinh phải lớn hơn ${ngaySinhMin} " +
-                        "và bé hơn ${ngaySinhMax}", Toast.LENGTH_SHORT).show();
+            if (submitted) return@launch
+
+            // 1. Kiểm tra các giá trị nhập vào có hợp lệ không
+            if (loaiCT.value == null || soAo == null) {
+                Toast.makeText(context, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show()
+                return@launch
             }
+
+            val jerseyNumber = soAo!! // Chắc chắn không null vì đã kiểm tra ở trên
+
+            // 2. Kiểm tra tuổi cầu thủ
+            val ngaySinhMin = LocalDate.now().minusYears(tuoiMax)
+            val ngaySinhMax = LocalDate.now().minusYears(tuoiMin)
+            if (ngaySinh.isBefore(ngaySinhMin) || ngaySinh.isAfter(ngaySinhMax)) {
+                Toast.makeText(context, "Tuổi cầu thủ không hợp lệ (${tuoiMin} - ${tuoiMax})", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+
+            // 3. Kiểm tra số áo có trùng không
+            val existingPlayer = if (cauThu.maCT == 0) {
+                // Trường hợp THÊM MỚI: kiểm tra toàn bộ đội
+                viewModel.cauThuDAO.checkJerseyNumberExists(maDoi, jerseyNumber)
+            } else {
+                // Trường hợp SỬA: kiểm tra những cầu thủ khác
+                viewModel.cauThuDAO.checkOtherPlayerHasJerseyNumber(maDoi, jerseyNumber, cauThu.maCT)
+            }
+
+            if (existingPlayer != null) {
+                // Nếu tìm thấy cầu thủ khác có số áo này -> Báo lỗi và dừng lại
+                Toast.makeText(context, "Số áo ${jerseyNumber} đã được sử dụng.", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+
+            // 4. Nếu tất cả kiểm tra đều qua, tiến hành lưu
             viewModel.cauThuDAO.upsertCauThu(
                 CauThu(
                     maCT = cauThu.maCT,
@@ -118,28 +138,30 @@ fun CauThuInputScreen(
                     maLCT = loaiCT.value!!,
                     maDoi = maDoi,
                     ghiChu = ghiChu,
-                    soAo = soAo!!,
+                    soAo = jerseyNumber,
                 )
             )
-            submitted = true;
-            delay(500);
+            Toast.makeText(context, "Lưu thành công!", Toast.LENGTH_SHORT).show()
+            submitted = true
+            delay(500)
             navController.popBackStack()
         }
-    };
+    }
 
     LaunchedEffect(Unit) {
         viewModel.viewModelScope.launch {
-
-            val loaiCTs = viewModel.cauThuDAO.selectAllLoaiCT();
+            val loaiCTs = viewModel.cauThuDAO.selectAllLoaiCT()
             loaiCTOptions = loaiCTs.map { OptionValue(value = it.maLCT, label = it.tenLCT) }
+            loaiCT = loaiCTOptions.find { it.value == cauThu.maLCT } ?: OptionValue.DEFAULT
 
-            loaiCT = loaiCTOptions.find { it.value == cauThu.maLCT } ?: OptionValue.DEFAULT;
-            tuoiMin = viewModel.thamSoDAO.selectThamSo("tuoiMin")!!.giaTri.toLong();
-            tuoiMax = viewModel.thamSoDAO.selectThamSo("tuoiMax")!!.giaTri.toLong();
+            // Lấy quy định tuổi an toàn
+            tuoiMin = viewModel.thamSoDAO.selectThamSo("tuoiMin")?.giaTri?.toLong() ?: 16L
+            tuoiMax = viewModel.thamSoDAO.selectThamSo("tuoiMax")?.giaTri?.toLong() ?: 40L
         }
     }
 
     Scaffold(
+        // ... (Phần Scaffold giữ nguyên)
         containerColor = DarkColorScheme.background,
         topBar = {
             AppTopBar(
@@ -184,13 +206,6 @@ fun CauThuInputScreen(
                     onDateSelected = {
                         if (it != null) {
                             ngaySinh = convertMillisToLocalDate(it)
-                            val ngaySinhMin = LocalDate.now().minusYears(tuoiMax);
-                            val ngaySinhMax = LocalDate.now().minusYears(tuoiMin);
-                            if (ngaySinh.isBefore(ngaySinhMin) || ngaySinh.isAfter(ngaySinhMax)) {
-                                Toast.makeText(context, "Ngày sinh phải lớn hơn ${ngaySinhMin} " +
-                                        "và bé hơn ${ngaySinhMax}", Toast.LENGTH_SHORT).show();
-                            }
-                            ngaySinh = ngaySinh.coerceIn(ngaySinhMin, ngaySinhMax);
                         }
                     },
                     onDismiss = {}
@@ -202,7 +217,15 @@ fun CauThuInputScreen(
                     options = loaiCTOptions,
                     selectedOption = loaiCT,
                     onOptionSelected = { loaiCT = it },
-                    showEmptyError = clicked);
+                    showEmptyError = clicked
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                InputIntField(
+                    value = soAo,
+                    label = "Số áo",
+                    onValueChange = { soAo = it }
+                )
                 Spacer(modifier = Modifier.height(16.dp))
 
                 InputTextField(
@@ -211,14 +234,7 @@ fun CauThuInputScreen(
                     onValueChange = { ghiChu = it },
                     isError = ghiChu.isEmpty() && clicked,
                     errorMessage = "Ghi chú trống",
-                    modifier = Modifier.height(100.dp))
-                Spacer(modifier = Modifier.height(32.dp))
-
-                InputIntField(
-                    value = soAo,
-                    label = "Số áo",
-                    onValueChange = { soAo = it },
-
+                    modifier = Modifier.height(100.dp)
                 )
                 Spacer(modifier = Modifier.height(32.dp))
 
@@ -261,12 +277,11 @@ fun CauThuInputScreen(
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF101010)
+// ... Preview ...@Preview(showBackground = true, backgroundColor = 0xFF101010)
 @Composable
 fun SignInScreen3Preview() {
     MaterialTheme {

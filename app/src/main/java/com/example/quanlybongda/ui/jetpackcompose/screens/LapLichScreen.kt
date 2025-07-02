@@ -64,18 +64,17 @@ import com.example.quanlybongda.ui.theme.darkCardBackground
 import com.example.quanlybongda.ui.theme.darkTextMuted
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 
-// Màu sắc từ thiết kế
-// Gradient cho thẻ chính - bạn có thể cần điều chỉnh lại các màu này cho chính xác với ảnh thiết kế (image_d0de8e.png)
-// Thiết kế có vẻ chuyển từ xanh dương đậm ở góc trên trái sang tím đậm ở góc dưới phải.
+// ... (Các hằng số màu sắc giữ nguyên) ...
 val featuredCardGradient = Brush.linearGradient(
-    colors = listOf(Color(0xFF3A4E99), Color(0xFF7B429E)) // Ví dụ: Xanh đậm -> Tím đậm
-    // Hoặc thử 3 màu nếu bạn thấy có điểm chuyển ở giữa
-    // colors = listOf(Color(0xFF2E3192), Color(0xFF4C2C80), Color(0xFF692971))
+    colors = listOf(Color(0xFF3A4E99), Color(0xFF7B429E))
 )
 val textGreenAccent = Color(0xFF4CFF89)
-val textScoreColor = Color(0xFFE0FF00) // Màu vàng chanh cho tỷ số, điều chỉnh lại cho khớp
+val textScoreColor = Color(0xFFE0FF00)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,6 +83,7 @@ fun LapLichScreen(
     modifier: Modifier = Modifier,
     viewModel: DatabaseViewModel = hiltViewModel()
 ) {
+    // ... (Toàn bộ logic state của bạn giữ nguyên) ...
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val currentMuaGiai by DatabaseViewModel.currentMuaGiai.collectAsState()
     var lichThiDaus by remember { mutableStateOf(listOf<LichThiDau>()) }
@@ -94,6 +94,7 @@ fun LapLichScreen(
     val user by viewModel.user.collectAsState()
     var isEditable by remember { mutableStateOf(false) }
 
+    // ... (Khối LaunchedEffect xử lý data giữ nguyên) ...
     LaunchedEffect(Unit) {
         viewModel.viewModelScope.launch {
             if (currentMuaGiai != null) {
@@ -167,23 +168,19 @@ fun LapLichScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
-                // Tăng khoảng cách giữa TopAppBar và FeaturedMatchCardUpdated
-                Spacer(modifier = Modifier.height(30.dp)) // << SỬA: Tăng khoảng cách
-
+                Spacer(modifier = Modifier.height(30.dp))
                 if (lichThiDaus.isNotEmpty()) {
                     FeaturedMatchCardUpdated(
                         team1Name = lichThiDaus[0].tenDoiMot ?: "",
                         team1ImageURL = lichThiDaus[0].doiMotLogo ?: "",
-                        team1Scorers = "De Jong 66’\nDepay 79’", // Giữ \n để xuống dòng tự nhiên
+                        team1Scorers = "De Jong 66’\nDepay 79’",
                         score = "${lichThiDaus[0].banThangDoiMot} - ${lichThiDaus[0].banThangDoiHai}",
                         team2Name = lichThiDaus[0].tenDoiHai ?: "",
                         team2ImageURL = lichThiDaus[0].doiHaiLogo ?: "",
-                        team2Scorers = "Alvarez 21’\nPalmer 70’" // Giữ \n
+                        team2Scorers = "Alvarez 21’\nPalmer 70’"
                     )
                 }
-                // Tăng khoảng cách giữa FeaturedMatchCardUpdated và MatchScheduleHeader
-                Spacer(modifier = Modifier.height(60.dp)) // << SỬA: Tăng khoảng cách
-
+                Spacer(modifier = Modifier.height(60.dp))
                 MatchScheduleHeader()
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -193,7 +190,6 @@ fun LapLichScreen(
                     item = lichThiDau,
                     isEditable = isEditable,
                     onDelete = {
-
                         if (selectedValue != null) {
                             viewModel.viewModelScope.launch {
                                 viewModel.lichThiDauDAO.deleteLichThiDau(selectedValue!!);
@@ -239,7 +235,11 @@ fun LapLichScreen(
                         MatchInfoRowNoLogos(
                             lichThiDau.tenDoiMot ?: "",
                             lichThiDau.doiMotLogo ?: "",
-                            DateConverter.LocalDateTimeToString(lichThiDau.ngayGioThucTe),
+                            // ✅ ĐÂY LÀ THAY ĐỔI DUY NHẤT
+                            formatLocalDateTime(
+                                dateTime = lichThiDau.ngayGioThucTe,
+                                outputPattern = "HH:mm  dd/MM/yyyy" // Chỉ hiển thị ngày/tháng/năm
+                            ),
                             lichThiDau.tenDoiHai ?: "",
                             lichThiDau.doiHaiLogo ?: "",
                             onClick = {
@@ -256,6 +256,7 @@ fun LapLichScreen(
     }
 }
 
+// ... (Các Composable khác như FeaturedMatchCardUpdated, TeamDisplayUpdated... giữ nguyên) ...
 @Composable
 fun FeaturedMatchCardUpdated(
     team1Name: String,
@@ -363,8 +364,6 @@ fun TeamDisplayUpdated( // Đổi tên và sửa đổi
     }
 }
 
-// --- Các Composable AppTopBar, MatchScheduleHeader, MatchInfoRowNoLogos, AppBottomNavigationBar ---
-// --- và hàm Preview giữ nguyên như phiên bản trước. Bạn copy chúng vào đây. ---
 
 @Composable
 fun MatchScheduleHeader() {
@@ -374,7 +373,6 @@ fun MatchScheduleHeader() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text("Match Schedule", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-//        Text("See All", color = darkTextMuted, fontSize = 12.sp, fontWeight = FontWeight.Medium)
     }
 }
 
@@ -415,10 +413,11 @@ fun MatchInfoRowNoLogos(
         }
         Text(
             text = matchDateTime,
-            color = darkTextMuted,
-            fontSize = 10.sp,
+            color = Color.White.copy(alpha = 0.9f), // Sáng hơn để tăng độ tương phản
+            fontSize = 13.sp,                      // Tăng kích thước chữ
+            fontWeight = FontWeight.Medium,        // Làm chữ đậm hơn một chút
             textAlign = TextAlign.Center,
-            lineHeight = 12.sp,
+            lineHeight = 16.sp,                    // Tăng chiều cao dòng cho dễ đọc
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 8.dp)
@@ -449,5 +448,19 @@ fun MatchInfoRowNoLogos(
 fun LapLichScreenPreview() {
     MaterialTheme {
         LapLichScreen(rememberNavController())
+    }
+}
+
+/**
+ * Hàm tiện ích để định dạng một đối tượng LocalDateTime thành một chuỗi tùy chỉnh.
+ * Bạn nên đặt hàm này trong một file riêng như Formatters.kt hoặc DateUtils.kt
+ */
+fun formatLocalDateTime(dateTime: LocalDateTime?, outputPattern: String): String {
+    if (dateTime == null) return ""
+    return try {
+        val formatter = DateTimeFormatter.ofPattern(outputPattern, Locale("vi", "VN"))
+        dateTime.format(formatter)
+    } catch (e: Exception) {
+        ""
     }
 }

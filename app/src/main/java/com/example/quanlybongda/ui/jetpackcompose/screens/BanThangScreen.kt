@@ -1,33 +1,12 @@
-package com.example.quanlybongda.ui.jetpackcompose.screens // Giữ nguyên package của bạn
+package com.example.quanlybongda.ui.jetpackcompose.screens
 
-// import androidx.compose.foundation.Image // Đã có ở trên, không cần import lại
-// import androidx.compose.foundation.layout.size // Đã có trong layout.*
-
+// ... (Các import của bạn giữ nguyên)
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,12 +29,13 @@ import com.example.quanlybongda.R
 import com.example.quanlybongda.ui.theme.DarkColorScheme
 import kotlinx.coroutines.launch
 
-// Màu sắc dựa trên thiết kế image_5022a5.png
+// ... (Các biến màu sắc của bạn giữ nguyên)
 val darkScreenBackground = Color(0xFF1E1E2C)
 val scoreColor = Color(0xFFE0FF00)
 val fullTimeColor = Color(0xFF4CFF89)
 val textWhiteColor = Color.White
 val textMutedColor = Color(0xFFA0A3BD)
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,29 +53,61 @@ fun BanThangScreen(
     val user by viewModel.user.collectAsState()
     var isEditable by remember { mutableStateOf(false) }
 
+    // ✅ SỬA LỖI: Khối LaunchedEffect được viết lại để xử lý null an toàn
     LaunchedEffect(Unit) {
         viewModel.viewModelScope.launch {
-            lichThiDau = viewModel.lichThiDauDAO.selectLichThiDauMaTD(maTD);
-            tiSoDoiMot =
-                viewModel.banThangDAO.selectSoBanThangTranDauDoi(maTD, lichThiDau!!.doiMot) +
-                viewModel.banThangDAO.selectSoBanThangPhanLuoiTranDauDoi(maTD, lichThiDau!!.doiHai);
-            tiSoDoiHai = viewModel.banThangDAO.selectSoBanThangTranDauDoi(maTD, lichThiDau!!.doiHai) +
-                    viewModel.banThangDAO.selectSoBanThangPhanLuoiTranDauDoi(maTD, lichThiDau!!.doiMot);
-            val banThangsTemp = viewModel.banThangDAO.selectBanThang(maTD);
-            val loaiBTs = viewModel.banThangDAO.selectAllLoaiBT();
-            val cauThus = viewModel.cauThuDAO.selectCauThuTGTD(maTD);
-            for (banThang in banThangsTemp) {
-                val cauThu = cauThus.find { banThang.maCT == it.maCT }!!;
-                if (cauThu.maDoi == lichThiDau!!.doiMot)
-                    banThang.side = "L";
-                else if (cauThu.maDoi == lichThiDau!!.doiHai)
-                    banThang.side = "R";
-                banThang.tenCT = cauThu.tenCT;
-                banThang.tenLBT = loaiBTs.find { banThang.maLBT == it.maLBT }!!.tenLBT;
+            // Bước 1: Lấy thông tin trận đấu và kiểm tra null ngay lập tức
+            val fetchedLichThiDau = viewModel.lichThiDauDAO.selectLichThiDauMaTD(maTD)
+
+            // Bước 2: Chỉ thực hiện logic còn lại nếu trận đấu tồn tại (không null)
+            fetchedLichThiDau?.let { ltd ->
+                // Cập nhật state cho giao diện
+                lichThiDau = ltd
+
+                // Tính toán tỷ số một cách an toàn
+                tiSoDoiMot = viewModel.banThangDAO.selectSoBanThangTranDauDoi(maTD, ltd.doiMot) +
+                        viewModel.banThangDAO.selectSoBanThangPhanLuoiTranDauDoi(maTD, ltd.doiHai)
+                tiSoDoiHai = viewModel.banThangDAO.selectSoBanThangTranDauDoi(maTD, ltd.doiHai) +
+                        viewModel.banThangDAO.selectSoBanThangPhanLuoiTranDauDoi(maTD, ltd.doiMot)
+
+                // Lấy các danh sách liên quan
+                val banThangsTemp = viewModel.banThangDAO.selectBanThang(maTD)
+                val loaiBTs = viewModel.banThangDAO.selectAllLoaiBT()
+                val cauThus = viewModel.cauThuDAO.selectCauThuTGTD(maTD)
+
+                // Bước 3: Xử lý danh sách bàn thắng một cách an toàn, tránh dùng `!!`
+                val processedBanThangs = banThangsTemp.map { banThang ->
+                    // Tìm cầu thủ, nếu không thấy sẽ là null, không crash
+                    val cauThu = cauThus.find { it.maCT == banThang.maCT }
+                    // Tìm loại bàn thắng
+                    val loaiBT = loaiBTs.find { it.maLBT == banThang.maLBT }
+
+                    // Gán tên và bên (side) cho bàn thắng nếu tìm thấy cầu thủ
+                    cauThu?.let { ct ->
+                        banThang.tenCT = ct.tenCT
+                        banThang.side = if (ct.maDoi == ltd.doiMot) "L" else "R"
+                    } ?: run {
+                        // Nếu không tìm thấy cầu thủ, gán giá trị mặc định
+                        banThang.tenCT = "Neto"
+                        banThang.side = "L"
+                    }
+
+                    // Gán tên loại bàn thắng nếu tìm thấy
+                    loaiBT?.let { lbt ->
+                        banThang.tenLBT = lbt.tenLBT
+                    } ?: run {
+                        banThang.tenLBT = "Bàn thắng"
+                    }
+
+                    banThang // Trả về đối tượng banThang đã được cập nhật
+                }
+
+                // Cập nhật state cuối cùng cho danh sách bàn thắng
+                banThangs = processedBanThangs
             }
-            banThangs = banThangsTemp;
         }
     }
+
 
     LaunchedEffect(user) {
         if (user == null)
@@ -106,6 +118,7 @@ fun BanThangScreen(
     }
 
     Scaffold(
+        // ... (Phần còn lại của Scaffold giữ nguyên)
         containerColor = DarkColorScheme.background,
         topBar = {
             AppTopBar(
@@ -126,8 +139,7 @@ fun BanThangScreen(
                 .fillMaxSize()
         ) {
             Image(
-                // painter = rememberAsyncImagePainter(BACKGROUND_IMAGE_URL), // THAY THẾ DÒNG NÀY
-                painter = rememberAsyncImagePainter(R.drawable.football_stadium), // << THAY BẰNG TÊN FILE DRAWABLE CỦA BẠN
+                painter = rememberAsyncImagePainter(R.drawable.football_stadium),
                 contentDescription = "Background Stadium",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
@@ -141,20 +153,14 @@ fun BanThangScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 item {
-
-                    // Khoảng cách giữa TopBar và Full Time
-                    Spacer(modifier = Modifier.height(30.dp)) // << SỬA: Tăng khoảng cách
-
+                    Spacer(modifier = Modifier.height(30.dp))
                     Text(
                         text = "Full Time",
                         color = fullTimeColor,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold
                     )
-
-                    // Khoảng cách giữa Full Time và Khu vực tỷ số
-                    Spacer(modifier = Modifier.height(20.dp)) // << SỬA: Tăng khoảng cách
-
+                    Spacer(modifier = Modifier.height(20.dp))
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -163,8 +169,8 @@ fun BanThangScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Image(
-                            painter = rememberAsyncImagePainter(R.drawable.arsenal_logo_4x), // Giả sử đây là logo đội 1
-                            contentDescription = "Team 1 Logo", // Sửa contentDescription cho phù hợp
+                            painter = rememberAsyncImagePainter(R.drawable.arsenal_logo_4x),
+                            contentDescription = "Team 1 Logo",
                             modifier = Modifier.size(70.dp)
                         )
                         Text(
@@ -174,34 +180,30 @@ fun BanThangScreen(
                             fontWeight = FontWeight.Bold
                         )
                         Image(
-                            painter = rememberAsyncImagePainter(R.drawable.mancity_logo_4x), // << THAY BẰNG LOGO ĐỘI 2, ví dụ: R.drawable.logo_mancity
-                            contentDescription = "Team 2 Logo", // Sửa contentDescription cho phù hợp
+                            painter = rememberAsyncImagePainter(R.drawable.mancity_logo_4x),
+                            contentDescription = "Team 2 Logo",
                             modifier = Modifier.size(70.dp)
                         )
                     }
-
                     Spacer(modifier = Modifier.height(32.dp))
-
                     Text(
                         text = "Statistic Match",
                         color = textWhiteColor,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.SemiBold
                     )
-
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                items (banThangs){
-                    // Sử dụng một action placeholder, bạn có thể thay đổi nếu cần
+                items(banThangs) {
                     StatisticRowUpdated(side = it.side, player = it.tenCT, action = it.tenLBT, time = it.thoiDiem.toString(), modifier)
                 }
-//                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
 }
 
+// ... (Composable StatisticRowUpdated và Preview giữ nguyên)
 @Composable
 fun StatisticRowUpdated(side: String, player: String, action: String, time: String, modifier: Modifier = Modifier) {
     Row(
@@ -215,7 +217,7 @@ fun StatisticRowUpdated(side: String, player: String, action: String, time: Stri
             color = textMutedColor,
             fontWeight = FontWeight.Normal,
             fontSize = 14.sp,
-            modifier = Modifier.weight(0.15f), // Cột Side
+            modifier = Modifier.weight(0.15f),
             textAlign = TextAlign.Center
         )
         Text(
@@ -225,14 +227,14 @@ fun StatisticRowUpdated(side: String, player: String, action: String, time: Stri
             fontSize = 15.sp,
             modifier = Modifier
                 .weight(0.5f)
-                .padding(start = 8.dp) // Cột Player, chiếm nhiều không gian nhất
+                .padding(start = 8.dp)
         )
         Text(
             text = action,
             color = textMutedColor,
             fontWeight = FontWeight.Normal,
             fontSize = 14.sp,
-            modifier = Modifier.weight(0.15f), // Cột Action
+            modifier = Modifier.weight(0.15f),
             textAlign = TextAlign.Center
         )
         Text(
@@ -240,12 +242,11 @@ fun StatisticRowUpdated(side: String, player: String, action: String, time: Stri
             color = textMutedColor,
             fontWeight = FontWeight.Normal,
             fontSize = 14.sp,
-            modifier = Modifier.weight(0.2f), // Cột Time
+            modifier = Modifier.weight(0.2f),
             textAlign = TextAlign.End
         )
     }
 }
-
 
 @Preview(showBackground = true, backgroundColor = 0xFF1E1E2C)
 @Composable

@@ -68,4 +68,13 @@ interface CauThuDAO {
     suspend fun selectCauThuTGTD(maTD : Int) : List<CauThu>;
 
 
+    // Thêm 2 hàm này vào trong interface CauThuDAO
+
+    // Dùng khi THÊM MỚI: kiểm tra số áo trong toàn đội
+    @Query("SELECT * FROM CauThu WHERE maDoi = :maDoi AND soAo = :soAo LIMIT 1")
+    suspend fun checkJerseyNumberExists(maDoi: Int, soAo: Int): CauThu?
+
+    // Dùng khi SỬA: kiểm tra số áo của những cầu thủ KHÁC trong đội
+    @Query("SELECT * FROM CauThu WHERE maDoi = :maDoi AND soAo = :soAo AND maCT != :currentPlayerId LIMIT 1")
+    suspend fun checkOtherPlayerHasJerseyNumber(maDoi: Int, soAo: Int, currentPlayerId: Int): CauThu?
 }

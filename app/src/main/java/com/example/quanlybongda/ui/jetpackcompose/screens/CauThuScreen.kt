@@ -143,7 +143,7 @@ fun CauThuScreen(
                 AddFloatingButton(
                     "Cầu thủ",
                     onClick = {
-                        if (cauThus.size > soCauThuMax) {
+                        if (cauThus.size >= soCauThuMax) {
                             Toast.makeText(context, "Vượt quá cầu thủ tối đa", Toast.LENGTH_SHORT).show();
                             return@AddFloatingButton;
                         }
