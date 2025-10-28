@@ -1,0 +1,634 @@
+{
+	"info": {
+		"_postman_id": "45428456-f7c82ff7-73cd-47b5-9945-4024e06c431e",
+		"name": "football-data.org v4",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Area",
+			"id": "45428456-2720a1b1-a61b-49c7-92a9-bd7bc77c281d",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"user-agent": true
+				},
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/v4/competitions/PL/",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"v4",
+						"competitions",
+						"PL",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Area List",
+			"id": "45428456-d814347c-d2ec-43df-a478-25d08ce76805",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"user-agent": true
+				},
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/v4/areas/",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"v4",
+						"areas",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Competition",
+			"id": "45428456-ba3bd621-8dc6-4475-ba64-3e88ae41b7c6",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"user-agent": true
+				},
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/v4/competitions/PL/",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"v4",
+						"competitions",
+						"PL",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Competition List",
+			"id": "45428456-6201d0c0-b24f-476b-9b74-885efbb024ed",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/v4/competitions",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"v4",
+						"competitions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Competition / Standings",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d7e9fad6-4b8b-422b-b3ce-0c7a122a6d2e",
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"id": "45428456-d36f2af8-db40-4237-ba10-86cdb7425521",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/v4/competitions/PL/standings",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"v4",
+						"competitions",
+						"PL",
+						"standings"
+					],
+					"query": [
+						{
+							"key": "season",
+							"value": "202",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Competition / Matches",
+			"id": "45428456-bdcb1060-0b05-4a8b-8633-756c21dcb0c7",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Unfold-Goals",
+						"value": "true",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/v4/competitions/2003/matches?season=2024",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"v4",
+						"competitions",
+						"2003",
+						"matches"
+					],
+					"query": [
+						{
+							"key": "season",
+							"value": "2024"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Competition / Teams",
+			"id": "45428456-4a25df61-1dc2-4b8c-9983-c711b595d34f",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/v4/competitions/PL/teams",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"v4",
+						"competitions",
+						"PL",
+						"teams"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Competition / Scorer",
+			"id": "45428456-c0ea2fd6-6b5a-4643-864a-78a0cdee9991",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/v4/competitions/PL/scorers?season=2024",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"v4",
+						"competitions",
+						"PL",
+						"scorers"
+					],
+					"query": [
+						{
+							"key": "season",
+							"value": "2024",
+							"type": "text"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Team",
+			"id": "45428456-1edfd902-d33b-4321-a341-bd636b48b75c",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/v4/teams/57/",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"v4",
+						"teams",
+						"57",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Team List",
+			"id": "45428456-78365861-3cd0-4a26-8022-6320ea5e4588",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/v4/teams?limit=100&offset=100",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"v4",
+						"teams"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "100"
+						},
+						{
+							"key": "offset",
+							"value": "100"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Team / Matches",
+			"id": "45428456-c1c72270-6085-40c4-95b1-b629a5ba4b59",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/v4/teams/19/matches",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"v4",
+						"teams",
+						"19",
+						"matches"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Person",
+			"id": "45428456-122a78d7-7188-4a20-ba03-a5d4f3279c80",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/v4/persons/171455",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"v4",
+						"persons",
+						"171455"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Person / Matches",
+			"id": "45428456-89eda148-fd06-431d-a17c-4804499fbbe5",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/v4/persons/16275/matches?limit=40",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"v4",
+						"persons",
+						"16275",
+						"matches"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "40"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Match",
+			"id": "45428456-15926645-b8de-48d3-be35-ecc4cc5c2163",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/v4/matches/327117",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"v4",
+						"matches",
+						"327117"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Match List",
+			"id": "45428456-6960e066-02dd-4d51-a69d-b0ef0abf5da1",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Unfold-Lineups",
+						"value": "true",
+						"type": "text"
+					},
+					{
+						"key": "X-Unfold-Bookings",
+						"value": "false",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "X-Unfold-Subs",
+						"value": "false",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "X-Unfold-Goals",
+						"value": "true",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/v4/matches/",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"v4",
+						"matches",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Match / Head2Head",
+			"id": "45428456-cd92562c-ea04-412f-baae-63b4f762e216",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/v4/matches/327125/head2head?limit=15",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"v4",
+						"matches",
+						"327125",
+						"head2head"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "15"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SearchPlayer",
+			"id": "45428456-2bfb4dae-0992-4228-a744-eaaf9022aa2b",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://www.thesportsdb.com/api/v1/json/123/searchplayers.php?p=David_Raya",
+					"protocol": "https",
+					"host": [
+						"www",
+						"thesportsdb",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"json",
+						"123",
+						"searchplayers.php"
+					],
+					"query": [
+						{
+							"key": "p",
+							"value": "David_Raya"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SearchEvent",
+			"id": "45428456-03f298b5-46ce-4b0c-98ac-788188bffb47",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://www.thesportsdb.com/api/v1/json/123/searchevents.php?e=Aston_Villa_vs_Arsenal&s=2024-2025",
+					"protocol": "https",
+					"host": [
+						"www",
+						"thesportsdb",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"json",
+						"123",
+						"searchevents.php"
+					],
+					"query": [
+						{
+							"key": "e",
+							"value": "Aston_Villa_vs_Arsenal"
+						},
+						{
+							"key": "s",
+							"value": "2024-2025"
+						},
+						{
+							"key": "f",
+							"value": "Premier_League_2024-08-24_Crystal_Palace_vs_West_Ham_United",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SearchEvent Lookup",
+			"id": "45428456-bc60065b-612c-4cdd-a131-5ca35daccff0",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://www.thesportsdb.com/api/v1/json/123/eventresults.php?id=2069574",
+					"protocol": "https",
+					"host": [
+						"www",
+						"thesportsdb",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"json",
+						"123",
+						"eventresults.php"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "2069574"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "value",
+				"value": "684b882673a44103b98093a7eb40f7d1",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "X-Auth-Token",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "88db674a-e72a-4911-bec3-7253768e5e14",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "0e718c02-852d-4b06-a514-6d02f57cd9a3",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "https://api.football-data.org/",
+			"type": "string"
+		}
+	]
+}
